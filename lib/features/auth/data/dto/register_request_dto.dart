@@ -4,7 +4,6 @@ class RegisterRequest {
   String email;
   String phone;
   int role;
-  String? profileImageUrl;
   String password;
 
   RegisterRequest({
@@ -13,7 +12,6 @@ class RegisterRequest {
     required this.email,
     required this.phone,
     required this.role,
-    this.profileImageUrl,
     required this.password,
   });
 
@@ -24,7 +22,6 @@ class RegisterRequest {
       'email': email,
       'phone': phone,
       'role': role,
-      'profileImageUrl': profileImageUrl,
       'password': password,
     };
   }

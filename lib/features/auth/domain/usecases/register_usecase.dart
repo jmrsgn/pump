@@ -25,7 +25,6 @@ class RegisterUseCase {
       email: email,
       phone: '${AppStrings.phPhonePrefix}$phone',
       role: role,
-      profileImageUrl: null,
       password: password,
     );
     return await _authRepository.register(request);

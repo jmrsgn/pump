@@ -1,5 +1,4 @@
 import 'package:pump/core/constants/app/app_error_strings.dart';
-import 'package:pump/core/domain/helpers/async_helper.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/features/posts/domain/usecases/create_post_usecase.dart';
 import 'package:pump/features/posts/presentation/providers/create_post_state.dart';
@@ -17,7 +16,6 @@ class CreatePostViewModel extends BaseViewmodel<CreatePostState> {
     return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
   }
 
-  // createPost ----------------------------------------------------------------
   Future<void> createPost(String title, String description) async {
     LoggerUtility.d(
       runtimeType.toString(),
@@ -28,18 +26,17 @@ class CreatePostViewModel extends BaseViewmodel<CreatePostState> {
       return emitError(AppErrorStrings.postDescriptionAreRequired);
     }
 
-    await AsyncHelper.runUI(
-      () async {
-        final response = await _createPostUseCase.execute(title, description);
-        if (response.isSuccess) {
-          state = state.copyWith(isLoading: false, errorMessage: null);
-        } else {
-          LoggerUtility.d(runtimeType.toString(), response.error);
-          emitError(response.error!.message);
-        }
-      },
-      onError: emitError,
-      tag: "${runtimeType.toString()}.createPost",
-    );
+    try {
+      final response = await _createPostUseCase.execute(title, description);
+      if (response.isSuccess) {
+        state = state.copyWith(isLoading: false, errorMessage: null);
+      } else {
+        LoggerUtility.d(runtimeType.toString(), response.error);
+        emitError(response.error!.message);
+      }
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "createPost", e, stack);
+      emitUnexpectedError();
+    }
   }
 }

@@ -1,4 +1,3 @@
-import 'package:pump/core/domain/helpers/async_helper.dart';
 import 'package:pump/core/domain/usecases/get_user_profile_usecase.dart';
 import 'package:pump/core/presentation/providers/user_state.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
@@ -26,22 +25,26 @@ class UserViewModel extends BaseViewmodel<UserState> {
 
     setLoading(true);
 
-    await AsyncHelper.runUI(
-      () async {
-        final result = await _getCurrentUserUseCase.execute();
+    try {
+      final result = await _getCurrentUserUseCase.execute();
 
-        if (result.isSuccess) {
-          state = state.copyWith(
-            isLoading: false,
-            user: result.data?.user,
-            errorMessage: null,
-          );
-        } else {
-          emitError(result.error!.message);
-        }
-      },
-      onError: emitError,
-      tag: "${runtimeType.toString()}.initializeCurrentUser",
-    );
+      if (result.isSuccess) {
+        state = state.copyWith(
+          isLoading: false,
+          user: result.data?.user,
+          errorMessage: null,
+        );
+      } else {
+        emitError(result.error!.message);
+      }
+    } catch (e, stack) {
+      LoggerUtility.e(
+        runtimeType.toString(),
+        "initializeCurrentUser",
+        e,
+        stack,
+      );
+      emitUnexpectedError();
+    }
   }
 }

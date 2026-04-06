@@ -1,6 +1,3 @@
-import 'package:pump/core/constants/app/app_error_strings.dart';
-import 'package:pump/core/domain/exceptions/data_provider_exception.dart';
-import 'package:pump/core/domain/helpers/async_helper.dart';
 import 'package:pump/core/errors/app_error.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 import 'package:pump/core/utils/secure_storage.dart';
@@ -24,28 +21,27 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Result<AuthResponse, AppError>> login(LoginRequest request) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [login]");
 
-    return AsyncHelper.runRepo<AuthResponse>(() async {
+    try {
       final result = await _authService.login(request);
-
-      if (result.isSuccess) {
-        final auth = result.data!;
-
-        // Save tokens & user
-        if (auth.token != null) {
-          await _secureStorage.saveToken(auth.token!);
-          await _secureStorage.saveCurrentLoggedInUser(
-            auth.userResponse!.toUser(),
-          );
-        }
-
-        return auth;
-      } else {
-        throw DataProviderException(
-          message: result.error!.message ?? AppErrorStrings.userLoginFailed,
-          statusCode: result.error?.status,
+      if (!result.isSuccess) {
+        return Result.failure(
+          AppError(message: result.error?.message ?? "User login failed"),
         );
       }
-    }, tag: "${runtimeType.toString()}.login");
+
+      final auth = result.data!;
+      if (auth.accessToken != null && auth.userResponse != null) {
+        await _secureStorage.saveToken(auth.accessToken!);
+        await _secureStorage.saveCurrentLoggedInUser(
+          auth.userResponse!.toUser(),
+        );
+      }
+
+      return Result.success(auth);
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "login", e, stack);
+      return Result.failure(AppError(message: "An unexpected error occurred"));
+    }
   }
 
   // register ------------------------------------------------------------------
@@ -53,19 +49,31 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Result<AuthResponse, AppError>> register(
     RegisterRequest request,
   ) async {
-    return AsyncHelper.runRepo<AuthResponse>(() async {
-      final result = await _authService.register(request);
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [register]");
 
-      if (result.isSuccess) {
-        return result.data!;
-      } else {
-        throw DataProviderException(
-          message:
-              result.error!.message ?? AppErrorStrings.userRegistrationFailed,
-          statusCode: result.error?.status,
+    try {
+      final result = await _authService.register(request);
+      if (!result.isSuccess) {
+        return Result.failure(
+          AppError(
+            message: result.error?.message ?? "User registration failed",
+          ),
         );
       }
-    }, tag: "${runtimeType.toString()}.register");
+
+      final auth = result.data!;
+      if (auth.accessToken != null && auth.userResponse != null) {
+        await _secureStorage.saveToken(auth.accessToken!);
+        await _secureStorage.saveCurrentLoggedInUser(
+          auth.userResponse!.toUser(),
+        );
+      }
+
+      return Result.success(auth);
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "register", e, stack);
+      return Result.failure(AppError(message: "An unexpected error occurred"));
+    }
   }
 
   @override

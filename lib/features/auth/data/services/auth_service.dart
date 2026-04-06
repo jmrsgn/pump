@@ -2,10 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
-import 'package:pump/core/constants/api/api_error_strings.dart';
 import 'package:pump/core/data/dto/api_error_response.dart';
-import 'package:pump/core/data/exceptions/auth_exception.dart';
-import 'package:pump/core/data/services/base_service.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 
 import '../../../../core/constants/api/api_constants.dart';
@@ -14,37 +11,47 @@ import '../dto/auth_response_dto.dart';
 import '../dto/login_request_dto.dart';
 import '../dto/register_request_dto.dart';
 
-class AuthService extends BaseService {
+class AuthService {
   // login ---------------------------------------------------------------------
-  Future<Result<AuthResponse, ApiErrorResponse>> login(LoginRequest request) {
+  Future<Result<AuthResponse, ApiErrorResponse>> login(
+    LoginRequest request,
+  ) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [login]");
 
-    return callApi<AuthResponse>(() async {
+    try {
       final response = await http.post(
         Uri.parse(ApiConstants.loginUrl),
         headers: ApiConstants.headerType,
         body: jsonEncode(request.toJson()),
       );
 
-      final json = jsonDecode(response.body);
+      final json = response.body.isNotEmpty ? jsonDecode(response.body) : {};
 
       // Success
+      // If response code is ok, return data immediately
       if (response.statusCode == HttpStatus.ok) {
         return Result.success(AuthResponse.fromJson(json['data']));
       }
 
-      final error = ApiErrorResponse.fromJson(json['error']);
-
-      if (response.statusCode == HttpStatus.unauthorized) {
-        throw AuthException(
+      final errorJson = json['error'] ?? {};
+      final error = ApiErrorResponse.fromJson(errorJson);
+      return Result.failure(
+        ApiErrorResponse(
+          status: error.status,
+          message: error.message,
           error: error.error,
-          message: error.message ?? ApiErrorStrings.userIsNotAuthenticated,
-          statusCode: HttpStatus.unauthorized,
-        );
-      }
-
-      throwServerException(error);
-    }, tag: "${runtimeType.toString()}.login");
+        ),
+      );
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "login", e, stack);
+      return Result.failure(
+        ApiErrorResponse(
+          status: HttpStatus.internalServerError,
+          message: "An unexpected error occurred",
+          error: "Internal server error",
+        ),
+      );
+    }
   }
 
   // register ------------------------------------------------------------------
@@ -53,32 +60,40 @@ class AuthService extends BaseService {
   ) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [register]");
 
-    return callApi<AuthResponse>(() async {
+    try {
       final response = await http.post(
         Uri.parse(ApiConstants.registerUrl),
         headers: ApiConstants.headerType,
         body: jsonEncode(request.toJson()),
       );
 
-      final json = jsonDecode(response.body);
+      final json = response.body.isNotEmpty ? jsonDecode(response.body) : {};
 
       // Success
+      // If response code is ok, return data immediately
       if (response.statusCode == HttpStatus.ok ||
           response.statusCode == HttpStatus.created) {
         return Result.success(AuthResponse.fromJson(json['data']));
       }
 
-      final error = ApiErrorResponse.fromJson(json['error']);
-
-      if (response.statusCode == HttpStatus.unauthorized) {
-        throw AuthException(
+      final errorJson = json['error'] ?? {};
+      final error = ApiErrorResponse.fromJson(errorJson);
+      return Result.failure(
+        ApiErrorResponse(
+          status: error.status,
+          message: error.message,
           error: error.error,
-          message: error.message ?? ApiErrorStrings.userIsNotAuthenticated,
-          statusCode: HttpStatus.unauthorized,
-        );
-      }
-
-      throwServerException(error);
-    }, tag: "${runtimeType.toString()}.register");
+        ),
+      );
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "register", e, stack);
+      return Result.failure(
+        ApiErrorResponse(
+          status: HttpStatus.internalServerError,
+          message: "An unexpected error occurred",
+          error: "Internal server error",
+        ),
+      );
+    }
   }
 }

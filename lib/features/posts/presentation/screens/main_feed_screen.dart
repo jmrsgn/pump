@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pump/core/constants/app/app_strings.dart';
 import 'package:pump/core/presentation/providers/user_providers.dart';
 import 'package:pump/core/routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
+import 'package:pump/features/posts/domain/entities/post.dart';
 import 'package:pump/features/posts/presentation/providers/post_providers.dart';
 import 'package:pump/features/posts/presentation/widgets/post_widget.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
-import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/app_drawer.dart';
 import '../../../../core/presentation/widgets/custom_scaffold.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
@@ -26,10 +25,10 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      ref.read(userViewModelProvider.notifier).initializeCurrentUser();
-      ref.read(mainFeedViewModelProvider.notifier).getPosts();
-    });
+    // Future.microtask(() {
+    //   ref.read(userViewModelProvider.notifier).initializeCurrentUser();
+    //   ref.read(mainFeedViewModelProvider.notifier).getPosts();
+    // });
   }
 
   @override
@@ -71,34 +70,40 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
         onRefresh: () async {
           await mainFeedViewModel.getPosts();
         },
-        child: posts.isEmpty
-            ? Center(
-                child: Text(
-                  AppStrings.noPostsAvailable,
-                  style: AppTextStyles.body.copyWith(
-                    color: AppColors.textDisabled,
-                  ),
-                ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.only(bottom: AppDimens.padding80),
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  final post = posts[index];
+        child: ListView.builder(
+          padding: const EdgeInsets.only(bottom: AppDimens.padding80),
+          itemCount: 10,
+          itemBuilder: (context, index) {
+            final post = Post(
+              id: index.toString(),
+              title: "Title " + index.toString(),
+              description:
+                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam eleifend odio a tempus maximus. Morbi consequat iaculis velit lobortis lobortis. Nunc nec aliquam nunc. Donec condimentum nulla at congue venenatis. Morbi scelerisque vehicula eros, sit amet viverra nibh vehicula et. Curabitur nec magna vitae enim maximus suscipit in in orci. Sed dignissim turpis vitae sodales lobortis. Mauris leo elit, tincidunt a semper vel, pharetra sit amet nisl.",
+              userId: "userId",
+              userName: "User Name 1",
+              userProfileImageUrl: "",
+              createdAt: DateTime.timestamp(),
+              updatedAt: DateTime.timestamp(),
+              likesCount: 0,
+              commentsCount: 0,
+              sharesCount: 0,
+              comments: [],
+              isLikedByCurrentUser: false,
+            );
 
-                  return PostWidget(
-                    post: post,
-                    onLikeTap: () => mainFeedViewModel.likePost(post.id),
-                    onTap: () {
-                      NavigationUtils.navigateTo(
-                        context,
-                        AppRoutes.postInfo,
-                        arguments: post,
-                      );
-                    },
-                  );
-                },
-              ),
+            return PostWidget(
+              post: post,
+              onLikeTap: () => mainFeedViewModel.likePost(post.id),
+              onTap: () {
+                NavigationUtils.navigateTo(
+                  context,
+                  AppRoutes.postInfo,
+                  arguments: post,
+                );
+              },
+            );
+          },
+        ),
       ),
 
       floatingActionButton: userState.user != null

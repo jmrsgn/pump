@@ -1,8 +1,6 @@
-import 'package:pump/core/domain/helpers/async_helper.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 
-import '../../../../core/constants/app/app_strings.dart';
 import '../../../../core/constants/app/ui_constants.dart';
 import '../../../../core/presentation/providers/ui_state.dart';
 import '../../domain/usecases/register_usecase.dart';
@@ -26,10 +24,7 @@ class RegisterViewmodel extends BaseViewmodel<UiState> {
     int role,
     String password,
   ) async {
-    LoggerUtility.d(
-      runtimeType.toString(),
-      "Execute method: [register] firstName: $firstName, lastName: $lastName email: $email phone: $phone role: $role password: $password",
-    );
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [register]");
 
     // Prevent double taps
     if (state.isLoading) return;
@@ -43,38 +38,41 @@ class RegisterViewmodel extends BaseViewmodel<UiState> {
       phone,
       password,
     ].any((e) => e.trim().isEmpty)) {
-      emitError(AppStrings.allFieldsAreRequired);
+      emitError("All fields are required");
       return;
     }
 
     if (!UIConstants.emailRegex.hasMatch(email.trim())) {
-      return emitError(AppStrings.enterAValidEmail);
+      return emitError("Enter a valid email");
     }
 
     if (password.length < UIConstants.minimumPasswordLength) {
-      return emitError(AppStrings.passwordMustBeAtLeast6Characters);
+      return emitError("Password must be at least 6 characters");
     }
 
-    await AsyncHelper.runUI(
-      () async {
-        final response = await _registerUseCase.execute(
-          firstName,
-          lastName,
-          email,
-          phone,
-          role,
-          password,
-        );
+    try {
+      final response = await _registerUseCase.execute(
+        firstName,
+        lastName,
+        email,
+        phone,
+        role,
+        password,
+      );
 
-        if (response.isSuccess) {
-          state = state.copyWith(isLoading: false, errorMessage: null);
-        } else {
-          LoggerUtility.d(runtimeType.toString(), response.error);
-          emitError(response.error!.message);
-        }
-      },
-      onError: emitError,
-      tag: "${runtimeType.toString()}.register",
-    );
+      if (response.isSuccess) {
+        state = state.copyWith(isLoading: false, errorMessage: null);
+      } else {
+        LoggerUtility.e(
+          runtimeType.toString(),
+          "register",
+          response.error!.message,
+        );
+        emitError(response.error!.message);
+      }
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "register", e, stack);
+      emitUnexpectedError();
+    }
   }
 }

@@ -1,8 +1,5 @@
-import 'package:pump/core/constants/app/app_error_strings.dart';
 import 'package:pump/core/data/dto/result.dart';
 import 'package:pump/core/domain/entities/authenticated_user.dart';
-import 'package:pump/core/domain/exceptions/data_provider_exception.dart';
-import 'package:pump/core/domain/helpers/async_helper.dart';
 import 'package:pump/core/errors/app_error.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 import 'package:pump/core/utils/secure_storage.dart';
@@ -24,28 +21,25 @@ class UserRepositoryImpl extends UserRepository {
       "Execute method: [getAuthenticatedCurrentUser]",
     );
 
-    return AsyncHelper.runRepo<AuthenticatedUser>(() async {
-      // Check for the token
+    try {
       final token = await _secureStorage.getToken();
       if (token == null || token.isEmpty) {
         LoggerUtility.e(
           runtimeType.toString(),
-          AppErrorStrings.tokenIsMissingWillNotProceedWithApiCall,
-        );
-        throw DataProviderException(
-          message: AppErrorStrings.tokenIsMissingWillNotProceedWithApiCall,
+          "Token is missing, will not proceed with API call",
         );
       }
 
       // Check for stored user
       final user = await _secureStorage.getCurrentLoggedInUser();
       if (user == null) {
-        LoggerUtility.e(runtimeType.toString(), AppErrorStrings.userIsMissing);
-        throw DataProviderException(
-          message: AppErrorStrings.userIsNotAuthenticated,
-        );
+        LoggerUtility.e(runtimeType.toString(), "User not found");
+        return Result.failure(AppError(message: "User not found"));
       }
-      return AuthenticatedUser(user: user, token: token);
-    }, tag: "${runtimeType.toString()}.getAuthenticatedCurrentUser");
+      return Result.success(AuthenticatedUser(user: user, token: token!));
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "getAuthenticatedUser", e, stack);
+      return Result.failure(AppError(message: "An unexpected error occurred"));
+    }
   }
 }

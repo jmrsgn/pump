@@ -34,45 +34,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  void _onLoginPressed() {
+    final email = _emailController.text;
+    final password = _passwordController.text;
+    ref.read(loginViewModelProvider.notifier).login(email, password);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // States
     final uiState = ref.watch(loginViewModelProvider);
 
-    // ViewModels
-    final loginViewModel = ref.watch(loginViewModelProvider.notifier);
-
-    // Listeners
     ref.listen<UiState>(loginViewModelProvider, (previous, next) {
       if (previous?.isLoading == true && next.isLoading == false) {
+        if (!mounted) return;
+
         if (next.errorMessage == null) {
-          if (!mounted) return;
           UiUtils.showSnackBarSuccess(
             context,
-            message: AppStrings.successfullyLoggedIn,
+            message: "Successfully logged in",
           );
           NavigationUtils.replaceWith(context, AppRoutes.mainFeed);
         } else {
-          if (!mounted) return;
           UiUtils.showSnackBarError(context, message: next.errorMessage!);
         }
       }
     });
-
-    // -------------------------------------------------------------------------
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: CustomScaffold(
         showAppBar: false,
         isLoading: uiState.isLoading,
-
         body: Stack(
           fit: StackFit.expand,
-          alignment: Alignment.center,
           children: [
             Image.asset('assets/images/home.png', fit: BoxFit.cover),
-
             Container(color: AppColors.overlay),
 
             Center(
@@ -91,39 +87,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     UiUtils.addVerticalSpaceXL(),
 
-                    Center(
-                      child: Column(
-                        children: [
-                          CustomTextField(
-                            hint: AppStrings.email,
-                            controller: _emailController,
-                          ),
-                          UiUtils.addVerticalSpaceM(),
-                          CustomTextField(
-                            hint: AppStrings.password,
-                            controller: _passwordController,
-                            obscureText: true,
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildForm(),
 
                     UiUtils.addVerticalSpaceM(),
 
                     Align(
-                      alignment: AlignmentGeometry.bottomRight,
+                      alignment: Alignment.bottomRight,
                       child: SizedBox(
                         width: AppDimens.dimen120,
                         child: CustomButton(
-                          onPressed: uiState.isLoading
-                              ? null
-                              : () {
-                                  final email = _emailController.text.trim();
-                                  final password = _passwordController.text
-                                      .trim();
-                                  loginViewModel.login(email, password);
-                                },
-
+                          onPressed: uiState.isLoading ? null : _onLoginPressed,
                           label: AppStrings.login,
                         ),
                       ),
@@ -133,35 +106,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
 
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: EdgeInsets.only(bottom: AppDimens.padding32),
-                child: RichText(
-                  text: TextSpan(
-                    text: "${AppStrings.dontHaveAnAccount} ",
-                    style: AppTextStyles.bodySmall,
-                    children: [
-                      TextSpan(
-                        text: AppStrings.registerHere,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            NavigationUtils.navigateTo(
-                              context,
-                              AppRoutes.register,
-                            );
-                          },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            _buildFooter(context),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForm() {
+    return Center(
+      child: Column(
+        children: [
+          CustomTextField(hint: AppStrings.email, controller: _emailController),
+          UiUtils.addVerticalSpaceM(),
+          CustomTextField(
+            hint: AppStrings.password,
+            controller: _passwordController,
+            obscureText: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooter(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: AppDimens.padding32),
+        child: RichText(
+          text: TextSpan(
+            text: "${AppStrings.dontHaveAnAccount} ",
+            style: AppTextStyles.bodySmall,
+            children: [
+              TextSpan(
+                text: AppStrings.registerHere,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    NavigationUtils.navigateTo(context, AppRoutes.register);
+                  },
+              ),
+            ],
+          ),
         ),
       ),
     );

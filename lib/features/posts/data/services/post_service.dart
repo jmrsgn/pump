@@ -12,6 +12,7 @@ import '../dto/create_post_request_dto.dart';
 import '../dto/post_response_dto.dart';
 
 class PostService {
+  // getPosts ------------------------------------------------------------------
   Future<Result<List<PostResponse>, ApiErrorResponse>> getPosts(
     String token,
   ) async {

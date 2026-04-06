@@ -1,78 +1,45 @@
-import '../../../../core/data/models/user_entity.dart';
-
 class User {
   final String id;
   final String firstName;
   final String lastName;
   final String email;
-  final String phone;
-  final int role;
-  final String? profileImageUrl;
+  final String profileImageUrl;
+  final int followersNo;
+  final int followingNo;
 
-  User({
+  const User({
     required this.id,
     required this.firstName,
     required this.lastName,
     required this.email,
-    required this.phone,
-    required this.role,
-    this.profileImageUrl,
+    required this.profileImageUrl,
+    required this.followersNo,
+    required this.followingNo,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
-      firstName: json['firstName'],
-      lastName: json['lastName'],
-      email: json['email'],
-      phone: json['phone'],
-      role: json['role'],
-      profileImageUrl: json['profileImageUrl'],
+      id: json['id'] as String,
+      firstName: json['firstName'] as String,
+      lastName: json['lastName'] as String,
+      email: json['email'] as String,
+      profileImageUrl: json['profileImageUrl'] as String? ?? '',
+      followersNo: (json['followersNo'] ?? 0) as int,
+      followingNo: (json['followingNo'] ?? 0) as int,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'firstName': firstName,
-      'lastName': lastName,
-      'email': email,
-      'phone': phone,
-      'role': role,
-      'profileImageUrl': profileImageUrl,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'firstName': firstName,
+    'lastName': lastName,
+    'email': email,
+    'profileImageUrl': profileImageUrl,
+    'followersNo': followersNo,
+    'followingNo': followingNo,
+  };
 
   @override
-  String toString() {
-    return 'User{id: $id, firstName: $firstName, lastName: $lastName, email: $email, phone: $phone, role: $role, profileImageUrl: $profileImageUrl}';
-  }
-}
-
-extension UserMapper on User {
-  UserEntity toEntity() {
-    return UserEntity(
-      id: id,
-      email: email,
-      firstName: firstName,
-      lastName: lastName,
-      phone: phone,
-      role: role,
-      profileImageUrl: profileImageUrl,
-    );
-  }
-}
-
-extension UserEntityMapper on UserEntity {
-  User toUser() {
-    return User(
-      id: id,
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      phone: phone,
-      role: role,
-      profileImageUrl: profileImageUrl,
-    );
-  }
+  String toString() =>
+      'User(id: $id, name: $firstName $lastName, email: $email)';
 }

@@ -1,4 +1,3 @@
-import 'package:pump/core/domain/helpers/async_helper.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/features/posts/domain/usecases/get_posts_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_post_usecase.dart';
@@ -19,81 +18,92 @@ class MainFeedViewmodel extends BaseViewmodel<MainFeedState> {
     return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
   }
 
-  // Helper methods ------------------------------------------------------------
-  void incrementCommentCount(String postId) {
-    final updatedPosts = state.posts.map((post) {
-      if (post.id == postId) {
-        return post.copyWith(commentsCount: post.commentsCount + 1);
-      }
-      return post;
-    }).toList();
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
 
-    state = state.copyWith(posts: updatedPosts);
+  void incrementCommentCount(String postId) {
+    state = state.copyWith(
+      posts: state.posts.map((post) {
+        if (post.id == postId) {
+          return post.copyWith(commentsCount: post.commentsCount + 1);
+        }
+        return post;
+      }).toList(),
+    );
   }
 
-  // getPosts ------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // getPosts
+  // ---------------------------------------------------------------------------
+
   Future<void> getPosts() async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [getPosts]");
 
-    // Prevent double taps
     if (state.isLoading) return;
 
     setLoading(true);
 
-    await AsyncHelper.runUI(
-      () async {
-        final response = await _getPostsUseCase.execute();
-        if (response.isSuccess) {
-          state = state.copyWith(
-            isLoading: false,
-            posts: response.data,
-            errorMessage: null,
-          );
-        } else {
-          LoggerUtility.d(runtimeType.toString(), response.error);
-          emitError(response.error!.message);
-        }
-      },
-      onError: emitError,
-      tag: "${runtimeType.toString()}.getPosts",
-    );
+    try {
+      final response = await _getPostsUseCase.execute();
+
+      if (!response.isSuccess) {
+        return emitError(response.error!.message);
+      }
+
+      state = state.copyWith(
+        isLoading: false,
+        posts: response.data,
+        errorMessage: null,
+      );
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "getPosts", e, stack);
+      emitUnexpectedError();
+    }
   }
 
-  // likePost ------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // likePost (optimistic update)
+  // ---------------------------------------------------------------------------
+
   Future<void> likePost(String postId) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [likePost]");
 
-    final post = state.posts.firstWhere((p) => p.id == postId);
-    final wasLiked = post.isLikedByCurrentUser;
+    final postIndex = state.posts.indexWhere((p) => p.id == postId);
+    if (postIndex == -1) return;
 
-    // Prevent double taps
-    if (state.isLoading) return;
+    final currentPost = state.posts[postIndex];
+    final wasLiked = currentPost.isLikedByCurrentUser;
 
-    setLoading(true);
+    // Optimistic UI update
+    final updatedPosts = wasLiked
+        ? PostLikeHelpers.applyLocalUnlikeToList(state.posts, postId)
+        : PostLikeHelpers.applyLocalLikeToList(state.posts, postId);
 
-    state = state.copyWith(
-      posts: wasLiked
-          ? PostLikeHelpers.applyLocalUnlikeToList(state.posts, postId)
-          : PostLikeHelpers.applyLocalLikeToList(state.posts, postId),
-    );
+    state = state.copyWith(posts: updatedPosts);
 
-    await AsyncHelper.runUI(
-      () async {
-        final response = await _likePostUseCase.execute(postId);
+    try {
+      final response = await _likePostUseCase.execute(postId);
 
-        if (response.isSuccess) {
-          state = state.copyWith(
-            post: response.data,
-            isLoading: false,
-            errorMessage: null,
-          );
-        } else {
-          LoggerUtility.d(runtimeType.toString(), response.error);
-          emitError(response.error!.message);
-        }
-      },
-      onError: emitError,
-      tag: "${runtimeType.toString()}.likePost",
-    );
+      if (!response.isSuccess) {
+        // rollback on failure
+        state = state.copyWith(posts: state.posts);
+        return emitError(response.error!.message);
+      }
+
+      final updatedPost = response.data!;
+
+      final newPosts = [...state.posts];
+      newPosts[postIndex] = updatedPost;
+
+      state = state.copyWith(posts: newPosts, errorMessage: null);
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "likePost", e, stack);
+
+      // rollback on crash
+      state = state.copyWith(posts: state.posts);
+
+      emitUnexpectedError();
+    }
   }
 }

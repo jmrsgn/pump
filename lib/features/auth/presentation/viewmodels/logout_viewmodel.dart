@@ -1,4 +1,3 @@
-import 'package:pump/core/domain/helpers/async_helper.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 
@@ -24,13 +23,12 @@ class LogoutViewmodel extends BaseViewmodel<UiState> {
 
     setLoading(true);
 
-    AsyncHelper.runUI(
-      () async {
-        await _logoutUseCase.execute();
-        state = state.copyWith(isLoading: false);
-      },
-      onError: emitError,
-      tag: "${runtimeType.toString()}.logout",
-    );
+    try {
+      await _logoutUseCase.execute();
+      state = state.copyWith(isLoading: false);
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "logout", e, stack);
+      emitUnexpectedError();
+    }
   }
 }

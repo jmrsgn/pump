@@ -4,21 +4,21 @@ class UserResponse {
   final String? id;
   final String? firstName;
   final String? lastName;
-  final String? username;
   final String? email;
-  final String? phone;
-  final int? role;
   final String? profileImageUrl;
+  final String? bio;
+  final int? followersNo;
+  final int? followingNo;
 
   UserResponse({
     this.id,
     this.firstName,
     this.lastName,
-    this.username,
     this.email,
-    this.phone,
-    this.role,
     this.profileImageUrl,
+    this.bio,
+    this.followersNo,
+    this.followingNo,
   });
 
   factory UserResponse.fromJson(Map<String, dynamic> json) {
@@ -26,11 +26,10 @@ class UserResponse {
       id: json['id'],
       firstName: json['firstName'],
       lastName: json['lastName'],
-      username: json['username'],
       email: json['email'],
-      phone: json['phone'],
-      role: json['role'],
       profileImageUrl: json['profileImageUrl'],
+      followersNo: json['followersNo'],
+      followingNo: json['followingNo'],
     );
   }
 
@@ -39,11 +38,10 @@ class UserResponse {
       'id': id,
       'firstName': firstName,
       'lastName': lastName,
-      'username': username,
       'email': email,
-      'phone': phone,
-      'role': role,
       'profileImageUrl': profileImageUrl,
+      'followersNo': followersNo,
+      'followingNo': followingNo,
     };
   }
 
@@ -53,9 +51,9 @@ class UserResponse {
       firstName: firstName ?? '',
       lastName: lastName ?? '',
       email: email ?? '',
-      phone: phone ?? '',
-      role: role ?? 1,
-      profileImageUrl: profileImageUrl,
+      profileImageUrl: profileImageUrl ?? '',
+      followersNo: followersNo ?? 0,
+      followingNo: followingNo ?? 0,
     );
   }
 }
