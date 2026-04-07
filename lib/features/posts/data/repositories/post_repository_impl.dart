@@ -1,7 +1,9 @@
 import 'package:pump/core/constants/app/app_error_strings.dart';
-import 'package:pump/core/data/dto/result.dart';
+import 'package:pump/core/data/dto/response/paged_response.dart';
+import 'package:pump/core/data/dto/response/result.dart';
 import 'package:pump/core/data/repositories/user_repository_impl.dart';
 import 'package:pump/core/domain/entities/authenticated_user.dart';
+import 'package:pump/core/enums/app_error_code.dart';
 import 'package:pump/core/errors/app_error.dart';
 import 'package:pump/features/posts/data/dto/create_post_request_dto.dart';
 import 'package:pump/features/posts/data/services/post_service.dart';
@@ -23,7 +25,7 @@ class PostRepositoryImpl implements PostRepository {
   ) async {
     try {
       final Result<AuthenticatedUser, AppError> userResult =
-          await _userRepositoryImpl.getAuthenticatedCurrentUser();
+          await _userRepositoryImpl.getAuthenticatedUser();
       if (userResult.isSuccess) {
         final request = CreatePostRequest(
           title: title,
@@ -67,41 +69,46 @@ class PostRepositoryImpl implements PostRepository {
     }
   }
 
+  // getPosts ------------------------------------------------------------------
   @override
-  Future<Result<List<Post>, AppError>> getPosts() async {
+  Future<Result<PagedResponse<Post>, AppError>> getPosts(int page) async {
     try {
-      final Result<AuthenticatedUser, AppError> userResult =
-          await _userRepositoryImpl.getAuthenticatedCurrentUser();
-      if (userResult.isSuccess) {
-        // Get all posts request
-        final result = await _postService.getPosts(userResult.data!.token);
-
-        if (result.isSuccess && result.data != null) {
-          final posts = result.data!.map((e) => e.toPost()).toList();
-          LoggerUtility.v(runtimeType.toString(), 'Posts fetched: $posts');
-          return Result.success(posts);
-        } else {
-          return Result.failure(userResult.error);
-        }
-      } else {
-        LoggerUtility.e(
-          runtimeType.toString(),
-          "User id is missing, will not proceed with API call",
-        );
+      // Get authenticated user
+      final userResult = await _userRepositoryImpl.getAuthenticatedUser();
+      if (!userResult.isSuccess || userResult.data == null) {
+        LoggerUtility.e(runtimeType.toString(), "User not authenticated");
         return Result.failure(
-          AppError(message: AppErrorStrings.userIsNotAuthenticated),
+          AppError(
+            message: "User is not authenticated",
+            code: AppErrorCode.unauthorized,
+          ),
         );
       }
-    } catch (e, stackTrace) {
-      LoggerUtility.e(
-        runtimeType.toString(),
-        AppErrorStrings.anUnexpectedErrorOccurred,
-        e.toString(),
-        stackTrace,
+
+      final postResult = await _postService.getPosts(
+        userResult.data!.token,
+        page,
       );
-      return Result.failure(
-        AppError(message: AppErrorStrings.anUnexpectedErrorOccurred),
+      if (!postResult.isSuccess || postResult.data == null) {
+        return Result.failure(
+          AppError(
+            message: postResult.error?.message ?? "Failed to fetch posts",
+          ),
+        );
+      }
+
+      final pagedDto = postResult.data!;
+      final paged = PagedResponse<Post>(
+        content: pagedDto.content.map((e) => e.toPost()).toList(),
+        page: pagedDto.page,
+        size: pagedDto.size,
+        totalElements: pagedDto.totalElements,
       );
+
+      return Result.success(paged);
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "getPosts", e, stack);
+      return Result.failure(AppError(message: "An unexpected error occurred"));
     }
   }
 
@@ -110,7 +117,7 @@ class PostRepositoryImpl implements PostRepository {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [likePost]");
     try {
       final Result<AuthenticatedUser, AppError> userResult =
-          await _userRepositoryImpl.getAuthenticatedCurrentUser();
+          await _userRepositoryImpl.getAuthenticatedUser();
       if (userResult.isSuccess) {
         final result = await _postService.likePost(
           userResult.data!.token,

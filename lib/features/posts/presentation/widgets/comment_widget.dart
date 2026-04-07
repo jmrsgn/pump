@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pump/core/constants/app/app_strings.dart';
 import 'package:pump/core/utils/time_utils.dart';
-import 'package:pump/features/posts/domain/entities/post.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/utils/ui_utils.dart';
+import '../../domain/entities/comment.dart';
 
 class CommentWidget extends ConsumerStatefulWidget {
   final Comment comment;
@@ -44,13 +44,13 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Avatar
-          widget.comment.userProfileImageUrl == null ||
-                  widget.comment.userProfileImageUrl!.isEmpty
+          widget.comment.authorProfileImageUrl == null ||
+                  widget.comment.authorProfileImageUrl!.isEmpty
               ? CircleAvatar(
                   backgroundColor: AppColors.primary,
                   radius: AppDimens.radius16,
                   child: Text(
-                    widget.comment.userName[0],
+                    widget.comment.author,
                     style: AppTextStyles.body.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -58,7 +58,7 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
                 )
               : CircleAvatar(
                   backgroundImage: AssetImage(
-                    widget.comment.userProfileImageUrl!,
+                    widget.comment.authorProfileImageUrl!,
                   ),
                   radius: AppDimens.radius16,
                 ),
@@ -71,7 +71,7 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.comment.userName,
+                  widget.comment.author,
                   style: AppTextStyles.body.copyWith(
                     fontWeight: FontWeight.bold,
                     height: AppDimens.textHeight1,

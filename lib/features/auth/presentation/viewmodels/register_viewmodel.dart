@@ -51,7 +51,7 @@ class RegisterViewmodel extends BaseViewmodel<UiState> {
     }
 
     try {
-      final response = await _registerUseCase.execute(
+      final result = await _registerUseCase.execute(
         firstName,
         lastName,
         email,
@@ -60,15 +60,15 @@ class RegisterViewmodel extends BaseViewmodel<UiState> {
         password,
       );
 
-      if (response.isSuccess) {
+      if (result.isSuccess) {
         state = state.copyWith(isLoading: false, errorMessage: null);
       } else {
         LoggerUtility.e(
           runtimeType.toString(),
           "register",
-          response.error!.message,
+          result.error!.message,
         );
-        emitError(response.error!.message);
+        emitError(result.error!.message);
       }
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "register", e, stack);

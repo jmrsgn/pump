@@ -3,15 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pump/core/presentation/providers/user_providers.dart';
 import 'package:pump/core/routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
-import 'package:pump/features/posts/domain/entities/post.dart';
 import 'package:pump/features/posts/presentation/providers/post_providers.dart';
-import 'package:pump/features/posts/presentation/widgets/post_widget.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
+import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/app_drawer.dart';
 import '../../../../core/presentation/widgets/custom_scaffold.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../widgets/post_widget.dart';
 
 class MainFeedScreen extends ConsumerStatefulWidget {
   const MainFeedScreen({super.key});
@@ -21,37 +21,57 @@ class MainFeedScreen extends ConsumerStatefulWidget {
 }
 
 class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
 
-    // Future.microtask(() {
-    //   ref.read(userViewModelProvider.notifier).initializeCurrentUser();
-    //   ref.read(mainFeedViewModelProvider.notifier).getPosts();
-    // });
+    _scrollController.addListener(_onScroll);
+
+    // Initial load
+    Future.microtask(() {
+      ref.read(userViewModelProvider.notifier).getAuthenticatedUser();
+      ref.read(mainFeedViewModelProvider.notifier).getPosts();
+    });
+  }
+
+  void _onScroll() {
+    final state = ref.read(mainFeedViewModelProvider);
+
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (state.hasNext && !state.isLoading) {
+        ref.read(mainFeedViewModelProvider.notifier).getPosts(isLoadMore: true);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // States
     final userState = ref.watch(userViewModelProvider);
-    final mainFeedState = ref.watch(mainFeedViewModelProvider);
+    final feedState = ref.watch(mainFeedViewModelProvider);
 
-    // ViewModels
-    final logoutViewModel = ref.read(logoutViewModelProvider.notifier);
-    final mainFeedViewModel = ref.read(mainFeedViewModelProvider.notifier);
+    final logoutVM = ref.read(logoutViewModelProvider.notifier);
+    final feedVM = ref.read(mainFeedViewModelProvider.notifier);
 
-    final posts = mainFeedState.posts;
-
-    // -------------------------------------------------------------------------
+    final posts = feedState.posts;
+    final isLoading = userState.isLoading || feedState.isLoading;
 
     return CustomScaffold(
-      isLoading: userState.isLoading || mainFeedState.isLoading,
+      isLoading: isLoading,
+      backgroundColor: AppColors.background,
+
       appBarLeadingIcon: Icons.menu,
       onAppBarLeadingIconPressed: (context) {
         Scaffold.of(context).openDrawer();
       },
-      backgroundColor: AppColors.background,
 
       drawer: userState.user == null
           ? const SizedBox.shrink()
@@ -59,7 +79,7 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
               currentUser: userState.user!,
               selectedRoute: AppRoutes.mainFeed,
               onSignOut: () async {
-                await logoutViewModel.logout();
+                await logoutVM.logout();
                 if (context.mounted) {
                   NavigationUtils.replaceWith(context, AppRoutes.login);
                 }
@@ -68,48 +88,48 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
 
       body: RefreshIndicator.noSpinner(
         onRefresh: () async {
-          await mainFeedViewModel.getPosts();
+          await feedVM.getPosts(); // refresh resets to page 0
         },
-        child: ListView.builder(
-          padding: const EdgeInsets.only(bottom: AppDimens.padding80),
-          itemCount: 10,
-          itemBuilder: (context, index) {
-            final post = Post(
-              id: index.toString(),
-              title: "Title " + index.toString(),
-              description:
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam eleifend odio a tempus maximus. Morbi consequat iaculis velit lobortis lobortis. Nunc nec aliquam nunc. Donec condimentum nulla at congue venenatis. Morbi scelerisque vehicula eros, sit amet viverra nibh vehicula et. Curabitur nec magna vitae enim maximus suscipit in in orci. Sed dignissim turpis vitae sodales lobortis. Mauris leo elit, tincidunt a semper vel, pharetra sit amet nisl.",
-              userId: "userId",
-              userName: "User Name 1",
-              userProfileImageUrl: "",
-              createdAt: DateTime.timestamp(),
-              updatedAt: DateTime.timestamp(),
-              likesCount: 0,
-              commentsCount: 0,
-              sharesCount: 0,
-              comments: [],
-              isLikedByCurrentUser: false,
-            );
 
-            return PostWidget(
-              post: post,
-              onLikeTap: () => mainFeedViewModel.likePost(post.id),
-              onTap: () {
-                NavigationUtils.navigateTo(
-                  context,
-                  AppRoutes.postInfo,
-                  arguments: post,
-                );
-              },
-            );
-          },
-        ),
+        child: posts.isEmpty && !isLoading
+            ? Center(
+                child: Text(
+                  "No posts available",
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.textDisabled,
+                  ),
+                ),
+              )
+            : ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.only(bottom: AppDimens.padding80),
+                itemCount: posts.length + (feedState.hasNext ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == posts.length) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  final post = posts[index];
+
+                  return PostWidget(
+                    post: post,
+                    onTap: () => NavigationUtils.navigateTo(
+                      context,
+                      AppRoutes.postInfo,
+                      arguments: post,
+                    ),
+                    onLikeTap: () => feedVM.likePost(post.id),
+                  );
+                },
+              ),
       ),
 
       floatingActionButton: userState.user != null
           ? FloatingActionButton(
               backgroundColor: AppColors.primary,
-              child: const Icon(Icons.add),
               onPressed: () {
                 NavigationUtils.navigateTo(
                   context,
@@ -117,6 +137,7 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
                   arguments: userState.user,
                 );
               },
+              child: const Icon(Icons.add),
             )
           : null,
     );

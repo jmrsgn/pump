@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
-import 'package:pump/core/data/dto/api_error_response.dart';
+import 'package:pump/core/data/dto/response/api_error_response.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 
 import '../../../../core/constants/api/api_constants.dart';
-import '../../../../core/data/dto/result.dart';
+import '../../../../core/data/dto/response/result.dart';
 import '../dto/auth_response_dto.dart';
 import '../dto/login_request_dto.dart';
 import '../dto/register_request_dto.dart';

@@ -1,5 +1,6 @@
 import 'package:pump/core/presentation/providers/ui_state.dart';
 
+import '../../domain/entities/comment.dart';
 import '../../domain/entities/post.dart';
 
 class PostInfoState extends UiState {

@@ -4,12 +4,17 @@ import 'package:logger/logger.dart';
 class LoggerUtility {
   LoggerUtility._();
 
+  // TODO: check or improve
   static final Logger _logger = Logger(
     printer: PrettyPrinter(
-      methodCount: 1, // Number of method calls to show
-      errorMethodCount: 5, // Stacktrace lines for errors
-      lineLength: 200, // Width of log lines
-      colors: true, // Colored output
+      methodCount: 1,
+      // Number of method calls to show
+      errorMethodCount: 5,
+      // Stacktrace lines for errors
+      lineLength: 200,
+      // Width of log lines
+      colors: true,
+      // Colored output
       printEmojis: true, // Emojis for log levels
     ),
     filter: _LogFilter(), // Disable logs in release mode

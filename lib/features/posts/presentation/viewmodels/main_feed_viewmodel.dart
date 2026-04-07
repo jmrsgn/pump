@@ -33,27 +33,30 @@ class MainFeedViewmodel extends BaseViewmodel<MainFeedState> {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // getPosts
-  // ---------------------------------------------------------------------------
-
-  Future<void> getPosts() async {
+  // getPosts ------------------------------------------------------------------
+  Future<void> getPosts({bool isLoadMore = false}) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [getPosts]");
-
     if (state.isLoading) return;
 
     setLoading(true);
 
     try {
-      final response = await _getPostsUseCase.execute();
+      final nextPage = isLoadMore ? state.currentPage + 1 : 0;
 
-      if (!response.isSuccess) {
-        return emitError(response.error!.message);
+      final result = await _getPostsUseCase.execute(nextPage);
+
+      if (!result.isSuccess || result.data == null) {
+        setLoading(false);
+        return emitError(result.error!.message);
       }
+
+      final paged = result.data!;
 
       state = state.copyWith(
         isLoading: false,
-        posts: response.data,
+        currentPage: paged.page,
+        hasNext: (paged.page + 1) * paged.size < paged.totalElements,
+        posts: isLoadMore ? [...state.posts, ...paged.content] : paged.content,
         errorMessage: null,
       );
     } catch (e, stack) {

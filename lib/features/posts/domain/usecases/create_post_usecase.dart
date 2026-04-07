@@ -1,7 +1,7 @@
 import 'package:pump/core/errors/app_error.dart';
 import 'package:pump/features/posts/domain/entities/post.dart';
 
-import '../../../../core/data/dto/result.dart';
+import '../../../../core/data/dto/response/result.dart';
 import '../repositories/post_repository.dart';
 
 class CreatePostUseCase {

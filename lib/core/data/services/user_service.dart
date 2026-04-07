@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:pump/core/data/dto/user_response_dto.dart';
+import 'package:pump/core/data/dto/response/user_response_dto.dart';
 import 'package:http/http.dart' as http;
 
 import '../../constants/api/api_constants.dart';
 import '../../constants/app/app_strings.dart';
 import '../../utilities/logger_utility.dart';
-import '../dto/api_error_response.dart';
-import '../dto/result.dart';
+import '../dto/response/api_error_response.dart';
+import '../dto/response/result.dart';
 
 class UserService {
   // Future<Result<UserResponse, ApiErrorResponse>> getCurrentUser(

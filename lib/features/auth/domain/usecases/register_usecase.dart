@@ -1,7 +1,6 @@
 import 'package:pump/core/errors/app_error.dart';
 
-import '../../../../core/constants/app/app_strings.dart';
-import '../../../../core/data/dto/result.dart';
+import '../../../../core/data/dto/response/result.dart';
 import '../../data/dto/auth_response_dto.dart';
 import '../../data/dto/register_request_dto.dart';
 import '../repositories/auth_repository.dart';
@@ -23,7 +22,7 @@ class RegisterUseCase {
       firstName: firstName,
       lastName: lastName,
       email: email,
-      phone: '${AppStrings.phPhonePrefix}$phone',
+      phone: phone,
       role: role,
       password: password,
     );

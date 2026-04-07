@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pump/core/domain/usecases/get_user_profile_usecase.dart';
+import 'package:pump/core/domain/usecases/get_authenticated_user_usecase.dart';
 import 'package:pump/core/presentation/providers/user_state.dart';
 
 import '../../data/repositories/user_repository_impl.dart';
@@ -15,8 +15,8 @@ final userRepositoryProvider = Provider<UserRepositoryImpl>((ref) {
 });
 
 // UseCases
-final getUserProfileUseCaseProvider = Provider<GetUserProfileUseCase>(
-  (ref) => GetUserProfileUseCase(ref.watch(userRepositoryProvider)),
+final getUserProfileUseCaseProvider = Provider<GetAuthenticatedUser>(
+  (ref) => GetAuthenticatedUser(ref.watch(userRepositoryProvider)),
 );
 
 // ViewModels
@@ -24,6 +24,6 @@ final userViewModelProvider = StateNotifierProvider<UserViewModel, UserState>((
   ref,
 ) {
   final repo = ref.watch(userRepositoryProvider);
-  final getUserProfileUseCase = GetUserProfileUseCase(repo);
+  final getUserProfileUseCase = GetAuthenticatedUser(repo);
   return UserViewModel(getUserProfileUseCase);
 });

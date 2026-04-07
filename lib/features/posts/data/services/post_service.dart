@@ -3,8 +3,9 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:pump/core/constants/api/api_constants.dart';
-import 'package:pump/core/data/dto/api_error_response.dart';
-import 'package:pump/core/data/dto/result.dart';
+import 'package:pump/core/data/dto/response/api_error_response.dart';
+import 'package:pump/core/data/dto/response/paged_response.dart';
+import 'package:pump/core/data/dto/response/result.dart';
 
 import '../../../../core/constants/api/api_error_strings.dart';
 import '../../../../core/utilities/logger_utility.dart';
@@ -13,34 +14,43 @@ import '../dto/post_response_dto.dart';
 
 class PostService {
   // getPosts ------------------------------------------------------------------
-  Future<Result<List<PostResponse>, ApiErrorResponse>> getPosts(
+  Future<Result<PagedResponse<PostResponse>, ApiErrorResponse>> getPosts(
     String token,
+    int page,
   ) async {
     try {
       final response = await http.get(
-        Uri.parse(ApiConstants.postUrl),
+        Uri.parse("${ApiConstants.postUrl}?page=$page"),
         headers: {...ApiConstants.headerType, 'Authorization': 'Bearer $token'},
       );
 
-      final jsonBody = jsonDecode(response.body);
+      final json = response.body.isNotEmpty ? jsonDecode(response.body) : {};
 
       if (response.statusCode == HttpStatus.ok) {
-        // Assume the backend returns a list of posts
-        List<PostResponse> posts = (jsonBody['data'] as List)
-            .map((e) => PostResponse.fromJson(e))
-            .toList();
+        final paged = PagedResponse<PostResponse>.fromJson(
+          json['data'],
+          (e) => PostResponse.fromJson(e),
+        );
 
-        return Result.success(posts);
-      } else {
-        final error = ApiErrorResponse.fromJson(jsonBody['error']);
-        return Result.failure(error);
+        return Result.success(paged);
       }
-    } catch (e) {
+
+      final errorJson = json['error'] ?? {};
+      final error = ApiErrorResponse.fromJson(errorJson);
+      return Result.failure(
+        ApiErrorResponse(
+          status: error.status,
+          message: error.message,
+          error: error.error,
+        ),
+      );
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "getPosts", e, stack);
       return Result.failure(
         ApiErrorResponse(
           status: HttpStatus.internalServerError,
-          error: ApiErrorStrings.internalServerError,
-          message: e.toString(),
+          message: "An unexpected error occurred",
+          error: "Internal server error",
         ),
       );
     }

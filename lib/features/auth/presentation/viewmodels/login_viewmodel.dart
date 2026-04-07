@@ -36,20 +36,12 @@ class LoginViewModel extends BaseViewmodel<UiState> {
     }
 
     try {
-      final response = await _loginUseCase.execute(
-        email.trim(),
-        password.trim(),
-      );
-
-      if (response.isSuccess) {
+      final result = await _loginUseCase.execute(email.trim(), password.trim());
+      if (result.isSuccess) {
         state = state.copyWith(isLoading: false, errorMessage: null);
       } else {
-        LoggerUtility.e(
-          runtimeType.toString(),
-          "login",
-          response.error!.message,
-        );
-        emitError(response.error!.message);
+        LoggerUtility.e(runtimeType.toString(), "login", result.error!.message);
+        emitError(result.error!.message);
       }
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "login", e, stack);

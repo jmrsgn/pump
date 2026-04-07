@@ -113,6 +113,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
+  // UI Components
   Widget _buildForm() {
     return Center(
       child: Column(

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pump/core/constants/app/app_error_strings.dart';
-import 'package:pump/core/domain/usecases/get_user_profile_usecase.dart';
+import 'package:pump/core/domain/usecases/get_authenticated_user_usecase.dart';
 import 'package:pump/features/posts/domain/entities/post.dart';
 import 'package:pump/features/posts/domain/usecases/create_comment_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_comments_usecase.dart';
@@ -9,12 +9,13 @@ import 'package:pump/features/posts/presentation/providers/post_info_state.dart'
 
 import '../../../../core/domain/entities/user.dart';
 import '../../../../core/utilities/logger_utility.dart';
+import '../../domain/entities/comment.dart';
 import '../providers/post_providers.dart';
 
 class PostInfoViewModel extends StateNotifier<PostInfoState> {
   final Ref ref;
   final CreateCommentUseCase _createCommentUseCase;
-  final GetUserProfileUseCase _getUserProfileUseCase;
+  final GetAuthenticatedUser _getUserProfileUseCase;
   final GetCommentsUseCase _getCommentsUseCase;
   final LikePostUseCase _likePostUseCase;
 
@@ -110,47 +111,47 @@ class PostInfoViewModel extends StateNotifier<PostInfoState> {
   Future<void> createComment(String comment, String postId) async {
     _setLoading(true);
 
-    final userResponse = await _getUserProfileUseCase.execute();
-    if (!userResponse.isSuccess || userResponse.data?.user == null) {
-      return _handleFailure(AppErrorStrings.anUnexpectedErrorOccurred);
-    }
-
-    final User currentUser = userResponse.data!.user;
-
-    final tempComment = Comment(
-      userName: "${currentUser.firstName} ${currentUser.lastName}",
-      userProfileImageUrl: currentUser.profileImageUrl,
-      comment: comment,
-      likesCount: 0,
-      repliesCount: 0,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    _addLocalComment(tempComment);
-
-    await _safeExecute(() async {
-      final response = await _createCommentUseCase.execute(
-        comment.trim(),
-        postId,
-      );
-
-      if (!response.isSuccess) {
-        _removeLocalComment(tempComment);
-        return _handleFailure(response.error!.message);
-      }
-
-      // Update comment count in feed
-      ref
-          .read(mainFeedViewModelProvider.notifier)
-          .incrementCommentCount(postId);
-
-      state = state.copyWith(
-        createdComment: response.data,
-        errorMessage: null,
-        isLoading: false,
-      );
-    }, "createComment");
+    // final userResponse = await _getUserProfileUseCase.execute();
+    // if (!userResponse.isSuccess || userResponse.data?.user == null) {
+    //   return _handleFailure(AppErrorStrings.anUnexpectedErrorOccurred);
+    // }
+    //
+    // final User currentUser = userResponse.data!.user;
+    //
+    // final tempComment = Comment(
+    //   userName: "${currentUser.firstName} ${currentUser.lastName}",
+    //   userProfileImageUrl: currentUser.profileImageUrl,
+    //   comment: comment,
+    //   likesCount: 0,
+    //   repliesCount: 0,
+    //   createdAt: DateTime.now(),
+    //   updatedAt: DateTime.now(),
+    // );
+    //
+    // _addLocalComment(tempComment);
+    //
+    // await _safeExecute(() async {
+    //   final response = await _createCommentUseCase.execute(
+    //     comment.trim(),
+    //     postId,
+    //   );
+    //
+    //   if (!response.isSuccess) {
+    //     _removeLocalComment(tempComment);
+    //     return _handleFailure(response.error!.message);
+    //   }
+    //
+    //   // Update comment count in feed
+    //   ref
+    //       .read(mainFeedViewModelProvider.notifier)
+    //       .incrementCommentCount(postId);
+    //
+    //   state = state.copyWith(
+    //     createdComment: response.data,
+    //     errorMessage: null,
+    //     isLoading: false,
+    //   );
+    // }, "createComment");
   }
 
   // getComments ---------------------------------------------------------------

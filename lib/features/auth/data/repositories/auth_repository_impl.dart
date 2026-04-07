@@ -2,7 +2,7 @@ import 'package:pump/core/errors/app_error.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 import 'package:pump/core/utils/secure_storage.dart';
 
-import '../../../../core/data/dto/result.dart';
+import '../../../../core/data/dto/response/result.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../dto/auth_response_dto.dart';
 import '../dto/login_request_dto.dart';
@@ -29,15 +29,27 @@ class AuthRepositoryImpl implements AuthRepository {
         );
       }
 
-      final auth = result.data!;
-      if (auth.accessToken != null && auth.userResponse != null) {
-        await _secureStorage.saveToken(auth.accessToken!);
-        await _secureStorage.saveCurrentLoggedInUser(
-          auth.userResponse!.toUser(),
+      final resultData = result.data!;
+      if (resultData.accessToken == null || resultData.userResponse == null) {
+        LoggerUtility.d(
+          runtimeType.toString(),
+          "Token or user is missing, will not let user log in",
+        );
+        return Result.failure(
+          AppError(message: result.error?.message ?? "User login failed"),
         );
       }
 
-      return Result.success(auth);
+      // Save token and user to Secure Storage
+      LoggerUtility.d(
+        runtimeType.toString(),
+        "Saving token and user to SecureStorage",
+      );
+      await _secureStorage.saveToken(resultData.accessToken!);
+      await _secureStorage.saveCurrentLoggedInUser(
+        resultData.userResponse!.toUser(),
+      );
+      return Result.success(resultData);
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "login", e, stack);
       return Result.failure(AppError(message: "An unexpected error occurred"));
@@ -60,16 +72,7 @@ class AuthRepositoryImpl implements AuthRepository {
           ),
         );
       }
-
-      final auth = result.data!;
-      if (auth.accessToken != null && auth.userResponse != null) {
-        await _secureStorage.saveToken(auth.accessToken!);
-        await _secureStorage.saveCurrentLoggedInUser(
-          auth.userResponse!.toUser(),
-        );
-      }
-
-      return Result.success(auth);
+      return Result.success(result.data!);
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "register", e, stack);
       return Result.failure(AppError(message: "An unexpected error occurred"));

@@ -28,6 +28,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  bool isCoach = false;
+
   @override
   void dispose() {
     _firstNameController.dispose();
@@ -38,34 +40,38 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
-  bool isCoach = false;
+  void _onRegisterPressed() {
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final password = _passwordController.text.trim();
+    final role = isCoach ? 2 : 1;
+
+    ref
+        .read(registerViewModelProvider.notifier)
+        .register(firstName, lastName, email, phone, role, password);
+  }
 
   @override
   Widget build(BuildContext context) {
-    // States
     final uiState = ref.watch(registerViewModelProvider);
 
-    // ViewModels
-    final registerViewModel = ref.read(registerViewModelProvider.notifier);
-
-    // Listeners
     ref.listen<UiState>(registerViewModelProvider, (previous, next) {
       if (previous?.isLoading == true && next.isLoading == false) {
+        if (!mounted) return;
+
         if (next.errorMessage == null) {
-          if (!mounted) return;
           UiUtils.showSnackBarSuccess(
             context,
-            message: AppStrings.userRegisteredSuccessfully,
+            message: "User registered successfully",
           );
           NavigationUtils.replaceWith(context, AppRoutes.login);
         } else {
-          if (!mounted) return;
           UiUtils.showSnackBarError(context, message: next.errorMessage!);
         }
       }
     });
-
-    // -------------------------------------------------------------------------
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -75,9 +81,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.all(AppDimens.paddingScreen),
+                padding: const EdgeInsets.all(AppDimens.paddingScreen),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     UiUtils.addVerticalSpaceS(),
 
@@ -88,120 +93,123 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                     UiUtils.addVerticalSpaceXXL(),
 
-                    Row(
-                      children: [
-                        Expanded(
-                          child: CustomTextField(
-                            hint: AppStrings.firstName,
-                            controller: _firstNameController,
-                          ),
-                        ),
-                        UiUtils.addHorizontalSpaceS(),
-                        Expanded(
-                          child: CustomTextField(
-                            hint: AppStrings.lastName,
-                            controller: _lastNameController,
-                          ),
-                        ),
-                      ],
-                    ),
-
+                    _buildNameFields(),
                     UiUtils.addVerticalSpaceM(),
 
-                    CustomTextField(
-                      hint: AppStrings.email,
-                      controller: _emailController,
-                    ),
-
+                    _buildEmailField(),
                     UiUtils.addVerticalSpaceM(),
 
-                    CustomTextField(
-                      hint: AppStrings.phone,
-                      controller: _phoneController,
-                    ),
-
+                    _buildPhoneField(),
                     UiUtils.addVerticalSpaceM(),
 
-                    CustomTextField(
-                      hint: AppStrings.password,
-                      controller: _passwordController,
-                      obscureText: true,
-                    ),
-
+                    _buildPasswordField(),
                     UiUtils.addVerticalSpaceM(),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            text: "${AppStrings.iAmSigningUpAsA} ",
-                            style: AppTextStyles.body,
-                            children: [
-                              TextSpan(
-                                text: isCoach
-                                    ? AppStrings.coach
-                                    : AppStrings.client,
-                                style: AppTextStyles.body.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        UiUtils.addHorizontalSpaceXS(),
-
-                        Switch(
-                          activeThumbColor: AppColors.primary,
-                          value: isCoach,
-                          onChanged: (value) => setState(() => isCoach = value),
-                        ),
-                      ],
-                    ),
+                    _buildRoleSwitch(),
                     UiUtils.addVerticalSpaceL(),
 
-                    SizedBox(
-                      width: AppDimens.dimen180,
-                      child: CustomButton(
-                        onPressed: uiState.isLoading
-                            ? null
-                            : () {
-                                final firstName = _firstNameController.text;
-                                final lastName = _lastNameController.text;
-                                final email = _emailController.text;
-                                final phone = _phoneController.text;
-                                final role = isCoach ? 2 : 1;
-                                final password = _passwordController.text;
+                    _buildRegisterButton(uiState),
 
-                                // Just call register, UI reacts via ref.listen
-                                registerViewModel.register(
-                                  firstName,
-                                  lastName,
-                                  email,
-                                  phone,
-                                  role,
-                                  password,
-                                );
-                              },
-                        label: AppStrings.register,
-                      ),
-                    ),
                     UiUtils.addVerticalSpaceXXL(),
                   ],
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppDimens.padding8),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: UiUtils.addCopyright(),
-              ),
-            ),
+            _buildFooter(),
           ],
         ),
+      ),
+    );
+  }
+
+  // UI Components
+  Widget _buildNameFields() {
+    return Row(
+      children: [
+        Expanded(
+          child: CustomTextField(
+            hint: AppStrings.firstName,
+            controller: _firstNameController,
+          ),
+        ),
+        UiUtils.addHorizontalSpaceS(),
+        Expanded(
+          child: CustomTextField(
+            hint: AppStrings.lastName,
+            controller: _lastNameController,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmailField() {
+    return CustomTextField(
+      hint: AppStrings.email,
+      controller: _emailController,
+    );
+  }
+
+  Widget _buildPhoneField() {
+    return CustomTextField(
+      hint: AppStrings.phone,
+      controller: _phoneController,
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return CustomTextField(
+      hint: AppStrings.password,
+      controller: _passwordController,
+      obscureText: true,
+    );
+  }
+
+  Widget _buildRoleSwitch() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        RichText(
+          text: TextSpan(
+            text: "${AppStrings.iAmSigningUpAsA} ",
+            style: AppTextStyles.body,
+            children: [
+              TextSpan(
+                text: isCoach ? AppStrings.coach : AppStrings.client,
+                style: AppTextStyles.body.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        UiUtils.addHorizontalSpaceXS(),
+        Switch(
+          activeThumbColor: AppColors.primary,
+          value: isCoach,
+          onChanged: (value) => setState(() => isCoach = value),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRegisterButton(UiState uiState) {
+    return SizedBox(
+      width: AppDimens.dimen180,
+      child: CustomButton(
+        onPressed: uiState.isLoading ? null : _onRegisterPressed,
+        label: AppStrings.register,
+      ),
+    );
+  }
+
+  Widget _buildFooter() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppDimens.padding8),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: UiUtils.addCopyright(),
       ),
     );
   }
