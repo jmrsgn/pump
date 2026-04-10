@@ -5,17 +5,17 @@ import '../../../../core/constants/app/ui_constants.dart';
 import '../../../../core/presentation/providers/ui_state.dart';
 import '../../domain/usecases/register_usecase.dart';
 
-class RegisterViewmodel extends BaseViewmodel<UiState> {
+class RegisterViewModel extends BaseViewModel<UiState> {
   final RegisterUseCase _registerUseCase;
 
-  RegisterViewmodel(this._registerUseCase) : super(UiState.initial());
+  RegisterViewModel(this._registerUseCase) : super(UiState.initial());
 
   @override
   UiState copyWithState({bool? isLoading, String? errorMessage}) {
     return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
   }
 
-  // Register ------------------------------------------------------------------
+  // register ------------------------------------------------------------------
   Future<void> register(
     String firstName,
     String lastName,

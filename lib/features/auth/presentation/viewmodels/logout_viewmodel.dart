@@ -4,7 +4,7 @@ import 'package:pump/core/utilities/logger_utility.dart';
 import '../../../../core/presentation/providers/ui_state.dart';
 import '../../domain/usecases/logout_usecase.dart';
 
-class LogoutViewmodel extends BaseViewmodel<UiState> {
+class LogoutViewmodel extends BaseViewModel<UiState> {
   final LogoutUseCase _logoutUseCase;
 
   LogoutViewmodel(this._logoutUseCase) : super(UiState.initial());

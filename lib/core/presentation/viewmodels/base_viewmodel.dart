@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pump/core/constants/app/app_error_strings.dart';
 
 /// Generic base viewmodel for any UiState-like class.
-abstract class BaseViewmodel<T> extends StateNotifier<T> {
-  BaseViewmodel(super.state);
+abstract class BaseViewModel<T> extends StateNotifier<T> {
+  BaseViewModel(super.state);
 
   /// Must be implemented by child classes (how to copy state)
   T copyWithState({bool? isLoading, String? errorMessage});
@@ -17,6 +18,6 @@ abstract class BaseViewmodel<T> extends StateNotifier<T> {
 
   /// For unexpected errors
   void emitUnexpectedError() {
-    emitError("An unexpected error occurred");
+    emitError(AppErrorStrings.anUnexpectedErrorOccurred);
   }
 }

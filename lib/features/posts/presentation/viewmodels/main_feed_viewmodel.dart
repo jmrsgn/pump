@@ -6,11 +6,11 @@ import 'package:pump/features/posts/presentation/providers/main_feed_state.dart'
 import '../../../../core/utilities/logger_utility.dart';
 import '../../domain/helpers/post_like_helpers.dart';
 
-class MainFeedViewmodel extends BaseViewmodel<MainFeedState> {
+class MainFeedViewModel extends BaseViewModel<MainFeedState> {
   final GetPostsUseCase _getPostsUseCase;
   final LikePostUseCase _likePostUseCase;
 
-  MainFeedViewmodel(this._getPostsUseCase, this._likePostUseCase)
+  MainFeedViewModel(this._getPostsUseCase, this._likePostUseCase)
     : super(MainFeedState.initial());
 
   @override
@@ -21,7 +21,6 @@ class MainFeedViewmodel extends BaseViewmodel<MainFeedState> {
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
-
   void incrementCommentCount(String postId) {
     state = state.copyWith(
       posts: state.posts.map((post) {
@@ -65,10 +64,7 @@ class MainFeedViewmodel extends BaseViewmodel<MainFeedState> {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // likePost (optimistic update)
-  // ---------------------------------------------------------------------------
-
+  // likePost (optimistic update) ----------------------------------------------
   Future<void> likePost(String postId) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [likePost]");
 

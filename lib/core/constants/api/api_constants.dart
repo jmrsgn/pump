@@ -7,7 +7,7 @@ class ApiConstants {
   static const String authServiceBaseUrl =
       'http://10.0.2.2:8081/api/v1'; // for Android emulator
   static const String socialServiceBaseUrl =
-      'http://10.0.2.2:8081/api/v1'; // for Android emulator
+      'http://10.0.2.2:8080/api/v1'; // for Android emulator
   // For iOS simulator, use http://localhost:8080/api/v1
 
   // Auth

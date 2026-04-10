@@ -44,19 +44,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final uiState = ref.watch(loginViewModelProvider);
 
+    // Listeners
     ref.listen<UiState>(loginViewModelProvider, (previous, next) {
-      if (previous?.isLoading == true && next.isLoading == false) {
-        if (!mounted) return;
+      final wasLoading = previous?.isLoading ?? false;
+      final isFinished = wasLoading && !next.isLoading;
 
-        if (next.errorMessage == null) {
-          UiUtils.showSnackBarSuccess(
-            context,
-            message: "Successfully logged in",
-          );
-          NavigationUtils.replaceWith(context, AppRoutes.mainFeed);
-        } else {
-          UiUtils.showSnackBarError(context, message: next.errorMessage!);
-        }
+      if (!isFinished || !mounted) return;
+
+      if (next.errorMessage == null) {
+        UiUtils.showSnackBarSuccess(context, message: "Successfully logged in");
+        NavigationUtils.replaceWith(context, AppRoutes.mainFeed);
+      } else {
+        UiUtils.showSnackBarError(context, message: next.errorMessage!);
       }
     });
 
@@ -137,11 +136,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         padding: EdgeInsets.only(bottom: AppDimens.padding32),
         child: RichText(
           text: TextSpan(
-            text: "${AppStrings.dontHaveAnAccount} ",
+            text: "Don't have an account? ",
             style: AppTextStyles.bodySmall,
             children: [
               TextSpan(
-                text: AppStrings.registerHere,
+                text: "Register here",
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,

@@ -5,7 +5,7 @@ import 'package:pump/core/utilities/logger_utility.dart';
 import '../../../../core/presentation/providers/ui_state.dart';
 import '../../domain/usecases/login_usecase.dart';
 
-class LoginViewModel extends BaseViewmodel<UiState> {
+class LoginViewModel extends BaseViewModel<UiState> {
   final LoginUseCase _loginUseCase;
 
   LoginViewModel(this._loginUseCase) : super(UiState.initial());
@@ -15,6 +15,7 @@ class LoginViewModel extends BaseViewmodel<UiState> {
     return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
   }
 
+  // login ---------------------------------------------------------------------
   Future<void> login(String email, String password) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [login]");
 

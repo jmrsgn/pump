@@ -5,7 +5,7 @@ import 'package:pump/features/posts/presentation/providers/create_post_state.dar
 
 import '../../../../core/utilities/logger_utility.dart';
 
-class CreatePostViewModel extends BaseViewmodel<CreatePostState> {
+class CreatePostViewModel extends BaseViewModel<CreatePostState> {
   final CreatePostUseCase _createPostUseCase;
 
   CreatePostViewModel(this._createPostUseCase)
@@ -22,17 +22,21 @@ class CreatePostViewModel extends BaseViewmodel<CreatePostState> {
       "Execute method: [createPost] title: [$title] description: [$description]",
     );
 
-    if (description.trim().isEmpty) {
-      return emitError(AppErrorStrings.postDescriptionAreRequired);
+    if (description.isEmpty) {
+      return emitError(AppErrorStrings.postDescriptionIsRequired);
     }
 
     try {
-      final response = await _createPostUseCase.execute(title, description);
-      if (response.isSuccess) {
+      final result = await _createPostUseCase.execute(title, description);
+      if (result.isSuccess) {
         state = state.copyWith(isLoading: false, errorMessage: null);
       } else {
-        LoggerUtility.d(runtimeType.toString(), response.error);
-        emitError(response.error!.message);
+        LoggerUtility.d(
+          runtimeType.toString(),
+          "createPost",
+          result.error!.message,
+        );
+        emitError(result.error!.message);
       }
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "createPost", e, stack);

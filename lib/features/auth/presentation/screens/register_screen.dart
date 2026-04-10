@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pump/core/presentation/widgets/custom_button.dart';
 import 'package:pump/core/utils/ui_utils.dart';
+import 'package:pump/features/auth/presentation/viewmodels/register_viewmodel.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';
@@ -28,6 +29,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  RegisterViewModel get _registerViewModel =>
+      ref.read(registerViewModelProvider.notifier);
+
   bool isCoach = false;
 
   @override
@@ -48,28 +52,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final password = _passwordController.text.trim();
     final role = isCoach ? 2 : 1;
 
-    ref
-        .read(registerViewModelProvider.notifier)
-        .register(firstName, lastName, email, phone, role, password);
+    _registerViewModel.register(
+      firstName,
+      lastName,
+      email,
+      phone,
+      role,
+      password,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final uiState = ref.watch(registerViewModelProvider);
 
+    // Listeners
     ref.listen<UiState>(registerViewModelProvider, (previous, next) {
-      if (previous?.isLoading == true && next.isLoading == false) {
-        if (!mounted) return;
+      final wasLoading = previous?.isLoading ?? false;
+      final isFinished = wasLoading && !next.isLoading;
 
-        if (next.errorMessage == null) {
-          UiUtils.showSnackBarSuccess(
-            context,
-            message: "User registered successfully",
-          );
-          NavigationUtils.replaceWith(context, AppRoutes.login);
-        } else {
-          UiUtils.showSnackBarError(context, message: next.errorMessage!);
-        }
+      if (!isFinished || !mounted) return;
+
+      if (next.errorMessage == null) {
+        UiUtils.showSnackBarSuccess(
+          context,
+          message: "User registered successfully",
+        );
+        NavigationUtils.replaceWith(context, AppRoutes.login);
+      } else {
+        UiUtils.showSnackBarError(context, message: next.errorMessage!);
       }
     });
 

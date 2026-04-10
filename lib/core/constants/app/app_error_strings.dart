@@ -13,5 +13,5 @@ class AppErrorStrings {
   static const userIsMissing = "User is missing";
 
   // Posts
-  static const postDescriptionAreRequired = "Post description is required";
+  static const postDescriptionIsRequired = "Post description is required";
 }

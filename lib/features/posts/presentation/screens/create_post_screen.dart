@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pump/core/constants/app/ui_constants.dart';
 import 'package:pump/features/posts/presentation/providers/create_post_state.dart';
 import 'package:pump/features/posts/presentation/providers/post_providers.dart';
+import 'package:pump/features/posts/presentation/viewmodels/create_post_viewmodel.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';
@@ -25,30 +26,67 @@ class CreatePostScreen extends ConsumerStatefulWidget {
 }
 
 class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
+  CreatePostViewModel get _createPostViewModel =>
+      ref.read(createPostViewModelProvider.notifier);
+
+  void _onSubmitPost() {
+    final title = _titleController.text.trim();
+    final description = _descriptionController.text.trim();
+    _createPostViewModel.createPost(title, description);
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildAvatar() {
+    final user = widget.currentUser;
+    return user.profileImageUrl == ""
+        ? CircleAvatar(
+            backgroundColor: AppColors.primary,
+            radius: AppDimens.radius16,
+            child: Text(
+              widget.currentUser.firstName[0],
+              style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+            ),
+          )
+        : CircleAvatar(
+            backgroundImage: AssetImage(widget.currentUser.profileImageUrl),
+            radius: AppDimens.radius16,
+          );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final createPostState = ref.watch(createPostViewModelProvider);
+
     // Listeners
     ref.listen<CreatePostState>(createPostViewModelProvider, (previous, next) {
-      if (previous?.isLoading == true && next.isLoading == false) {
-        if (next.errorMessage == null) {
-          if (!mounted) return;
-          UiUtils.showSnackBarSuccess(
-            context,
-            message: AppStrings.successfullyCreatedPost,
-          );
-          NavigationUtils.replaceWith(context, AppRoutes.mainFeed);
-        } else {
-          if (!mounted) return;
-          UiUtils.showSnackBarError(context, message: next.errorMessage!);
-        }
+      final wasLoading = previous?.isLoading ?? false;
+      final isFinished = wasLoading && !next.isLoading;
+
+      if (!isFinished || !mounted) return;
+
+      if (next.errorMessage == null) {
+        UiUtils.showSnackBarSuccess(
+          context,
+          message: "Post created successfully",
+        );
+
+        NavigationUtils.replaceWith(context, AppRoutes.mainFeed);
+      } else {
+        UiUtils.showSnackBarError(
+          context,
+          message: next.errorMessage ?? 'Something went wrong',
+        );
       }
     });
-
-    final createPostState = ref.watch(createPostViewModelProvider);
-    final createPostViewModel = ref.watch(createPostViewModelProvider.notifier);
-
-    final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
 
     return CustomScaffold(
       isLoading: createPostState.isLoading,
@@ -59,45 +97,28 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             FontAwesomeIcons.paperPlane,
             size: AppDimens.dimen20,
           ),
-          onPressed: () {
-            final title = titleController.text.trim();
-            final description = descriptionController.text.trim();
-            createPostViewModel.createPost(title, description);
-          },
+          onPressed: createPostState.isLoading ? null : _onSubmitPost,
         ),
       ],
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
-        child: Container(
+        child: Padding(
           padding: const EdgeInsets.all(AppDimens.paddingScreen),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // User info row
+              // User info
               Row(
                 children: [
-                  widget.currentUser.profileImageUrl == null
-                      ? CircleAvatar(
-                          backgroundColor: AppColors.primary,
-                          radius: AppDimens.radius16,
-                          child: Text(
-                            widget.currentUser.firstName[0],
-                            style: AppTextStyles.body.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )
-                      : CircleAvatar(
-                          backgroundImage: AssetImage(
-                            widget.currentUser.profileImageUrl!,
-                          ),
-                          radius: AppDimens.radius16,
-                        ),
+                  _buildAvatar(),
                   UiUtils.addHorizontalSpaceS(),
-                  Text(
-                    '${widget.currentUser.firstName} ${widget.currentUser.lastName}',
-                    style: AppTextStyles.body.copyWith(
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      '${widget.currentUser.firstName} ${widget.currentUser.lastName}',
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -105,12 +126,13 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
               UiUtils.addVerticalSpaceM(),
 
-              // Title TextField
+              // Title
               TextField(
-                controller: titleController,
+                controller: _titleController,
                 maxLines: UIConstants.maxLines1,
-                decoration: InputDecoration(
-                  hintText: AppStrings.whatsOnYourMind,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  hintText: "What's on your mind?",
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
@@ -123,19 +145,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
               UiUtils.addVerticalSpaceS(),
 
-              // Description TextField
+              // Description
               Expanded(
                 child: TextField(
-                  controller: descriptionController,
+                  controller: _descriptionController,
                   maxLines: null,
                   expands: true,
                   textAlignVertical: TextAlignVertical.top,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
+                  decoration: const InputDecoration(border: InputBorder.none),
                   style: AppTextStyles.bodySmall,
                 ),
               ),

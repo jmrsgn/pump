@@ -28,10 +28,6 @@ class AppStrings {
 
   // Login Page
   static const login = 'Login';
-  static const dontHaveAnAccount = "Don't have an account?";
-  static const registerHere = "Register here";
-  static const invalidCredentials = "Invalid credentials";
-  static const successfullyLoggedIn = "Successfully logged in";
   static const emailAndPasswordAreRequired = "Email and password are required";
   static const enterAValidEmail = "Enter a valid email";
   static const passwordMustBeAtLeast6Characters =
@@ -49,17 +45,13 @@ class AppStrings {
   static const allFieldsAreRequired = "All fields are required";
   static const userRegisteredSuccessfully = "User registered successfully";
   static const phPhonePrefix = "+63";
-  static const userRegistrationFailed = "User registration failed";
 
   // Main Feed Page
   static const comment = "Comment";
   static const share = "Share";
-  static const noPostsAvailable = "No posts available";
 
   // Create Post Page
   static const createPost = "Create Post";
-  static const whatsOnYourMind = "What's on your mind?";
-  static const successfullyCreatedPost = "Successfully created post";
 
   // About Page
   static const about = "About";

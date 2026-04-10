@@ -34,8 +34,8 @@ final loginViewModelProvider = StateNotifierProvider<LoginViewModel, UiState>((
 });
 
 final registerViewModelProvider =
-    StateNotifierProvider<RegisterViewmodel, UiState>((ref) {
-      return RegisterViewmodel(ref.watch(registerUseCaseProvider));
+    StateNotifierProvider<RegisterViewModel, UiState>((ref) {
+      return RegisterViewModel(ref.watch(registerUseCaseProvider));
     });
 
 final logoutViewModelProvider = StateNotifierProvider<LogoutViewmodel, UiState>(

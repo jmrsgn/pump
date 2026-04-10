@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pump/core/presentation/providers/user_providers.dart';
+import 'package:pump/core/presentation/viewmodels/user_viewmodel.dart';
 import 'package:pump/core/routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
+import 'package:pump/features/auth/presentation/viewmodels/logout_viewmodel.dart';
 import 'package:pump/features/posts/presentation/providers/post_providers.dart';
+import 'package:pump/features/posts/presentation/viewmodels/main_feed_viewmodel.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
@@ -21,7 +24,15 @@ class MainFeedScreen extends ConsumerStatefulWidget {
 }
 
 class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
-  final ScrollController _scrollController = ScrollController();
+  final _scrollController = ScrollController();
+
+  MainFeedViewModel get _mainFeedViewModel =>
+      ref.read(mainFeedViewModelProvider.notifier);
+
+  LogoutViewmodel get _logoutVewModel =>
+      ref.read(logoutViewModelProvider.notifier);
+
+  UserViewModel get _userViewModel => ref.read(userViewModelProvider.notifier);
 
   @override
   void initState() {
@@ -31,18 +42,19 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
 
     // Initial load
     Future.microtask(() {
-      ref.read(userViewModelProvider.notifier).getAuthenticatedUser();
-      ref.read(mainFeedViewModelProvider.notifier).getPosts();
+      _userViewModel.getAuthenticatedUser();
+      _mainFeedViewModel.getPosts();
     });
   }
 
   void _onScroll() {
-    final state = ref.read(mainFeedViewModelProvider);
+    final currentState = ref.read(mainFeedViewModelProvider);
 
+    // If user is near the bottom within 200 px of the screen, load more posts
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      if (state.hasNext && !state.isLoading) {
-        ref.read(mainFeedViewModelProvider.notifier).getPosts(isLoadMore: true);
+      if (currentState.hasNext && !currentState.isLoading) {
+        _mainFeedViewModel.getPosts(isLoadMore: true);
       }
     }
   }
@@ -57,9 +69,6 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
   Widget build(BuildContext context) {
     final userState = ref.watch(userViewModelProvider);
     final feedState = ref.watch(mainFeedViewModelProvider);
-
-    final logoutVM = ref.read(logoutViewModelProvider.notifier);
-    final feedVM = ref.read(mainFeedViewModelProvider.notifier);
 
     final posts = feedState.posts;
     final isLoading = userState.isLoading || feedState.isLoading;
@@ -79,7 +88,7 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
               currentUser: userState.user!,
               selectedRoute: AppRoutes.mainFeed,
               onSignOut: () async {
-                await logoutVM.logout();
+                await _logoutVewModel.logout();
                 if (context.mounted) {
                   NavigationUtils.replaceWith(context, AppRoutes.login);
                 }
@@ -88,7 +97,7 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
 
       body: RefreshIndicator.noSpinner(
         onRefresh: () async {
-          await feedVM.getPosts(); // refresh resets to page 0
+          await _mainFeedViewModel.getPosts(); // refresh resets to page 0
         },
 
         child: posts.isEmpty && !isLoading
@@ -107,7 +116,7 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
                 itemBuilder: (context, index) {
                   if (index == posts.length) {
                     return const Padding(
-                      padding: EdgeInsets.all(16),
+                      padding: EdgeInsets.all(AppDimens.padding16),
                       child: Center(child: CircularProgressIndicator()),
                     );
                   }
@@ -121,7 +130,7 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
                       AppRoutes.postInfo,
                       arguments: post,
                     ),
-                    onLikeTap: () => feedVM.likePost(post.id),
+                    onLikeTap: () => _mainFeedViewModel.likePost(post.id),
                   );
                 },
               ),

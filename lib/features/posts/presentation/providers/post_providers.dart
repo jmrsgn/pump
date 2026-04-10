@@ -66,8 +66,8 @@ final createPostViewModelProvider =
     });
 
 final mainFeedViewModelProvider =
-    StateNotifierProvider<MainFeedViewmodel, MainFeedState>((ref) {
-      return MainFeedViewmodel(
+    StateNotifierProvider<MainFeedViewModel, MainFeedState>((ref) {
+      return MainFeedViewModel(
         ref.watch(getPostsUseCaseProvider),
         ref.watch(likePostUseCaseProvider),
       );
