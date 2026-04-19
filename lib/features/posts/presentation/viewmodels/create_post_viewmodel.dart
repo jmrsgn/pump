@@ -1,4 +1,4 @@
-import 'package:pump/core/constants/app/app_error_strings.dart';
+import 'package:pump/core/constants/error/validation_error_constants.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/features/posts/domain/usecases/create_post_usecase.dart';
 import 'package:pump/features/posts/presentation/providers/create_post_state.dart';
@@ -16,14 +16,20 @@ class CreatePostViewModel extends BaseViewModel<CreatePostState> {
     return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
   }
 
+  // createPost ----------------------------------------------------------------
   Future<void> createPost(String title, String description) async {
     LoggerUtility.d(
       runtimeType.toString(),
       "Execute method: [createPost] title: [$title] description: [$description]",
     );
 
+    // Prevent double taps
+    if (state.isLoading) return;
+
+    setLoading(true);
+
     if (description.isEmpty) {
-      return emitError(AppErrorStrings.postDescriptionIsRequired);
+      return emitError(ValidationErrorConstants.postDescriptionIsRequired);
     }
 
     try {

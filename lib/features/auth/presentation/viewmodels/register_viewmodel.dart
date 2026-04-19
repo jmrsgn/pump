@@ -1,3 +1,4 @@
+import 'package:pump/core/constants/error/validation_error_constants.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 
@@ -38,16 +39,18 @@ class RegisterViewModel extends BaseViewModel<UiState> {
       phone,
       password,
     ].any((e) => e.trim().isEmpty)) {
-      emitError("All fields are required");
+      emitError(ValidationErrorConstants.allFieldsAreRequired);
       return;
     }
 
     if (!UIConstants.emailRegex.hasMatch(email.trim())) {
-      return emitError("Enter a valid email");
+      return emitError(ValidationErrorConstants.enterAValidEmail);
     }
 
     if (password.length < UIConstants.minimumPasswordLength) {
-      return emitError("Password must be at least 6 characters");
+      return emitError(
+        ValidationErrorConstants.passwordMustBeAtLeast6Characters,
+      );
     }
 
     try {

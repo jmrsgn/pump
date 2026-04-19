@@ -1,4 +1,6 @@
 import 'package:pump/core/constants/app/app_error_strings.dart';
+import 'package:pump/core/constants/error/auth_error_constants.dart';
+import 'package:pump/core/constants/error/system_error_constants.dart';
 import 'package:pump/core/data/dto/response/paged_response.dart';
 import 'package:pump/core/data/dto/response/result.dart';
 import 'package:pump/core/data/repositories/user_repository_impl.dart';
@@ -33,32 +35,42 @@ class PostRepositoryImpl implements PostRepository {
         LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
         return Result.failure(
           AppError(
-            message: "User is not authenticated",
+            message: AuthErrorConstants.userIsNotAuthenticated,
             code: AppErrorCode.unauthorized,
           ),
         );
       }
 
-      final request = CreatePostRequest(
-        title: title,
-        description: description,
-        userId: userResult.data!.user.id,
-      );
+      final request = CreatePostRequest(title: title, description: description);
 
-      // Create Post Request
-      final result = await _postService.createPost(
+      final createPostResult = await _postService.createPost(
         userResult.data!.token,
         request,
       );
 
-      if (result.isSuccess && result.data != null) {
-        LoggerUtility.v(
-          runtimeType.toString(),
-          'Created post: ${result.data?.toPost()}',
+      if (!createPostResult.isSuccess) {
+        return Result.failure(
+          AppError(
+            message: createPostResult.error?.message ?? "Create post failed",
+          ),
         );
-        return Result.success(result.data?.toPost());
       }
-      return Result.failure(userResult.error);
+
+      final response = createPostResult.data;
+      if (response == null) {
+        return Result.failure(
+          AppError(
+            message: AppErrorStrings.anUnexpectedErrorOccurred,
+            code: AppErrorCode.unknown,
+          ),
+        );
+      }
+
+      final post = response.toPost();
+
+      LoggerUtility.v(runtimeType.toString(), "Created post: $post");
+
+      return Result.success(post);
     } catch (e, stackTrace) {
       LoggerUtility.e(
         runtimeType.toString(),
@@ -66,8 +78,12 @@ class PostRepositoryImpl implements PostRepository {
         e.toString(),
         stackTrace,
       );
+
       return Result.failure(
-        AppError(message: AppErrorStrings.anUnexpectedErrorOccurred),
+        AppError(
+          message: AppErrorStrings.anUnexpectedErrorOccurred,
+          code: AppErrorCode.unknown,
+        ),
       );
     }
   }
@@ -82,7 +98,7 @@ class PostRepositoryImpl implements PostRepository {
         LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
         return Result.failure(
           AppError(
-            message: "User is not authenticated",
+            message: AuthErrorConstants.userIsNotAuthenticated,
             code: AppErrorCode.unauthorized,
           ),
         );
@@ -111,7 +127,9 @@ class PostRepositoryImpl implements PostRepository {
       return Result.success(paged);
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "getPosts", e, stack);
-      return Result.failure(AppError(message: "An unexpected error occurred"));
+      return Result.failure(
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
+      );
     }
   }
 

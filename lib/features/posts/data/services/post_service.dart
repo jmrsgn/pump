@@ -3,11 +3,11 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:pump/core/constants/api/api_constants.dart';
+import 'package:pump/core/constants/error/system_error_constants.dart';
 import 'package:pump/core/data/dto/response/api_error_response.dart';
 import 'package:pump/core/data/dto/response/paged_response.dart';
 import 'package:pump/core/data/dto/response/result.dart';
 
-import '../../../../core/constants/api/api_error_strings.dart';
 import '../../../../core/utilities/logger_utility.dart';
 import '../dto/create_post_request_dto.dart';
 import '../dto/post_response_dto.dart';
@@ -56,10 +56,7 @@ class PostService {
     }
   }
 
-  /// Create a new post, after sending it to server, return the created post
-  ///
-  /// @param request: CreatePostRequest
-  /// returns: Result<PostResponse, ApiErrorResponse>
+  // createPost ----------------------------------------------------------------
   Future<Result<PostResponse, ApiErrorResponse>> createPost(
     String token,
     CreatePostRequest request,
@@ -75,24 +72,49 @@ class PostService {
 
       if (response.statusCode == HttpStatus.ok ||
           response.statusCode == HttpStatus.created) {
-        return Result.success(PostResponse.fromJson(json['data']));
-      } else {
-        final error = ApiErrorResponse.fromJson(json['error']);
-        return Result.failure(error);
+        final data = json['data'];
+        if (data == null) {
+          return Result.failure(
+            ApiErrorResponse(
+              status: response.statusCode,
+              error: ApiErrorStrings.invalidResponse,
+              message: "Response data is null",
+            ),
+          );
+        }
+
+        return Result.success(PostResponse.fromJson(data));
       }
+
+      final errorJson = json['error'] ?? {};
+      final error = ApiErrorResponse.fromJson(errorJson);
+
+      if (errorJson == null) {
+        return Result.failure(
+          ApiErrorResponse(
+            status: response.statusCode,
+            error: error.message,
+            message: "Error response is null",
+          ),
+        );
+      }
+
+      return Result.failure(ApiErrorResponse.fromJson(errorJson));
     } catch (e, stackTrace) {
       LoggerUtility.e(
         runtimeType.toString(),
-        ApiErrorStrings.anUnexpectedErrorOccurred,
+        SystemErrorConstants.anUnexpectedErrorOccurred,
         e.toString(),
         stackTrace,
       );
-      final apiErrorResponse = ApiErrorResponse(
-        status: HttpStatus.internalServerError,
-        error: ApiErrorStrings.anUnexpectedErrorOccurred,
-        message: '${ApiErrorStrings.anUnexpectedErrorOccurred}: $e',
+
+      return Result.failure(
+        ApiErrorResponse(
+          status: HttpStatus.internalServerError,
+          error: SystemErrorConstants.anUnexpectedErrorOccurred,
+          message: "${SystemErrorConstants.anUnexpectedErrorOccurred}: $e",
+        ),
       );
-      return Result.failure(apiErrorResponse);
     }
   }
 

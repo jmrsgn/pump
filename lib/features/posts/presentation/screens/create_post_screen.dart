@@ -81,10 +81,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
         NavigationUtils.replaceWith(context, AppRoutes.mainFeed);
       } else {
-        UiUtils.showSnackBarError(
-          context,
-          message: next.errorMessage ?? 'Something went wrong',
-        );
+        UiUtils.showSnackBarError(context, message: next.errorMessage!);
       }
     });
 
