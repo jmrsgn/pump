@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pump/core/constants/app/app_error_strings.dart';
+import 'package:pump/core/constants/error/system_error_constants.dart';
 
 /// Generic base viewmodel for any UiState-like class.
 abstract class BaseViewModel<T> extends StateNotifier<T> {
@@ -18,6 +18,6 @@ abstract class BaseViewModel<T> extends StateNotifier<T> {
 
   /// For unexpected errors
   void emitUnexpectedError() {
-    emitError(AppErrorStrings.anUnexpectedErrorOccurred);
+    emitError(SystemErrorConstants.anUnexpectedErrorOccurred);
   }
 }

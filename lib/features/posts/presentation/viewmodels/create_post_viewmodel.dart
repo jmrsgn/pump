@@ -1,18 +1,17 @@
 import 'package:pump/core/constants/error/validation_error_constants.dart';
+import 'package:pump/core/presentation/providers/ui_state.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/features/posts/domain/usecases/create_post_usecase.dart';
-import 'package:pump/features/posts/presentation/providers/create_post_state.dart';
 
 import '../../../../core/utilities/logger_utility.dart';
 
-class CreatePostViewModel extends BaseViewModel<CreatePostState> {
+class CreatePostViewModel extends BaseViewModel<UiState> {
   final CreatePostUseCase _createPostUseCase;
 
-  CreatePostViewModel(this._createPostUseCase)
-    : super(CreatePostState.initial());
+  CreatePostViewModel(this._createPostUseCase) : super(UiState.initial());
 
   @override
-  CreatePostState copyWithState({bool? isLoading, String? errorMessage}) {
+  UiState copyWithState({bool? isLoading, String? errorMessage}) {
     return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
   }
 

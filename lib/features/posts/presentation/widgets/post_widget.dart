@@ -112,19 +112,29 @@ class _PostWidgetState extends ConsumerState<PostWidget>
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppDimens.padding4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.post.title, style: AppTextStyles.heading3),
-                    UiUtils.addVerticalSpaceS(),
-                    Text(
-                      widget.post.description,
-                      style: AppTextStyles.body,
-                      maxLines: UIConstants.maxLines3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+                child: widget.post.title.isEmpty
+                    ? Text(
+                        widget.post.description,
+                        style: AppTextStyles.body,
+                        maxLines: UIConstants.maxLines3,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.post.title,
+                            style: AppTextStyles.heading3,
+                          ),
+                          UiUtils.addVerticalSpaceS(),
+                          Text(
+                            widget.post.description,
+                            style: AppTextStyles.body,
+                            maxLines: UIConstants.maxLines3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
               ),
             ),
 

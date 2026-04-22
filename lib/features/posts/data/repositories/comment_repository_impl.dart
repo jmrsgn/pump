@@ -1,4 +1,5 @@
-import 'package:pump/core/constants/app/app_error_strings.dart';
+import 'package:pump/core/constants/error/auth_error_constants.dart';
+import 'package:pump/core/constants/error/system_error_constants.dart';
 import 'package:pump/core/data/dto/response/result.dart';
 import 'package:pump/core/data/repositories/user_repository_impl.dart';
 import 'package:pump/core/domain/entities/authenticated_user.dart';
@@ -51,18 +52,18 @@ class CommentRepositoryImpl implements CommentRepository {
           "User id is missing, will not proceed with API call",
         );
         return Result.failure(
-          AppError(message: AppErrorStrings.userIsNotAuthenticated),
+          AppError(message: AuthErrorConstants.userIsNotAuthenticated),
         );
       }
     } catch (e, stackTrace) {
       LoggerUtility.e(
         runtimeType.toString(),
-        AppErrorStrings.anUnexpectedErrorOccurred,
+        SystemErrorConstants.anUnexpectedErrorOccurred,
         e.toString(),
         stackTrace,
       );
       return Result.failure(
-        AppError(message: AppErrorStrings.anUnexpectedErrorOccurred),
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );
     }
   }

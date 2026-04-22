@@ -2,6 +2,7 @@ import 'package:pump/core/errors/app_error.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 import 'package:pump/core/utils/secure_storage.dart';
 
+import '../../../../core/constants/error/system_error_constants.dart';
 import '../../../../core/data/dto/response/result.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../dto/auth_response_dto.dart';
@@ -52,7 +53,9 @@ class AuthRepositoryImpl implements AuthRepository {
       return Result.success(resultData);
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "login", e, stack);
-      return Result.failure(AppError(message: "An unexpected error occurred"));
+      return Result.failure(
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
+      );
     }
   }
 
@@ -75,7 +78,9 @@ class AuthRepositoryImpl implements AuthRepository {
       return Result.success(result.data!);
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "register", e, stack);
-      return Result.failure(AppError(message: "An unexpected error occurred"));
+      return Result.failure(
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
+      );
     }
   }
 

@@ -1,11 +1,9 @@
-import 'package:pump/core/constants/app/app_error_strings.dart';
 import 'package:pump/core/constants/error/auth_error_constants.dart';
 import 'package:pump/core/constants/error/system_error_constants.dart';
 import 'package:pump/core/data/dto/response/paged_response.dart';
 import 'package:pump/core/data/dto/response/result.dart';
 import 'package:pump/core/data/repositories/user_repository_impl.dart';
 import 'package:pump/core/domain/entities/authenticated_user.dart';
-import 'package:pump/core/enums/app_error_code.dart';
 import 'package:pump/core/errors/app_error.dart';
 import 'package:pump/features/posts/data/dto/create_post_request_dto.dart';
 import 'package:pump/features/posts/data/services/post_service.dart';
@@ -34,10 +32,7 @@ class PostRepositoryImpl implements PostRepository {
       if (!userResult.isSuccess || userResult.data == null) {
         LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
         return Result.failure(
-          AppError(
-            message: AuthErrorConstants.userIsNotAuthenticated,
-            code: AppErrorCode.unauthorized,
-          ),
+          AppError(message: AuthErrorConstants.userIsNotAuthenticated),
         );
       }
 
@@ -57,33 +52,11 @@ class PostRepositoryImpl implements PostRepository {
       }
 
       final response = createPostResult.data;
-      if (response == null) {
-        return Result.failure(
-          AppError(
-            message: AppErrorStrings.anUnexpectedErrorOccurred,
-            code: AppErrorCode.unknown,
-          ),
-        );
-      }
-
-      final post = response.toPost();
-
-      LoggerUtility.v(runtimeType.toString(), "Created post: $post");
-
-      return Result.success(post);
-    } catch (e, stackTrace) {
-      LoggerUtility.e(
-        runtimeType.toString(),
-        AppErrorStrings.anUnexpectedErrorOccurred,
-        e.toString(),
-        stackTrace,
-      );
-
+      return Result.success(response?.toPost());
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "createPost", e, stack);
       return Result.failure(
-        AppError(
-          message: AppErrorStrings.anUnexpectedErrorOccurred,
-          code: AppErrorCode.unknown,
-        ),
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );
     }
   }
@@ -97,10 +70,7 @@ class PostRepositoryImpl implements PostRepository {
       if (!userResult.isSuccess || userResult.data == null) {
         LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
         return Result.failure(
-          AppError(
-            message: AuthErrorConstants.userIsNotAuthenticated,
-            code: AppErrorCode.unauthorized,
-          ),
+          AppError(message: AuthErrorConstants.userIsNotAuthenticated),
         );
       }
 
@@ -133,6 +103,7 @@ class PostRepositoryImpl implements PostRepository {
     }
   }
 
+  // likePost ------------------------------------------------------------------
   @override
   Future<Result<Post, AppError>> likePost(String postId) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [likePost]");
@@ -148,7 +119,7 @@ class PostRepositoryImpl implements PostRepository {
           return Result.success(result.data?.toPost());
         } else {
           return Result.failure(
-            AppError(message: AppErrorStrings.anUnexpectedErrorOccurred),
+            AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
           );
         }
       } else {
@@ -157,18 +128,18 @@ class PostRepositoryImpl implements PostRepository {
           "User id is missing, will not proceed with API call",
         );
         return Result.failure(
-          AppError(message: AppErrorStrings.userIsNotAuthenticated),
+          AppError(message: AuthErrorConstants.userIsNotAuthenticated),
         );
       }
     } catch (e, stackTrace) {
       LoggerUtility.e(
         runtimeType.toString(),
-        AppErrorStrings.anUnexpectedErrorOccurred,
+        SystemErrorConstants.anUnexpectedErrorOccurred,
         e.toString(),
         stackTrace,
       );
       return Result.failure(
-        AppError(message: AppErrorStrings.anUnexpectedErrorOccurred),
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );
     }
   }

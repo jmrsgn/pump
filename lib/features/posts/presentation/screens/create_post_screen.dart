@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pump/core/constants/app/ui_constants.dart';
-import 'package:pump/features/posts/presentation/providers/create_post_state.dart';
 import 'package:pump/features/posts/presentation/providers/post_providers.dart';
 import 'package:pump/features/posts/presentation/viewmodels/create_post_viewmodel.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';
 import '../../../../core/domain/entities/user.dart';
+import '../../../../core/presentation/providers/ui_state.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/custom_scaffold.dart';
@@ -67,7 +67,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     final createPostState = ref.watch(createPostViewModelProvider);
 
     // Listeners
-    ref.listen<CreatePostState>(createPostViewModelProvider, (previous, next) {
+    ref.listen<UiState>(createPostViewModelProvider, (previous, next) {
       final wasLoading = previous?.isLoading ?? false;
       final isFinished = wasLoading && !next.isLoading;
 
@@ -149,7 +149,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   maxLines: null,
                   expands: true,
                   textAlignVertical: TextAlignVertical.top,
-                  decoration: const InputDecoration(border: InputBorder.none),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
                   style: AppTextStyles.bodySmall,
                 ),
               ),

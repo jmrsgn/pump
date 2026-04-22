@@ -6,6 +6,7 @@ import 'package:pump/core/data/dto/response/api_error_response.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 
 import '../../../../core/constants/api/api_constants.dart';
+import '../../../../core/constants/error/system_error_constants.dart';
 import '../../../../core/data/dto/response/result.dart';
 import '../dto/auth_response_dto.dart';
 import '../dto/login_request_dto.dart';
@@ -47,8 +48,8 @@ class AuthService {
       return Result.failure(
         ApiErrorResponse(
           status: HttpStatus.internalServerError,
-          message: "An unexpected error occurred",
-          error: "Internal server error",
+          error: SystemErrorConstants.anUnexpectedErrorOccurred,
+          message: SystemErrorConstants.internalServerError,
         ),
       );
     }
@@ -90,8 +91,8 @@ class AuthService {
       return Result.failure(
         ApiErrorResponse(
           status: HttpStatus.internalServerError,
-          message: "An unexpected error occurred",
-          error: "Internal server error",
+          error: SystemErrorConstants.anUnexpectedErrorOccurred,
+          message: SystemErrorConstants.internalServerError,
         ),
       );
     }

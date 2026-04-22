@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:pump/core/constants/api/api_constants.dart';
-import 'package:pump/core/constants/api/api_error_strings.dart';
+import 'package:pump/core/constants/error/system_error_constants.dart';
 import 'package:pump/core/data/dto/response/api_error_response.dart';
 import 'package:pump/core/data/dto/response/result.dart';
 import 'package:pump/features/posts/data/dto/create_comment_request_dto.dart';
@@ -76,14 +76,14 @@ class CommentService {
     } catch (e, stackTrace) {
       LoggerUtility.e(
         runtimeType.toString(),
-        ApiErrorStrings.anUnexpectedErrorOccurred,
+        SystemErrorConstants.anUnexpectedErrorOccurred,
         e.toString(),
         stackTrace,
       );
       final apiErrorResponse = ApiErrorResponse(
         status: HttpStatus.internalServerError,
-        error: ApiErrorStrings.internalServerError,
-        message: ApiErrorStrings.anUnexpectedErrorOccurred,
+        error: SystemErrorConstants.internalServerError,
+        message: SystemErrorConstants.anUnexpectedErrorOccurred,
       );
       return Result.failure(apiErrorResponse);
     }

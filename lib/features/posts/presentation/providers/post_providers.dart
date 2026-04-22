@@ -6,13 +6,13 @@ import 'package:pump/features/posts/domain/usecases/create_post_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_comments_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_posts_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_post_usecase.dart';
-import 'package:pump/features/posts/presentation/providers/create_post_state.dart';
 import 'package:pump/features/posts/presentation/providers/main_feed_state.dart';
 import 'package:pump/features/posts/presentation/providers/post_info_state.dart';
 import 'package:pump/features/posts/presentation/viewmodels/create_post_viewmodel.dart';
 import 'package:pump/features/posts/presentation/viewmodels/main_feed_viewmodel.dart';
 import 'package:pump/features/posts/presentation/viewmodels/post_info_viewmodel.dart';
 
+import '../../../../core/presentation/providers/ui_state.dart';
 import '../../data/repositories/comment_repository_impl.dart';
 import '../../data/repositories/post_repository_impl.dart';
 import '../../domain/usecases/create_comment_usecase.dart';
@@ -61,7 +61,7 @@ final likePostUseCaseProvider = Provider<LikePostUseCase>(
 
 // ViewModels
 final createPostViewModelProvider =
-    StateNotifierProvider<CreatePostViewModel, CreatePostState>((ref) {
+    StateNotifierProvider<CreatePostViewModel, UiState>((ref) {
       return CreatePostViewModel(ref.watch(createPostUseCaseProvider));
     });
 

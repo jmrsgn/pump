@@ -1,13 +1,10 @@
-import 'package:pump/core/enums/app_error_code.dart';
-
 class AppError {
   final String message;
-  final AppErrorCode? code;
 
-  AppError({required this.message, this.code});
+  AppError({required this.message});
 
   @override
   String toString() {
-    return 'AppError{message: $message, code: $code}';
+    return 'AppError{message: $message}';
   }
 }

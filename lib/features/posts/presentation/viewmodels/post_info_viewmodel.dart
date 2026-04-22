@@ -1,16 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pump/core/constants/app/app_error_strings.dart';
 import 'package:pump/core/domain/usecases/get_authenticated_user_usecase.dart';
-import 'package:pump/features/posts/domain/entities/post.dart';
 import 'package:pump/features/posts/domain/usecases/create_comment_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_comments_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_post_usecase.dart';
 import 'package:pump/features/posts/presentation/providers/post_info_state.dart';
 
-import '../../../../core/domain/entities/user.dart';
+import '../../../../core/constants/error/system_error_constants.dart';
 import '../../../../core/utilities/logger_utility.dart';
 import '../../domain/entities/comment.dart';
-import '../providers/post_providers.dart';
 
 class PostInfoViewModel extends StateNotifier<PostInfoState> {
   final Ref ref;
@@ -45,7 +42,7 @@ class PostInfoViewModel extends StateNotifier<PostInfoState> {
       await action();
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), errorTag, e, stack);
-      _handleFailure(AppErrorStrings.anUnexpectedErrorOccurred);
+      _handleFailure(SystemErrorConstants.anUnexpectedErrorOccurred);
     }
   }
 
