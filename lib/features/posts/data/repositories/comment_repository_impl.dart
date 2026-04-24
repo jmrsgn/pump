@@ -2,9 +2,7 @@ import 'package:pump/core/constants/error/auth_error_constants.dart';
 import 'package:pump/core/constants/error/system_error_constants.dart';
 import 'package:pump/core/data/dto/response/result.dart';
 import 'package:pump/core/data/repositories/user_repository_impl.dart';
-import 'package:pump/core/domain/entities/authenticated_user.dart';
 import 'package:pump/core/errors/app_error.dart';
-import 'package:pump/features/posts/data/dto/create_comment_request_dto.dart';
 
 import '../../../../core/utilities/logger_utility.dart';
 import '../../domain/entities/comment.dart';
@@ -17,57 +15,50 @@ class CommentRepositoryImpl implements CommentRepository {
 
   CommentRepositoryImpl(this._commentService, this._userRepositoryImpl);
 
+  // createComment -------------------------------------------------------------
   @override
   Future<Result<Comment, AppError>> createComment(
-    String comment,
     String postId,
+    String comment,
   ) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [createComment]");
+
     try {
-      final Result<AuthenticatedUser, AppError> userResult =
-          await _userRepositoryImpl.getAuthenticatedUser();
-      if (userResult.isSuccess) {
-        final request = CreateCommentRequest(
-          comment: comment,
-          userId: userResult.data!.user.id,
-        );
-
-        // Create Post Request
-        final result = await _commentService.createComment(
-          userResult.data!.token,
-          request,
-          postId,
-        );
-
-        if (result.isSuccess && result.data != null) {
-          LoggerUtility.v(
-            runtimeType.toString(),
-            'Created comment: ${result.data?.toComment()}',
-          );
-          return Result.success(result.data?.toComment());
-        }
-        return Result.failure(userResult.error);
-      } else {
-        LoggerUtility.e(
-          runtimeType.toString(),
-          "User id is missing, will not proceed with API call",
-        );
+      // Get authenticated user
+      final userResult = await _userRepositoryImpl.getAuthenticatedUser();
+      if (!userResult.isSuccess || userResult.data == null) {
+        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
         return Result.failure(
           AppError(message: AuthErrorConstants.userIsNotAuthenticated),
         );
       }
-    } catch (e, stackTrace) {
-      LoggerUtility.e(
-        runtimeType.toString(),
-        SystemErrorConstants.anUnexpectedErrorOccurred,
-        e.toString(),
-        stackTrace,
+
+      final createCommentResult = await _commentService.createComment(
+        userResult.data!.token,
+        postId,
+        comment,
       );
+
+      if (!createCommentResult.isSuccess) {
+        return Result.failure(
+          AppError(
+            message:
+                createCommentResult.error?.message ?? "Create comment failed",
+          ),
+        );
+      }
+
+      final response = createCommentResult.data!;
+      return Result.success(response.toComment());
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "createComment", e, stack);
       return Result.failure(
         AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );
     }
   }
 
+  // getComments ---------------------------------------------------------------
   @override
   Future<Result<List<Comment>, AppError>> getComments(String postId) async {
     return Result.success(null);

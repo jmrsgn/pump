@@ -78,7 +78,6 @@ final postInfoViewModelProvider =
       return PostInfoViewModel(
         ref,
         ref.watch(createCommentUseCaseProvider),
-        ref.watch(getUserProfileUseCaseProvider),
         ref.watch(getCommentsUseCaseProvider),
         ref.watch(likePostUseCaseProvider),
       );

@@ -13,10 +13,15 @@ import '../../../../core/utils/time_utils.dart';
 
 class PostWidget extends ConsumerStatefulWidget {
   final Post post;
-  final VoidCallback? onTap;
+  final VoidCallback? onPostInfoTap;
   final VoidCallback? onLikeTap;
 
-  const PostWidget({super.key, required this.post, this.onTap, this.onLikeTap});
+  const PostWidget({
+    super.key,
+    required this.post,
+    this.onPostInfoTap,
+    this.onLikeTap,
+  });
 
   @override
   ConsumerState<PostWidget> createState() => _PostWidgetState();
@@ -104,37 +109,7 @@ class _PostWidgetState extends ConsumerState<PostWidget>
 
             UiUtils.addVerticalSpaceS(),
 
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: widget.onTap,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppDimens.dimen4),
-                child: widget.post.title.isEmpty
-                    ? Text(
-                        widget.post.description,
-                        style: AppTextStyles.body,
-                        maxLines: UIConstants.maxLines3,
-                        overflow: TextOverflow.ellipsis,
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.post.title,
-                            style: AppTextStyles.heading3,
-                          ),
-                          UiUtils.addVerticalSpaceS(),
-                          Text(
-                            widget.post.description,
-                            style: AppTextStyles.body,
-                            maxLines: UIConstants.maxLines3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-              ),
-            ),
+            _buildPostInfo(),
 
             UiUtils.addVerticalSpaceS(),
 
@@ -161,7 +136,7 @@ class _PostWidgetState extends ConsumerState<PostWidget>
                 Row(
                   children: [
                     GestureDetector(
-                      onTap: widget.onTap,
+                      onTap: widget.onPostInfoTap,
                       child: Text(
                         '${widget.post.commentsCount} ${AppStrings.comments}',
                         style: AppTextStyles.bodySmall.copyWith(
@@ -187,78 +162,117 @@ class _PostWidgetState extends ConsumerState<PostWidget>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Row(
-                  children: [
-                    InkWell(
-                      onTap: widget.onLikeTap,
-                      borderRadius: BorderRadius.circular(AppDimens.radius4),
-                      child: Row(
-                        children: [
-                          Icon(
-                            widget.post.isLikedByCurrentUser
-                                ? FontAwesomeIcons.solidThumbsUp
-                                : FontAwesomeIcons.thumbsUp,
-                            size: AppDimens.dimen16,
-                            color: widget.post.isLikedByCurrentUser
-                                ? AppColors.info
-                                : AppColors.textDisabled,
-                          ),
-                          UiUtils.addHorizontalSpaceS(),
-                          Text(
-                            widget.post.isLikedByCurrentUser
-                                ? AppStrings.liked
-                                : AppStrings.like,
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: widget.post.isLikedByCurrentUser
-                                  ? AppColors.info
-                                  : AppColors.textDisabled,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                GestureDetector(
-                  onTap: widget.onTap,
-                  child: Row(
-                    children: [
-                      Icon(
-                        FontAwesomeIcons.comment,
-                        color: AppColors.textDisabled,
-                        size: AppDimens.dimen16,
-                      ),
-                      UiUtils.addHorizontalSpaceS(),
-                      Text(
-                        AppStrings.comment,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textDisabled,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    Icon(
-                      FontAwesomeIcons.share,
-                      color: AppColors.textDisabled,
-                      size: AppDimens.dimen16,
-                    ),
-                    UiUtils.addHorizontalSpaceS(),
-                    Text(
-                      AppStrings.share,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textDisabled,
-                      ),
-                    ),
-                  ],
-                ),
+                _buildLikeButton(),
+                _buildCommentButton(),
+                _buildShareButton(),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPostInfo() {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: widget.onPostInfoTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppDimens.dimen4),
+        child: widget.post.title.isEmpty
+            ? Text(
+                widget.post.description,
+                style: AppTextStyles.body,
+                maxLines: UIConstants.maxLines3,
+                overflow: TextOverflow.ellipsis,
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(widget.post.title, style: AppTextStyles.heading3),
+                  UiUtils.addVerticalSpaceS(),
+                  Text(
+                    widget.post.description,
+                    style: AppTextStyles.body,
+                    maxLines: UIConstants.maxLines3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildLikeButton() {
+    final isLikedByCurrentUser = widget.post.isLikedByCurrentUser;
+
+    return InkWell(
+      onTap: widget.onLikeTap,
+      borderRadius: BorderRadius.circular(AppDimens.dimen4),
+      child: Row(
+        children: [
+          Icon(
+            isLikedByCurrentUser
+                ? FontAwesomeIcons.solidThumbsUp
+                : FontAwesomeIcons.thumbsUp,
+            size: AppDimens.dimen16,
+            color: isLikedByCurrentUser
+                ? AppColors.info
+                : AppColors.textDisabled,
+          ),
+          UiUtils.addHorizontalSpaceS(),
+          Text(
+            isLikedByCurrentUser ? AppStrings.liked : AppStrings.like,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: isLikedByCurrentUser
+                  ? AppColors.info
+                  : AppColors.textDisabled,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommentButton() {
+    return GestureDetector(
+      onTap: widget.onPostInfoTap,
+      child: Row(
+        children: [
+          Icon(
+            FontAwesomeIcons.comment,
+            color: AppColors.textDisabled,
+            size: AppDimens.dimen16,
+          ),
+          UiUtils.addHorizontalSpaceS(),
+          Text(
+            AppStrings.comment,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textDisabled,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShareButton() {
+    return Row(
+      children: [
+        Icon(
+          FontAwesomeIcons.share,
+          color: AppColors.textDisabled,
+          size: AppDimens.dimen16,
+        ),
+        UiUtils.addHorizontalSpaceS(),
+        Text(
+          AppStrings.share,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: AppColors.textDisabled,
+          ),
+        ),
+      ],
     );
   }
 }

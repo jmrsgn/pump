@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pump/core/constants/error/validation_error_constants.dart';
 import 'package:pump/core/domain/usecases/get_authenticated_user_usecase.dart';
+import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/features/posts/domain/usecases/create_comment_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_comments_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_post_usecase.dart';
@@ -8,23 +10,31 @@ import 'package:pump/features/posts/presentation/providers/post_info_state.dart'
 import '../../../../core/constants/error/system_error_constants.dart';
 import '../../../../core/utilities/logger_utility.dart';
 import '../../domain/entities/comment.dart';
+import '../providers/post_providers.dart';
 
-class PostInfoViewModel extends StateNotifier<PostInfoState> {
+class PostInfoViewModel extends BaseViewModel<PostInfoState> {
   final Ref ref;
+  final GetAuthenticatedUserUseCase _getAuthenticatedUserUseCase;
   final CreateCommentUseCase _createCommentUseCase;
-  final GetAuthenticatedUser _getUserProfileUseCase;
   final GetCommentsUseCase _getCommentsUseCase;
   final LikePostUseCase _likePostUseCase;
 
   PostInfoViewModel(
     this.ref,
+    this._getAuthenticatedUserUseCase,
     this._createCommentUseCase,
-    this._getUserProfileUseCase,
     this._getCommentsUseCase,
     this._likePostUseCase,
   ) : super(PostInfoState.initial());
 
-  // Helpers -------------------------------------------------------------------
+  @override
+  PostInfoState copyWithState({bool? isLoading, String? errorMessage}) {
+    return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
   void _setLoading(bool value) {
     state = state.copyWith(isLoading: value);
   }
@@ -46,13 +56,8 @@ class PostInfoViewModel extends StateNotifier<PostInfoState> {
     }
   }
 
-  // Comment Helpers -----------------------------------------------------------
   void loadInitialComments(List<Comment> initialComments) {
     state = state.copyWith(comments: initialComments);
-  }
-
-  void clearComments() {
-    state = state.copyWith(comments: []);
   }
 
   void _addLocalComment(Comment c) {
@@ -65,7 +70,6 @@ class PostInfoViewModel extends StateNotifier<PostInfoState> {
     );
   }
 
-  // Like Helpers --------------------------------------------------------------
   void _applyLocalLike() {
     state = state.copyWith(
       post: state.post.copyWith(
@@ -106,49 +110,90 @@ class PostInfoViewModel extends StateNotifier<PostInfoState> {
 
   // createComment -------------------------------------------------------------
   Future<void> createComment(String comment, String postId) async {
+    LoggerUtility.d(
+      runtimeType.toString(),
+      "Execute method: [createComment] comment: [$comment]",
+    );
+
+    // Prevent double taps
+    if (state.isLoading) return;
+
     _setLoading(true);
 
-    // final userResponse = await _getUserProfileUseCase.execute();
-    // if (!userResponse.isSuccess || userResponse.data?.user == null) {
-    //   return _handleFailure(AppErrorStrings.anUnexpectedErrorOccurred);
-    // }
-    //
-    // final User currentUser = userResponse.data!.user;
-    //
-    // final tempComment = Comment(
-    //   userName: "${currentUser.firstName} ${currentUser.lastName}",
-    //   userProfileImageUrl: currentUser.profileImageUrl,
-    //   comment: comment,
-    //   likesCount: 0,
-    //   repliesCount: 0,
-    //   createdAt: DateTime.now(),
-    //   updatedAt: DateTime.now(),
-    // );
-    //
-    // _addLocalComment(tempComment);
-    //
-    // await _safeExecute(() async {
-    //   final response = await _createCommentUseCase.execute(
-    //     comment.trim(),
-    //     postId,
-    //   );
-    //
-    //   if (!response.isSuccess) {
-    //     _removeLocalComment(tempComment);
-    //     return _handleFailure(response.error!.message);
-    //   }
-    //
-    //   // Update comment count in feed
-    //   ref
-    //       .read(mainFeedViewModelProvider.notifier)
-    //       .incrementCommentCount(postId);
-    //
-    //   state = state.copyWith(
-    //     createdComment: response.data,
-    //     errorMessage: null,
-    //     isLoading: false,
-    //   );
-    // }, "createComment");
+    final trimmedComment = comment.trim();
+    if (trimmedComment.isEmpty) {
+      return emitError(ValidationErrorConstants.aCommentIsRequired);
+    }
+
+    try {
+      final userResult = await _getAuthenticatedUserUseCase.execute();
+      if (!userResult.isSuccess || userResult.data?.user == null) {
+        return emitUnexpectedError();
+      }
+
+      final currentUser = userResult.data!.user;
+
+      // Create temporary comment (optimistic)
+      final tempComment = Comment(
+        id: '',
+        author: "${currentUser.firstName} ${currentUser.lastName}",
+        authorProfileImageUrl: currentUser.profileImageUrl,
+        comment: trimmedComment,
+        likesCount: 0,
+        repliesCount: 0,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        postId: postId,
+        isLikedByCurrentUser: false,
+      );
+
+      _addLocalComment(tempComment);
+
+      final result = await _createCommentUseCase.execute(
+        trimmedComment,
+        postId,
+      );
+
+      if (!result.isSuccess || result.data == null) {
+        // rollback
+        _removeLocalComment(tempComment);
+        return _handleFailure(result.error?.message ?? "Create comment failed");
+      }
+
+      final createdComment = result.data!;
+
+      // Replace temp with actual comment
+      final updatedComments = List.of(state.comments);
+      final index = updatedComments.indexWhere((c) => c == tempComment);
+
+      // Silent ignore
+      if (index != -1) {
+        updatedComments[index] = createdComment;
+      }
+
+      // Update comment count in feed
+      ref
+          .read(mainFeedViewModelProvider.notifier)
+          .incrementCommentCount(postId);
+
+      state = state.copyWith(
+        comments: updatedComments,
+        createdComment: createdComment,
+        errorMessage: null,
+        isLoading: false,
+      );
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "createComment", e, stack);
+
+      // rollback (safe)
+      state = state.copyWith(
+        comments: state.comments
+            .where((c) => c.comment != trimmedComment)
+            .toList(),
+      );
+
+      emitUnexpectedError();
+    }
   }
 
   // getComments ---------------------------------------------------------------
@@ -170,33 +215,42 @@ class PostInfoViewModel extends StateNotifier<PostInfoState> {
     }, "getComments");
   }
 
-  // Like Post -----------------------------------------------------------------
+  // likePost (optimistic update) ----------------------------------------------
   Future<void> likePost(String postId) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [likePost]");
 
-    final wasLiked = state.post.isLikedByCurrentUser;
+    final originalPost = state.post; // backup
+    final wasLiked = originalPost.isLikedByCurrentUser;
 
+    // Optimistic update
     if (wasLiked) {
       _applyLocalUnlike();
     } else {
       _applyLocalLike();
     }
 
-    await _safeExecute(() async {
-      final response = await _likePostUseCase.execute(postId);
+    try {
+      final result = await _likePostUseCase.execute(postId);
 
-      if (response.isFailure) {
-        _rollbackLocalLike(wasLiked);
-        return _handleFailure(response.error!.message);
+      if (!result.isSuccess || result.data == null) {
+        // rollback exact state
+        state = state.copyWith(post: originalPost);
+        return emitError(result.error?.message ?? "Like post failed");
       }
 
-      final updatedPost = response.data;
+      final updatedPost = result.data!;
 
+      // replace with updated post
       state = state.copyWith(
         post: updatedPost,
-        isLoading: false,
         errorMessage: null,
+        isLoading: false,
       );
-    }, "likePost");
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "likePost", e, stack);
+      // rollback exact state
+      state = state.copyWith(post: originalPost);
+      emitUnexpectedError();
+    }
   }
 }

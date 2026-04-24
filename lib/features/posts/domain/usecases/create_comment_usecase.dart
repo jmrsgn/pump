@@ -10,9 +10,9 @@ class CreateCommentUseCase {
   CreateCommentUseCase(this._commentRepository);
 
   Future<Result<Comment, AppError>> execute(
-    String comment,
     String postId,
+    String comment,
   ) async {
-    return await _commentRepository.createComment(comment, postId);
+    return await _commentRepository.createComment(postId, comment);
   }
 }

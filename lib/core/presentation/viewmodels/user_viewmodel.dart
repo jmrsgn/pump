@@ -4,7 +4,7 @@ import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 
 class UserViewModel extends BaseViewModel<UserState> {
-  final GetAuthenticatedUser _getAuthenticatedUserUseCase;
+  final GetAuthenticatedUserUseCase _getAuthenticatedUserUseCase;
 
   UserViewModel(this._getAuthenticatedUserUseCase) : super(UserState.initial());
 

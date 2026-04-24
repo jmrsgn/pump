@@ -38,7 +38,7 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
     final relativeTime = TimeUtils.timeAgo(widget.comment.createdAt);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppDimens.padding8),
+      padding: const EdgeInsets.symmetric(vertical: AppDimens.dimen8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,7 +48,7 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
                   widget.comment.authorProfileImageUrl!.isEmpty
               ? CircleAvatar(
                   backgroundColor: AppColors.primary,
-                  radius: AppDimens.radius16,
+                  radius: AppDimens.dimen16,
                   child: Text(
                     widget.comment.author,
                     style: AppTextStyles.body.copyWith(
@@ -60,7 +60,7 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
                   backgroundImage: AssetImage(
                     widget.comment.authorProfileImageUrl!,
                   ),
-                  radius: AppDimens.radius16,
+                  radius: AppDimens.dimen16,
                 ),
 
           UiUtils.addHorizontalSpaceM(),

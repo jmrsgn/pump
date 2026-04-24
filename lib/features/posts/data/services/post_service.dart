@@ -21,7 +21,7 @@ class PostService {
     try {
       final response = await http.get(
         Uri.parse("${ApiConstants.postUrl}?page=$page"),
-        headers: {...ApiConstants.headerType, 'Authorization': 'Bearer $token'},
+        headers: {...ApiConstants.headerTypeJson, 'Authorization': 'Bearer $token'},
       );
 
       final json = response.body.isEmpty ? {} : jsonDecode(response.body);
@@ -64,7 +64,7 @@ class PostService {
     try {
       final response = await http.post(
         Uri.parse(ApiConstants.postUrl),
-        headers: {...ApiConstants.headerType, 'Authorization': 'Bearer $token'},
+        headers: {...ApiConstants.headerTypeJson, 'Authorization': 'Bearer $token'},
         body: jsonEncode(request.toJson()),
       );
 
@@ -104,7 +104,7 @@ class PostService {
     try {
       final response = await http.post(
         Uri.parse(ApiConstants.getLikePostUrl(postId)),
-        headers: {...ApiConstants.headerType, 'Authorization': 'Bearer $token'},
+        headers: {...ApiConstants.headerTypeJson, 'Authorization': 'Bearer $token'},
       );
 
       final json = response.body.isEmpty ? {} : jsonDecode(response.body);

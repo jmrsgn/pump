@@ -36,9 +36,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
     super.initState();
 
     // Get all comments from server on initial load of the screen
-    // TODO: check
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(postInfoViewModelProvider.notifier).clearComments();
       ref.read(postInfoViewModelProvider.notifier).getComments(widget.post.id);
     });
 
@@ -99,7 +97,14 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
                   UiUtils.addVerticalSpaceM(),
                   _buildPostInfo(),
                   UiUtils.addVerticalSpaceM(),
-                  _buildActionButtons(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildLikeButton(),
+                      _buildCommentButton(),
+                      _buildShareButton(),
+                    ],
+                  ),
                   UiUtils.addVerticalSpaceL(),
                   _buildLikesAndShares(),
                 ],
@@ -155,7 +160,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
       children: [
         CircleAvatar(
           backgroundColor: AppColors.primary,
-          radius: AppDimens.radius16,
+          radius: AppDimens.dimen16,
           child: Text(
             widget.post.userName[0],
             style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
@@ -198,32 +203,6 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
     );
   }
 
-  Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _iconLabel(FontAwesomeIcons.thumbsUp, AppStrings.like),
-        _iconLabel(FontAwesomeIcons.comment, AppStrings.comment),
-        _iconLabel(FontAwesomeIcons.share, AppStrings.share),
-      ],
-    );
-  }
-
-  Widget _iconLabel(IconData icon, String label) {
-    return Row(
-      children: [
-        Icon(icon, color: AppColors.textDisabled, size: AppDimens.dimen16),
-        UiUtils.addHorizontalSpaceS(),
-        Text(
-          label,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.textDisabled,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildLikesAndShares() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -247,6 +226,76 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
         Text(
           '${widget.post.sharesCount} ${AppStrings.shares}',
           style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLikeButton() {
+    final isLikedByCurrentUser = widget.post.isLikedByCurrentUser;
+
+    return InkWell(
+      onTap: () =>
+          ref.read(postInfoViewModelProvider.notifier).likePost(widget.post.id),
+      borderRadius: BorderRadius.circular(AppDimens.dimen4),
+      child: Row(
+        children: [
+          Icon(
+            isLikedByCurrentUser
+                ? FontAwesomeIcons.solidThumbsUp
+                : FontAwesomeIcons.thumbsUp,
+            size: AppDimens.dimen16,
+            color: isLikedByCurrentUser
+                ? AppColors.info
+                : AppColors.textDisabled,
+          ),
+          UiUtils.addHorizontalSpaceS(),
+          Text(
+            isLikedByCurrentUser ? AppStrings.liked : AppStrings.like,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: isLikedByCurrentUser
+                  ? AppColors.info
+                  : AppColors.textDisabled,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommentButton() {
+    return Row(
+      children: [
+        Icon(
+          FontAwesomeIcons.comment,
+          color: AppColors.textDisabled,
+          size: AppDimens.dimen16,
+        ),
+        UiUtils.addHorizontalSpaceS(),
+        Text(
+          AppStrings.comment,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: AppColors.textDisabled,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShareButton() {
+    return Row(
+      children: [
+        Icon(
+          FontAwesomeIcons.share,
+          color: AppColors.textDisabled,
+          size: AppDimens.dimen16,
+        ),
+        UiUtils.addHorizontalSpaceS(),
+        Text(
+          AppStrings.share,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: AppColors.textDisabled,
+          ),
         ),
       ],
     );

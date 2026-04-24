@@ -72,7 +72,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
             Center(
               child: Padding(
-                padding: const EdgeInsets.all(AppDimens.padding16),
+                padding: const EdgeInsets.all(AppDimens.dimen16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +80,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       AppConstants.appName.toUpperCase(),
                       style: AppTextStyles.heading1.copyWith(
-                        fontSize: AppDimens.textSize32,
+                        fontSize: AppDimens.dimen32,
                       ),
                     ),
 
@@ -133,7 +133,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Padding(
-        padding: EdgeInsets.only(bottom: AppDimens.padding32),
+        padding: EdgeInsets.only(bottom: AppDimens.dimen32),
         child: RichText(
           text: TextSpan(
             text: "Don't have an account? ",

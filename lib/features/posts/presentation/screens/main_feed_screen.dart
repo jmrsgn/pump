@@ -125,7 +125,7 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
 
                   return PostWidget(
                     post: post,
-                    onTap: () => NavigationUtils.navigateTo(
+                    onPostInfoTap: () => NavigationUtils.navigateTo(
                       context,
                       AppRoutes.postInfo,
                       arguments: post,

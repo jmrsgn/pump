@@ -1,8 +1,11 @@
 class ApiConstants {
   ApiConstants._();
 
-  static const Map<String, String> headerType = {
+  static const Map<String, String> headerTypeJson = {
     'Content-Type': 'application/json',
+  };
+  static const Map<String, String> headerTypeTextPlain = {
+    'Content-Type': 'text/plain',
   };
   static const String authServiceBaseUrl =
       'http://10.0.2.2:8081/api/v1'; // for Android emulator

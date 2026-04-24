@@ -15,8 +15,8 @@ final userRepositoryProvider = Provider<UserRepositoryImpl>((ref) {
 });
 
 // UseCases
-final getUserProfileUseCaseProvider = Provider<GetAuthenticatedUser>(
-  (ref) => GetAuthenticatedUser(ref.watch(userRepositoryProvider)),
+final getUserProfileUseCaseProvider = Provider<GetAuthenticatedUserUseCase>(
+  (ref) => GetAuthenticatedUserUseCase(ref.watch(userRepositoryProvider)),
 );
 
 // ViewModels
@@ -24,6 +24,6 @@ final userViewModelProvider = StateNotifierProvider<UserViewModel, UserState>((
   ref,
 ) {
   final repo = ref.watch(userRepositoryProvider);
-  final getUserProfileUseCase = GetAuthenticatedUser(repo);
+  final getUserProfileUseCase = GetAuthenticatedUserUseCase(repo);
   return UserViewModel(getUserProfileUseCase);
 });

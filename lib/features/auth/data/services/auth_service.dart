@@ -22,7 +22,7 @@ class AuthService {
     try {
       final response = await http.post(
         Uri.parse(ApiConstants.loginUrl),
-        headers: ApiConstants.headerType,
+        headers: ApiConstants.headerTypeJson,
         body: jsonEncode(request.toJson()),
       );
 
@@ -64,7 +64,7 @@ class AuthService {
     try {
       final response = await http.post(
         Uri.parse(ApiConstants.registerUrl),
-        headers: ApiConstants.headerType,
+        headers: ApiConstants.headerTypeJson,
         body: jsonEncode(request.toJson()),
       );
 
