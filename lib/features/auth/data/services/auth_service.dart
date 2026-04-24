@@ -26,7 +26,7 @@ class AuthService {
         body: jsonEncode(request.toJson()),
       );
 
-      final json = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      final json = response.body.isEmpty ? {} : jsonDecode(response.body);
 
       // Success
       // If response code is ok, return data immediately
@@ -68,7 +68,7 @@ class AuthService {
         body: jsonEncode(request.toJson()),
       );
 
-      final json = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      final json = response.body.isEmpty ? {} : jsonDecode(response.body);
 
       // Success
       // If response code is ok, return data immediately

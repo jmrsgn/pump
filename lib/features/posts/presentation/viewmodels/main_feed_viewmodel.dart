@@ -69,8 +69,15 @@ class MainFeedViewModel extends BaseViewModel<MainFeedState> {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [likePost]");
 
     final postIndex = state.posts.indexWhere((p) => p.id == postId);
-    if (postIndex == -1) return;
+    if (postIndex == -1) {
+      LoggerUtility.d(
+        runtimeType.toString(),
+        "Post with postId $postId not found",
+      );
+      return;
+    }
 
+    final originalPosts = List.of(state.posts); // backup
     final currentPost = state.posts[postIndex];
     final wasLiked = currentPost.isLikedByCurrentUser;
 
@@ -82,26 +89,28 @@ class MainFeedViewModel extends BaseViewModel<MainFeedState> {
     state = state.copyWith(posts: updatedPosts);
 
     try {
-      final response = await _likePostUseCase.execute(postId);
+      final result = await _likePostUseCase.execute(postId);
 
-      if (!response.isSuccess) {
-        // rollback on failure
-        state = state.copyWith(posts: state.posts);
-        return emitError(response.error!.message);
+      if (!result.isSuccess || result.data == null) {
+        // rollback correctly
+        state = state.copyWith(posts: originalPosts);
+        return emitError(result.error?.message ?? "Like post failed");
       }
 
-      final updatedPost = response.data!;
+      final updatedPost = result.data!;
+      final newPosts = List.of(state.posts);
 
-      final newPosts = [...state.posts];
-      newPosts[postIndex] = updatedPost;
+      final safeIndex = newPosts.indexWhere((p) => p.id == updatedPost.id);
+      // If post not found, silent ignore
+      if (safeIndex != -1) {
+        newPosts[safeIndex] = updatedPost;
+      }
 
       state = state.copyWith(posts: newPosts, errorMessage: null);
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "likePost", e, stack);
-
-      // rollback on crash
-      state = state.copyWith(posts: state.posts);
-
+      // rollback correctly
+      state = state.copyWith(posts: originalPosts);
       emitUnexpectedError();
     }
   }

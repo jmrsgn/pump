@@ -9,10 +9,7 @@ class UiUtils {
   UiUtils._();
 
   static Widget addDivider() {
-    return Divider(
-      color: AppColors.divider,
-      thickness: AppDimens.dimen1,
-    );
+    return Divider(color: AppColors.divider, thickness: AppDimens.dimen1);
   }
 
   static Widget addCopyright() {
@@ -30,52 +27,52 @@ class UiUtils {
 
   // Vertical Spaces
   static Widget addVerticalSpaceXS() {
-    return SizedBox(height: AppDimens.space4);
+    return SizedBox(height: AppDimens.dimen4);
   }
 
   static Widget addVerticalSpaceS() {
-    return SizedBox(height: AppDimens.space8);
+    return SizedBox(height: AppDimens.dimen8);
   }
 
   static Widget addVerticalSpaceM() {
-    return SizedBox(height: AppDimens.space12);
+    return SizedBox(height: AppDimens.dimen12);
   }
 
   static Widget addVerticalSpaceL() {
-    return SizedBox(height: AppDimens.space16);
+    return SizedBox(height: AppDimens.dimen16);
   }
 
   static Widget addVerticalSpaceXL() {
-    return SizedBox(height: AppDimens.space24);
+    return SizedBox(height: AppDimens.dimen24);
   }
 
   static Widget addVerticalSpaceXXL() {
-    return SizedBox(height: AppDimens.space32);
+    return SizedBox(height: AppDimens.dimen32);
   }
 
   // Horizontal Spaces
   static Widget addHorizontalSpaceXS() {
-    return SizedBox(width: AppDimens.space4);
+    return SizedBox(width: AppDimens.dimen4);
   }
 
   static Widget addHorizontalSpaceS() {
-    return SizedBox(width: AppDimens.space8);
+    return SizedBox(width: AppDimens.dimen8);
   }
 
   static Widget addHorizontalSpaceM() {
-    return SizedBox(width: AppDimens.space12);
+    return SizedBox(width: AppDimens.dimen12);
   }
 
   static Widget addHorizontalSpaceL() {
-    return SizedBox(width: AppDimens.space16);
+    return SizedBox(width: AppDimens.dimen16);
   }
 
   static Widget addHorizontalSpaceXL() {
-    return SizedBox(width: AppDimens.space24);
+    return SizedBox(width: AppDimens.dimen24);
   }
 
   static Widget addHorizontalSpaceXXL() {
-    return SizedBox(width: AppDimens.space32);
+    return SizedBox(width: AppDimens.dimen32);
   }
 
   // Snackbar
@@ -95,7 +92,7 @@ class UiUtils {
         action: action,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimens.radius4),
+          borderRadius: BorderRadius.circular(AppDimens.dimen4),
         ),
       ),
     );

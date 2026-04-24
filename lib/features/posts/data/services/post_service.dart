@@ -24,7 +24,7 @@ class PostService {
         headers: {...ApiConstants.headerType, 'Authorization': 'Bearer $token'},
       );
 
-      final json = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      final json = response.body.isEmpty ? {} : jsonDecode(response.body);
 
       if (response.statusCode == HttpStatus.ok) {
         final paged = PagedResponse<PostResponse>.fromJson(
@@ -68,7 +68,7 @@ class PostService {
         body: jsonEncode(request.toJson()),
       );
 
-      final json = jsonDecode(response.body);
+      final json = response.body.isEmpty ? {} : jsonDecode(response.body);
 
       if (response.statusCode == HttpStatus.ok ||
           response.statusCode == HttpStatus.created) {
@@ -107,28 +107,32 @@ class PostService {
         headers: {...ApiConstants.headerType, 'Authorization': 'Bearer $token'},
       );
 
-      final json = jsonDecode(response.body);
+      final json = response.body.isEmpty ? {} : jsonDecode(response.body);
 
       if (response.statusCode == HttpStatus.ok ||
           response.statusCode == HttpStatus.created) {
         return Result.success(PostResponse.fromJson(json['data']));
-      } else {
-        final error = ApiErrorResponse.fromJson(json['error']);
-        return Result.failure(error);
       }
-    } catch (e, stackTrace) {
-      LoggerUtility.e(
-        runtimeType.toString(),
-        SystemErrorConstants.anUnexpectedErrorOccurred,
-        e.toString(),
-        stackTrace,
+
+      final errorJson = json['error'] ?? {};
+      final error = ApiErrorResponse.fromJson(errorJson);
+
+      return Result.failure(
+        ApiErrorResponse(
+          status: error.status,
+          message: error.message,
+          error: error.error,
+        ),
       );
-      final apiErrorResponse = ApiErrorResponse(
-        status: HttpStatus.internalServerError,
-        error: SystemErrorConstants.anUnexpectedErrorOccurred,
-        message: '${SystemErrorConstants.anUnexpectedErrorOccurred}: $e',
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "likePost", e, stack);
+      return Result.failure(
+        ApiErrorResponse(
+          status: HttpStatus.internalServerError,
+          message: SystemErrorConstants.internalServerError,
+          error: SystemErrorConstants.anUnexpectedErrorOccurred,
+        ),
       );
-      return Result.failure(apiErrorResponse);
     }
   }
 }

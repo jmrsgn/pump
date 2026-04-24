@@ -4,7 +4,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pump/core/constants/app/ui_constants.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/posts/domain/entities/post.dart';
-import 'package:pump/features/posts/presentation/providers/post_providers.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';
@@ -40,20 +39,19 @@ class _PostWidgetState extends ConsumerState<PostWidget>
   @override
   Widget build(BuildContext context) {
     final relativeTime = TimeUtils.timeAgo(widget.post.createdAt);
-    final postInfoViewModel = ref.watch(postInfoViewModelProvider.notifier);
 
     return Card(
       color: AppColors.surface,
-      margin: EdgeInsets.only(bottom: AppDimens.margin4),
+      margin: EdgeInsets.only(bottom: AppDimens.dimen4),
       shape: RoundedRectangleBorder(),
       child: Padding(
-        padding: const EdgeInsets.all(AppDimens.padding8),
+        padding: const EdgeInsets.all(AppDimens.dimen8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header user info
             Container(
-              padding: const EdgeInsets.all(AppDimens.padding4),
+              padding: const EdgeInsets.all(AppDimens.dimen4),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -61,7 +59,7 @@ class _PostWidgetState extends ConsumerState<PostWidget>
                           widget.post.userProfileImageUrl!.isEmpty
                       ? CircleAvatar(
                           backgroundColor: AppColors.primary,
-                          radius: AppDimens.radius16,
+                          radius: AppDimens.dimen16,
                           child: Text(
                             widget.post.userName[0],
                             style: AppTextStyles.body.copyWith(
@@ -73,7 +71,7 @@ class _PostWidgetState extends ConsumerState<PostWidget>
                           backgroundImage: AssetImage(
                             widget.post.userProfileImageUrl!,
                           ),
-                          radius: AppDimens.radius16,
+                          radius: AppDimens.dimen16,
                         ),
 
                   UiUtils.addHorizontalSpaceM(),
@@ -111,7 +109,7 @@ class _PostWidgetState extends ConsumerState<PostWidget>
               onTap: widget.onTap,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(AppDimens.padding4),
+                padding: const EdgeInsets.all(AppDimens.dimen4),
                 child: widget.post.title.isEmpty
                     ? Text(
                         widget.post.description,

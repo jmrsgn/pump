@@ -3,7 +3,6 @@ import 'package:pump/core/constants/error/system_error_constants.dart';
 import 'package:pump/core/data/dto/response/paged_response.dart';
 import 'package:pump/core/data/dto/response/result.dart';
 import 'package:pump/core/data/repositories/user_repository_impl.dart';
-import 'package:pump/core/domain/entities/authenticated_user.dart';
 import 'package:pump/core/errors/app_error.dart';
 import 'package:pump/features/posts/data/dto/create_post_request_dto.dart';
 import 'package:pump/features/posts/data/services/post_service.dart';
@@ -107,37 +106,34 @@ class PostRepositoryImpl implements PostRepository {
   @override
   Future<Result<Post, AppError>> likePost(String postId) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [likePost]");
+
     try {
-      final Result<AuthenticatedUser, AppError> userResult =
-          await _userRepositoryImpl.getAuthenticatedUser();
-      if (userResult.isSuccess) {
-        final result = await _postService.likePost(
-          userResult.data!.token,
-          postId,
-        );
-        if (result.isSuccess && result.data != null) {
-          return Result.success(result.data?.toPost());
-        } else {
-          return Result.failure(
-            AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
-          );
-        }
-      } else {
-        LoggerUtility.e(
-          runtimeType.toString(),
-          "User id is missing, will not proceed with API call",
-        );
+      // Get authenticated user
+      final userResult = await _userRepositoryImpl.getAuthenticatedUser();
+      if (!userResult.isSuccess || userResult.data == null) {
+        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
         return Result.failure(
           AppError(message: AuthErrorConstants.userIsNotAuthenticated),
         );
       }
-    } catch (e, stackTrace) {
-      LoggerUtility.e(
-        runtimeType.toString(),
-        SystemErrorConstants.anUnexpectedErrorOccurred,
-        e.toString(),
-        stackTrace,
+
+      final likePostResult = await _postService.likePost(
+        userResult.data!.token,
+        postId,
       );
+
+      if (!likePostResult.isSuccess || likePostResult.data == null) {
+        return Result.failure(
+          AppError(
+            message: likePostResult.error?.message ?? "Like post failed",
+          ),
+        );
+      }
+
+      final response = likePostResult.data!;
+      return Result.success(response.toPost());
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "likePost", e, stack);
       return Result.failure(
         AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );

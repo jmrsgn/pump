@@ -31,14 +31,12 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
 
-  late final postInfoViewModel = ref.watch(postInfoViewModelProvider.notifier);
-  late final postInfoState = ref.watch(postInfoViewModelProvider);
-
   @override
   void initState() {
     super.initState();
 
     // Get all comments from server on initial load of the screen
+    // TODO: check
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(postInfoViewModelProvider.notifier).clearComments();
       ref.read(postInfoViewModelProvider.notifier).getComments(widget.post.id);
@@ -60,15 +58,19 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
   Widget build(BuildContext context) {
     final relativeTime = TimeUtils.timeAgo(widget.post.createdAt);
 
-    final postInfoViewModel = ref.watch(postInfoViewModelProvider.notifier);
     final postInfoState = ref.watch(postInfoViewModelProvider);
 
     final comments = postInfoState.comments;
 
     // Listen for new comments and scroll down
     ref.listen<PostInfoState>(postInfoViewModelProvider, (previous, next) {
-      if (previous != null &&
-          previous.comments.length != next.comments.length) {
+      final wasLoading = previous?.isLoading ?? false;
+      final isFinished = wasLoading && !next.isLoading;
+
+      if (!isFinished || !mounted) return;
+
+      if ((previous?.comments.length != next.comments.length) &&
+          next.errorMessage == null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_scrollController.hasClients) {
             _scrollController.animateTo(
@@ -89,7 +91,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
         body: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(AppDimens.padding8),
+              padding: const EdgeInsets.all(AppDimens.dimen8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -109,7 +111,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
               child: ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimens.padding8,
+                  horizontal: AppDimens.dimen8,
                 ),
                 itemCount: comments.length,
                 itemBuilder: (context, index) {
@@ -131,10 +133,12 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
               controller: _commentController,
               focusNode: _focusNode,
               onSend: () {
-                postInfoViewModel.createComment(
-                  _commentController.text.trim(),
-                  widget.post.id,
-                );
+                ref
+                    .watch(postInfoViewModelProvider.notifier)
+                    .createComment(
+                      _commentController.text.trim(),
+                      widget.post.id,
+                    );
                 // Clear input field
                 _commentController.clear();
               },
@@ -178,13 +182,19 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
   }
 
   Widget _buildPostInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(widget.post.title, style: AppTextStyles.heading3),
-        UiUtils.addVerticalSpaceS(),
-        Text(widget.post.description, style: AppTextStyles.body),
-      ],
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppDimens.dimen4),
+      child: widget.post.title.isEmpty
+          ? Text(widget.post.description, style: AppTextStyles.body)
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(widget.post.title, style: AppTextStyles.heading3),
+                UiUtils.addVerticalSpaceS(),
+                Text(widget.post.description, style: AppTextStyles.body),
+              ],
+            ),
     );
   }
 
