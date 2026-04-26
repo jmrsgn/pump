@@ -4,6 +4,7 @@ import 'package:pump/core/data/dto/response/result.dart';
 import 'package:pump/core/data/repositories/user_repository_impl.dart';
 import 'package:pump/core/errors/app_error.dart';
 
+import '../../../../core/data/dto/response/paged_response.dart';
 import '../../../../core/utilities/logger_utility.dart';
 import '../../domain/entities/comment.dart';
 import '../../domain/repositories/comment_repository.dart';
@@ -60,45 +61,99 @@ class CommentRepositoryImpl implements CommentRepository {
 
   // getComments ---------------------------------------------------------------
   @override
-  Future<Result<List<Comment>, AppError>> getComments(String postId) async {
-    return Result.success(null);
-    // try {
-    //   final Result<AuthenticatedUser, AppError> userResult =
-    //       await _userRepositoryImpl.getAuthenticatedUser();
-    //   if (userResult.isSuccess) {
-    //     final result = await _commentService.getComments(
-    //       userResult.data!.token,
-    //       postId,
-    //     );
-    //
-    //     if (result.isSuccess && result.data != null) {
-    //       final comments = result.data!.map((e) => e.toComment()).toList();
-    //       LoggerUtility.d(
-    //         runtimeType.toString(),
-    //         "Comments fetched: $comments",
-    //       );
-    //       return Result.success(comments);
-    //     }
-    //     return Result.failure(userResult.error);
-    //   } else {
-    //     LoggerUtility.e(
-    //       runtimeType.toString(),
-    //       "User id is missing, will not proceed with API call",
-    //     );
-    //     return Result.failure(
-    //       AppError(message: AppErrorStrings.userIsNotAuthenticated),
-    //     );
-    //   }
-    // } catch (e, stackTrace) {
-    //   LoggerUtility.e(
-    //     runtimeType.toString(),
-    //     AppErrorStrings.anUnexpectedErrorOccurred,
-    //     e.toString(),
-    //     stackTrace,
-    //   );
-    //   return Result.failure(
-    //     AppError(message: AppErrorStrings.anUnexpectedErrorOccurred),
-    //   );
-    // }
+  Future<Result<PagedResponse<Comment>, AppError>> getComments(
+    String postId,
+    int page,
+  ) async {
+    try {
+      // Get authenticated user
+      final userResult = await _userRepositoryImpl.getAuthenticatedUser();
+      if (!userResult.isSuccess || userResult.data == null) {
+        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
+        return Result.failure(
+          AppError(message: AuthErrorConstants.userIsNotAuthenticated),
+        );
+      }
+
+      final commentResult = await _commentService.getComments(
+        userResult.data!.token,
+        postId,
+        page,
+      );
+
+      if (!commentResult.isSuccess || commentResult.data == null) {
+        return Result.failure(
+          AppError(
+            message: commentResult.error?.message ?? "Failed to fetch comments",
+          ),
+        );
+      }
+
+      final pagedDto = commentResult.data!;
+
+      final paged = PagedResponse<Comment>(
+        content: pagedDto.content.map((e) => e.toComment()).toList(),
+        page: pagedDto.page,
+        size: pagedDto.size,
+        totalElements: pagedDto.totalElements,
+      );
+
+      return Result.success(paged);
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "getComments", e, stack);
+      return Result.failure(
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
+      );
+    }
+  }
+
+  // getReplies ----------------------------------------------------------------
+  @override
+  Future<Result<PagedResponse<Comment>, AppError>> getReplies(
+    String postId,
+    String commentId,
+    int page,
+  ) async {
+    try {
+      // Get authenticated user
+      final userResult = await _userRepositoryImpl.getAuthenticatedUser();
+      if (!userResult.isSuccess || userResult.data == null) {
+        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
+        return Result.failure(
+          AppError(message: AuthErrorConstants.userIsNotAuthenticated),
+        );
+      }
+
+      final repliesResult = await _commentService.getReplies(
+        userResult.data!.token,
+        postId,
+        commentId,
+        page,
+      );
+
+      if (!repliesResult.isSuccess || repliesResult.data == null) {
+        return Result.failure(
+          AppError(
+            message: repliesResult.error?.message ?? "Failed to fetch replies",
+          ),
+        );
+      }
+
+      final pagedDto = repliesResult.data!;
+
+      final paged = PagedResponse<Comment>(
+        content: pagedDto.content.map((e) => e.toComment()).toList(),
+        page: pagedDto.page,
+        size: pagedDto.size,
+        totalElements: pagedDto.totalElements,
+      );
+
+      return Result.success(paged);
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "getReplies", e, stack);
+      return Result.failure(
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
+      );
+    }
   }
 }

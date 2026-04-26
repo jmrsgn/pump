@@ -4,6 +4,7 @@ class CommentResponse {
   final String id;
   final String comment;
   final String postId;
+  final String? parentCommentId;
   final String author;
   final String? authorProfileImageUrl;
   final int likesCount;
@@ -16,6 +17,7 @@ class CommentResponse {
     required this.id,
     required this.comment,
     required this.postId,
+    this.parentCommentId,
     required this.author,
     this.authorProfileImageUrl,
     required this.likesCount,
@@ -30,8 +32,9 @@ class CommentResponse {
       id: json['id'] ?? '',
       comment: json['comment'] ?? '',
       postId: json['postId'] ?? '',
+      parentCommentId: json['parentCommentId'] as String?,
       author: json['author'] ?? '',
-      authorProfileImageUrl: json['authorProfileImageUrl'],
+      authorProfileImageUrl: json['authorProfileImageUrl'] as String?,
       likesCount: json['likesCount'] ?? 0,
       repliesCount: json['repliesCount'] ?? 0,
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
@@ -44,6 +47,7 @@ class CommentResponse {
     return Comment(
       id: id,
       postId: postId,
+      parentCommentId: parentCommentId,
       author: author,
       authorProfileImageUrl: authorProfileImageUrl,
       comment: comment,

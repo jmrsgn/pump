@@ -17,7 +17,7 @@ class ApiConstants {
   static const String loginUrl = "$authServiceBaseUrl/auth/login";
   static const String registerUrl = "$authServiceBaseUrl/auth/register";
 
-  // Profile
+  // User
   static const String profileUrl = "$socialServiceBaseUrl/user/profile";
 
   // Post
@@ -26,5 +26,8 @@ class ApiConstants {
   static String getLikePostUrl(String postId) => "$postUrl/$postId/like";
 
   // Comment
-  static String getCommentUrl(String postId) => "$postUrl/$postId/comment";
+  static String getCommentsUrl(String postId) => "$postUrl/$postId/comment";
+
+  static String getCommentRepliesUrl(String postId, String commentId) =>
+      "${getCommentsUrl(postId)}/$commentId/replies";
 }

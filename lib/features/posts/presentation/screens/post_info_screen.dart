@@ -10,6 +10,7 @@ import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/posts/domain/entities/post.dart';
 import 'package:pump/features/posts/presentation/providers/post_info_state.dart';
 import 'package:pump/features/posts/presentation/providers/post_providers.dart';
+import 'package:pump/features/posts/presentation/viewmodels/post_info_viewmodel.dart';
 import 'package:pump/features/posts/presentation/widgets/comment_widget.dart';
 
 import '../../../../core/constants/app/app_strings.dart';
@@ -31,16 +32,31 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
 
+  PostInfoViewModel get _postInfoViewModel =>
+      ref.read(postInfoViewModelProvider.notifier);
+
   @override
   void initState() {
     super.initState();
+    startMinuteRebuild();
 
-    // Get all comments from server on initial load of the screen
+    // Get comments on initial load
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(postInfoViewModelProvider.notifier).getComments(widget.post.id);
+      // Assign post param to state post
+      _postInfoViewModel.setPost(widget.post);
+      _postInfoViewModel.getComments(widget.post.id);
     });
 
-    startMinuteRebuild();
+    _scrollController.addListener(() {
+      final postInfoState = ref.read(postInfoViewModelProvider);
+
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        if (postInfoState.hasNext && !postInfoState.isLoading) {
+          _postInfoViewModel.getComments(widget.post.id, isLoadMore: true);
+        }
+      }
+    });
   }
 
   @override
@@ -54,13 +70,14 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
 
   @override
   Widget build(BuildContext context) {
-    final relativeTime = TimeUtils.timeAgo(widget.post.createdAt);
-
     final postInfoState = ref.watch(postInfoViewModelProvider);
 
-    final comments = postInfoState.comments;
+    final post = postInfoState.post;
 
-    // Listen for new comments and scroll down
+    final relativeTime = TimeUtils.timeAgo(post.createdAt);
+
+    final topLevelComments = postInfoState.comments;
+
     ref.listen<PostInfoState>(postInfoViewModelProvider, (previous, next) {
       final wasLoading = previous?.isLoading ?? false;
       final isFinished = wasLoading && !next.isLoading;
@@ -93,59 +110,89 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeader(relativeTime),
+                  _buildHeader(post, relativeTime),
                   UiUtils.addVerticalSpaceM(),
-                  _buildPostInfo(),
+                  _buildPostInfo(post),
                   UiUtils.addVerticalSpaceM(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildLikeButton(),
+                      _buildLikeButton(post),
                       _buildCommentButton(),
                       _buildShareButton(),
                     ],
                   ),
                   UiUtils.addVerticalSpaceL(),
-                  _buildLikesAndShares(),
+                  _buildLikesAndShares(post),
                 ],
               ),
             ),
 
-            // Only comments section is scrollable
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppDimens.dimen8,
                 ),
-                itemCount: comments.length,
+                itemCount: topLevelComments.length,
                 itemBuilder: (context, index) {
-                  final c = comments[index];
+                  final comment = topLevelComments[index];
+                  final replies = comment.replies;
 
                   return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CommentWidget(comment: c),
-                      if (index < comments.length - 1)
-                        UiUtils.addVerticalSpaceL(),
+                      CommentWidget(comment: comment),
+
+                      if (comment.repliesCount > 0 && !comment.isRepliesLoaded)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: AppDimens.dimen40,
+                            top: AppDimens.dimen4,
+                          ),
+                          child: InkWell(
+                            onTap: () {
+                              _postInfoViewModel.getReplies(
+                                post.id,
+                                comment.id,
+                              );
+                            },
+                            child: Text(
+                              "View ${comment.repliesCount} replies",
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.textDisabled,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      ...replies.map(
+                        (reply) => Padding(
+                          padding: const EdgeInsets.only(
+                            left: AppDimens.dimen40,
+                          ),
+                          child: CommentWidget(comment: reply),
+                        ),
+                      ),
+
+                      UiUtils.addVerticalSpaceL(),
                     ],
                   );
                 },
               ),
             ),
 
-            // Input is fixed at the bottom
             AppTextInput(
               controller: _commentController,
               focusNode: _focusNode,
               onSend: () {
                 ref
-                    .watch(postInfoViewModelProvider.notifier)
-                    .createComment(
-                      _commentController.text.trim(),
-                      widget.post.id,
-                    );
-                // Clear input field
+                    .read(postInfoViewModelProvider.notifier)
+                    .createComment(post.id, _commentController.text.trim());
                 _commentController.clear();
+                // Hide keyboard
+                _focusNode.unfocus();
               },
               onAttach: () {},
             ),
@@ -155,14 +202,16 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
     );
   }
 
-  Widget _buildHeader(String relativeTime) {
+  Widget _buildHeader(Post post, String relativeTime) {
+    final initial = post.userName.isNotEmpty ? post.userName[0] : '?';
+
     return Row(
       children: [
         CircleAvatar(
           backgroundColor: AppColors.primary,
           radius: AppDimens.dimen16,
           child: Text(
-            widget.post.userName[0],
+            initial,
             style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
@@ -171,7 +220,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              widget.post.userName,
+              post.userName,
               style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
             ),
             Text(
@@ -186,24 +235,24 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
     );
   }
 
-  Widget _buildPostInfo() {
+  Widget _buildPostInfo(Post post) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppDimens.dimen4),
-      child: widget.post.title.isEmpty
-          ? Text(widget.post.description, style: AppTextStyles.body)
+      child: post.title.isEmpty
+          ? Text(post.description, style: AppTextStyles.body)
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.post.title, style: AppTextStyles.heading3),
+                Text(post.title, style: AppTextStyles.heading3),
                 UiUtils.addVerticalSpaceS(),
-                Text(widget.post.description, style: AppTextStyles.body),
+                Text(post.description, style: AppTextStyles.body),
               ],
             ),
     );
   }
 
-  Widget _buildLikesAndShares() {
+  Widget _buildLikesAndShares(Post post) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -216,7 +265,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
             ),
             UiUtils.addHorizontalSpaceS(),
             Text(
-              '${widget.post.likesCount}',
+              '${post.likesCount}',
               style: AppTextStyles.bodySmall.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -224,38 +273,33 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
           ],
         ),
         Text(
-          '${widget.post.sharesCount} ${AppStrings.shares}',
+          '${post.sharesCount} ${AppStrings.shares}',
           style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     );
   }
 
-  Widget _buildLikeButton() {
-    final isLikedByCurrentUser = widget.post.isLikedByCurrentUser;
+  Widget _buildLikeButton(Post post) {
+    final isLiked = post.isLikedByCurrentUser;
 
     return InkWell(
-      onTap: () =>
-          ref.read(postInfoViewModelProvider.notifier).likePost(widget.post.id),
+      onTap: () => _postInfoViewModel.likePost(post.id),
       borderRadius: BorderRadius.circular(AppDimens.dimen4),
       child: Row(
         children: [
           Icon(
-            isLikedByCurrentUser
+            isLiked
                 ? FontAwesomeIcons.solidThumbsUp
                 : FontAwesomeIcons.thumbsUp,
             size: AppDimens.dimen16,
-            color: isLikedByCurrentUser
-                ? AppColors.info
-                : AppColors.textDisabled,
+            color: isLiked ? AppColors.info : AppColors.textDisabled,
           ),
           UiUtils.addHorizontalSpaceS(),
           Text(
-            isLikedByCurrentUser ? AppStrings.liked : AppStrings.like,
+            isLiked ? AppStrings.liked : AppStrings.like,
             style: AppTextStyles.bodySmall.copyWith(
-              color: isLikedByCurrentUser
-                  ? AppColors.info
-                  : AppColors.textDisabled,
+              color: isLiked ? AppColors.info : AppColors.textDisabled,
             ),
           ),
         ],

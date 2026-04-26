@@ -50,7 +50,7 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
                   backgroundColor: AppColors.primary,
                   radius: AppDimens.dimen16,
                   child: Text(
-                    widget.comment.author,
+                    widget.comment.author[0],
                     style: AppTextStyles.body.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -72,7 +72,7 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
               children: [
                 Text(
                   widget.comment.author,
-                  style: AppTextStyles.body.copyWith(
+                  style: AppTextStyles.bodySmall.copyWith(
                     fontWeight: FontWeight.bold,
                     height: AppDimens.textHeight1,
                   ),

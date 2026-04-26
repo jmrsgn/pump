@@ -102,7 +102,12 @@ class MainFeedViewModel extends BaseViewModel<MainFeedState> {
 
       final safeIndex = newPosts.indexWhere((p) => p.id == updatedPost.id);
       // If post not found, silent ignore
-      if (safeIndex != -1) {
+      if (safeIndex == -1) {
+        LoggerUtility.d(
+          runtimeType.toString(),
+          "Post is not found in updated list of posts",
+        );
+      } else {
         newPosts[safeIndex] = updatedPost;
       }
 

@@ -6,6 +6,7 @@ import 'package:pump/core/presentation/widgets/custom_button.dart';
 import 'package:pump/core/routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
+import 'package:pump/features/auth/presentation/viewmodels/login_viewmodel.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';
@@ -27,6 +28,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  LoginViewModel get _loginViewModel =>
+      ref.read(loginViewModelProvider.notifier);
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -37,7 +41,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _onLoginPressed() {
     final email = _emailController.text;
     final password = _passwordController.text;
-    ref.read(loginViewModelProvider.notifier).login(email, password);
+    _loginViewModel.login(email, password);
   }
 
   @override

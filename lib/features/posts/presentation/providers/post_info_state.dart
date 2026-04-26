@@ -6,6 +6,10 @@ import '../../domain/entities/post.dart';
 class PostInfoState extends UiState {
   final Post post;
   final List<Comment> comments;
+  final int currentPage;
+  final bool hasNext;
+
+  // for reply creation / UI feedback
   final Comment? createdComment;
 
   const PostInfoState({
@@ -13,6 +17,8 @@ class PostInfoState extends UiState {
     super.errorMessage,
     required this.post,
     required this.comments,
+    required this.currentPage,
+    required this.hasNext,
     this.createdComment,
   });
 
@@ -22,6 +28,8 @@ class PostInfoState extends UiState {
     bool? isLoading,
     String? errorMessage,
     List<Comment>? comments,
+    int? currentPage,
+    bool? hasNext,
     Comment? createdComment,
   }) {
     return PostInfoState(
@@ -29,6 +37,8 @@ class PostInfoState extends UiState {
       errorMessage: errorMessage,
       post: post ?? this.post,
       comments: comments ?? this.comments,
+      currentPage: currentPage ?? this.currentPage,
+      hasNext: hasNext ?? this.hasNext,
       createdComment: createdComment ?? this.createdComment,
     );
   }
@@ -39,6 +49,8 @@ class PostInfoState extends UiState {
       errorMessage: null,
       post: Post.empty(),
       comments: const [],
+      currentPage: 0,
+      hasNext: true,
       createdComment: null,
     );
   }

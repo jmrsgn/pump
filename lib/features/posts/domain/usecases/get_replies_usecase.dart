@@ -5,15 +5,16 @@ import '../../../../core/data/dto/response/paged_response.dart';
 import '../../../../core/data/dto/response/result.dart';
 import '../entities/comment.dart';
 
-class GetCommentsUseCase {
+class GetRepliesUseCase {
   final CommentRepository _commentRepository;
 
-  GetCommentsUseCase(this._commentRepository);
+  GetRepliesUseCase(this._commentRepository);
 
   Future<Result<PagedResponse<Comment>, AppError>> execute(
     String postId,
+    String commentId,
     int page,
   ) async {
-    return await _commentRepository.getComments(postId, page);
+    return await _commentRepository.getReplies(postId, commentId, page);
   }
 }

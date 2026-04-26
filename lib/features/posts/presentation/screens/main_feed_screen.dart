@@ -38,25 +38,23 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
   void initState() {
     super.initState();
 
-    _scrollController.addListener(_onScroll);
+    _scrollController.addListener(() {
+      final currentState = ref.read(mainFeedViewModelProvider);
+
+      // If user is near the bottom within 200 px of the screen, load more posts
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        if (currentState.hasNext && !currentState.isLoading) {
+          _mainFeedViewModel.getPosts(isLoadMore: true);
+        }
+      }
+    });
 
     // Initial load
     Future.microtask(() {
       _userViewModel.getAuthenticatedUser();
       _mainFeedViewModel.getPosts();
     });
-  }
-
-  void _onScroll() {
-    final currentState = ref.read(mainFeedViewModelProvider);
-
-    // If user is near the bottom within 200 px of the screen, load more posts
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      if (currentState.hasNext && !currentState.isLoading) {
-        _mainFeedViewModel.getPosts(isLoadMore: true);
-      }
-    }
   }
 
   @override
