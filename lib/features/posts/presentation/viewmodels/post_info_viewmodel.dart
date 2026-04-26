@@ -4,6 +4,7 @@ import 'package:pump/core/domain/usecases/get_authenticated_user_usecase.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/features/posts/domain/entities/post.dart';
 import 'package:pump/features/posts/domain/usecases/create_comment_usecase.dart';
+import 'package:pump/features/posts/domain/usecases/create_reply_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_comments_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_replies_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_post_usecase.dart';
@@ -17,6 +18,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
   final Ref ref;
   final GetAuthenticatedUserUseCase _getAuthenticatedUserUseCase;
   final CreateCommentUseCase _createCommentUseCase;
+  final CreateReplyUseCase _createReplyUseCase;
   final GetCommentsUseCase _getCommentsUseCase;
   final GetRepliesUseCase _getRepliesUseCase;
   final LikePostUseCase _likePostUseCase;
@@ -25,6 +27,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     this.ref,
     this._getAuthenticatedUserUseCase,
     this._createCommentUseCase,
+    this._createReplyUseCase,
     this._getCommentsUseCase,
     this._getRepliesUseCase,
     this._likePostUseCase,
@@ -46,6 +49,14 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     state = state.copyWith(post: post);
   }
 
+  void setCommentReplyingTo(Comment comment) {
+    state = state.copyWith(commentReplyingTo: comment);
+  }
+
+  void clearCommentReplyingTo() {
+    state = state.copyWith(commentReplyingTo: null);
+  }
+
   void _addLocalComment(Comment c) {
     state = state.copyWith(
       comments: [...state.comments, c],
@@ -58,6 +69,47 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       comments: state.comments.where((x) => x != c).toList(),
       post: state.post.copyWith(commentsCount: state.post.commentsCount - 1),
     );
+  }
+
+  void _addLocalReply(Comment reply, String parentId) {
+    final updated = state.comments.map((c) {
+      if (c.id == parentId) {
+        return c.copyWith(replies: [...c.replies, reply]);
+      }
+      return c;
+    }).toList();
+
+    state = state.copyWith(comments: updated);
+  }
+
+  void _removeLocalReply(Comment reply, String parentId) {
+    final updated = state.comments.map((c) {
+      if (c.id == parentId) {
+        return c.copyWith(replies: c.replies.where((r) => r != reply).toList());
+      }
+      return c;
+    }).toList();
+
+    state = state.copyWith(comments: updated);
+  }
+
+  void _replaceLocalReply(Comment temp, Comment actual, String parentId) {
+    final updated = state.comments.map((c) {
+      if (c.id == parentId) {
+        final replies = List<Comment>.from(c.replies);
+
+        final index = replies.indexWhere((r) => r.createdAt == temp.createdAt);
+
+        if (index != -1) {
+          replies[index] = actual;
+        }
+
+        return c.copyWith(replies: replies);
+      }
+      return c;
+    }).toList();
+
+    state = state.copyWith(comments: updated);
   }
 
   void _applyLocalLike() {
@@ -95,6 +147,8 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       return emitError(ValidationErrorConstants.aCommentIsRequired);
     }
 
+    Comment? tempComment;
+
     try {
       final userResult = await _getAuthenticatedUserUseCase.execute();
       if (!userResult.isSuccess || userResult.data?.user == null) {
@@ -102,9 +156,9 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       }
 
       final currentUser = userResult.data!.user;
+      final commentReplyingTo = state.commentReplyingTo;
 
-      // Create temporary comment (optimistic)
-      final tempComment = Comment(
+      tempComment = Comment(
         id: '',
         author: "${currentUser.firstName} ${currentUser.lastName}",
         authorProfileImageUrl: currentUser.profileImageUrl,
@@ -114,60 +168,76 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         postId: postId,
+        parentCommentId: commentReplyingTo?.id,
         isLikedByCurrentUser: false,
       );
 
-      _addLocalComment(tempComment);
+      if (commentReplyingTo != null) {
+        _addLocalReply(tempComment, commentReplyingTo.id);
+      } else {
+        _addLocalComment(tempComment);
+      }
 
-      final result = await _createCommentUseCase.execute(
-        postId,
-        trimmedComment,
-      );
+      final result = commentReplyingTo != null
+          ? await _createReplyUseCase.execute(
+              postId,
+              commentReplyingTo.id,
+              trimmedComment,
+            )
+          : await _createCommentUseCase.execute(postId, trimmedComment);
 
       if (!result.isSuccess || result.data == null) {
-        // rollback
-        _removeLocalComment(tempComment);
-        return emitError(result.error?.message ?? "Create comment failed");
+        if (commentReplyingTo != null) {
+          _removeLocalReply(tempComment, commentReplyingTo.id);
+        } else {
+          _removeLocalComment(tempComment);
+        }
+
+        return emitError(result.error?.message ?? "Create failed");
       }
 
       final createdComment = result.data!;
 
-      // Update comments count of post in main feed screen
-      ref
-          .read(mainFeedViewModelProvider.notifier)
-          .incrementCommentCount(postId);
-
-      // Replace temp with actual comment
-      final updatedComments = List.of(state.comments);
-      final index = updatedComments.indexWhere(
-        (c) => c.createdAt == tempComment.createdAt,
-      );
-
-      // Silent ignore
-      if (index == -1) {
-        LoggerUtility.d(
-          runtimeType.toString(),
-          "Comment is not present in updated list of comments",
-        );
-      } else {
-        updatedComments[index] = createdComment;
+      if (commentReplyingTo == null) {
+        ref
+            .read(mainFeedViewModelProvider.notifier)
+            .incrementCommentCount(postId);
       }
 
-      state = state.copyWith(
-        comments: updatedComments,
-        createdComment: createdComment,
-        errorMessage: null,
-        isLoading: false,
-      );
+      if (commentReplyingTo != null) {
+        _replaceLocalReply(tempComment, createdComment, commentReplyingTo.id);
+      } else {
+        final updatedComments = List.of(state.comments);
+
+        final index = updatedComments.indexWhere(
+          (c) => c.createdAt == tempComment?.createdAt,
+        );
+
+        if (index != -1) {
+          updatedComments[index] = createdComment;
+        }
+
+        state = state.copyWith(
+          comments: updatedComments,
+          createdComment: createdComment,
+          errorMessage: null,
+          isLoading: false,
+        );
+      }
+
+      state = state.copyWith(commentReplyingTo: null);
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "createComment", e, stack);
 
-      // rollback (safe)
-      state = state.copyWith(
-        comments: state.comments
-            .where((c) => c.comment != trimmedComment)
-            .toList(),
-      );
+      final replyingTo = state.commentReplyingTo;
+
+      if (tempComment != null) {
+        if (replyingTo != null) {
+          _removeLocalReply(tempComment, replyingTo.id);
+        } else {
+          _removeLocalComment(tempComment);
+        }
+      }
 
       emitUnexpectedError();
     }
@@ -271,6 +341,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       final targetComment = state.comments[targetIndex];
 
       final nextPage = isLoadMore ? targetComment.currentRepliesPage + 1 : 0;
+      LoggerUtility.d(runtimeType.toString(), "nextPage: [$nextPage]");
 
       final result = await _getRepliesUseCase.execute(
         postId,

@@ -11,6 +11,7 @@ class PostInfoState extends UiState {
 
   // for reply creation / UI feedback
   final Comment? createdComment;
+  final Comment? commentReplyingTo;
 
   const PostInfoState({
     required super.isLoading,
@@ -20,6 +21,7 @@ class PostInfoState extends UiState {
     required this.currentPage,
     required this.hasNext,
     this.createdComment,
+    this.commentReplyingTo,
   });
 
   @override
@@ -31,6 +33,7 @@ class PostInfoState extends UiState {
     int? currentPage,
     bool? hasNext,
     Comment? createdComment,
+    Comment? commentReplyingTo,
   }) {
     return PostInfoState(
       isLoading: isLoading ?? this.isLoading,
@@ -40,6 +43,7 @@ class PostInfoState extends UiState {
       currentPage: currentPage ?? this.currentPage,
       hasNext: hasNext ?? this.hasNext,
       createdComment: createdComment ?? this.createdComment,
+      commentReplyingTo: commentReplyingTo ?? this.commentReplyingTo,
     );
   }
 
@@ -52,6 +56,7 @@ class PostInfoState extends UiState {
       currentPage: 0,
       hasNext: true,
       createdComment: null,
+      commentReplyingTo: null,
     );
   }
 }

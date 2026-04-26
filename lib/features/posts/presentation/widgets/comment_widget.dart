@@ -12,8 +12,9 @@ import '../../domain/entities/comment.dart';
 
 class CommentWidget extends ConsumerStatefulWidget {
   final Comment comment;
+  final void Function(Comment comment)? onReply;
 
-  const CommentWidget({super.key, required this.comment});
+  const CommentWidget({super.key, required this.comment, this.onReply});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _CommentWidgetState();
@@ -96,10 +97,13 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
                       ),
                     ),
                     UiUtils.addHorizontalSpaceXL(),
-                    Text(
-                      AppStrings.reply,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textDisabled,
+                    InkWell(
+                      onTap: () => widget.onReply?.call(widget.comment),
+                      child: Text(
+                        AppStrings.reply,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textDisabled,
+                        ),
                       ),
                     ),
                     Spacer(),

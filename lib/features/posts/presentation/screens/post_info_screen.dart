@@ -16,6 +16,7 @@ import 'package:pump/features/posts/presentation/widgets/comment_widget.dart';
 import '../../../../core/constants/app/app_strings.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/app_text_input.dart';
+import '../../domain/entities/comment.dart';
 
 class PostInfoScreen extends ConsumerStatefulWidget {
   final Post post;
@@ -137,46 +138,34 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
                 itemCount: topLevelComments.length,
                 itemBuilder: (context, index) {
                   final comment = topLevelComments[index];
-                  final replies = comment.replies;
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CommentWidget(comment: comment),
+                      CommentWidget(
+                        comment: comment,
+                        onReply: (selectedComment) {
+                          // Show keyboard and focus
+                          _focusNode.requestFocus();
 
-                      if (comment.repliesCount > 0 && !comment.isRepliesLoaded)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: AppDimens.dimen40,
-                            top: AppDimens.dimen4,
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              _postInfoViewModel.getReplies(
-                                post.id,
-                                comment.id,
+                          _commentController.text =
+                              "@${selectedComment.author} ";
+                          _commentController.selection =
+                              TextSelection.fromPosition(
+                                TextPosition(
+                                  offset: _commentController.text.length,
+                                ),
                               );
-                            },
-                            child: Text(
-                              "View ${comment.repliesCount} replies",
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.textDisabled,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                      ...replies.map(
-                        (reply) => Padding(
-                          padding: const EdgeInsets.only(
-                            left: AppDimens.dimen40,
-                          ),
-                          child: CommentWidget(comment: reply),
-                        ),
+                        },
                       ),
 
-                      UiUtils.addVerticalSpaceL(),
+                      (comment.repliesCount > 0 && !comment.isRepliesLoaded)
+                          ? _buildCommentReplies(
+                              comment: comment,
+                              replies: comment.replies,
+                              postId: post.id,
+                            )
+                          : SizedBox.shrink(),
                     ],
                   );
                 },
@@ -187,9 +176,10 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
               controller: _commentController,
               focusNode: _focusNode,
               onSend: () {
-                ref
-                    .read(postInfoViewModelProvider.notifier)
-                    .createComment(post.id, _commentController.text.trim());
+                _postInfoViewModel.createComment(
+                  post.id,
+                  _commentController.text.trim(),
+                );
                 _commentController.clear();
                 // Hide keyboard
                 _focusNode.unfocus();
@@ -199,6 +189,48 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCommentReplies({
+    required Comment comment,
+    required List<Comment> replies,
+    required String postId,
+  }) {
+    final hasSingleReply = comment.repliesCount == 1;
+    final label = hasSingleReply ? "reply" : "replies";
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            left: AppDimens.dimen40,
+            top: AppDimens.dimen4,
+          ),
+          child: InkWell(
+            onTap: () {
+              _postInfoViewModel.getReplies(postId, comment.id);
+            },
+            child: Text(
+              "View ${comment.repliesCount} $label",
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textDisabled,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+
+        ...replies.map(
+          (reply) => Padding(
+            padding: const EdgeInsets.only(left: AppDimens.dimen40),
+            child: CommentWidget(comment: reply),
+          ),
+        ),
+
+        UiUtils.addVerticalSpaceL(),
+      ],
     );
   }
 

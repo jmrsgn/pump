@@ -10,6 +10,12 @@ abstract class CommentRepository {
     String postId,
   );
 
+  Future<Result<Comment, AppError>> createReply(
+    String postId,
+    String parentCommentId,
+    String comment,
+  );
+
   Future<Result<PagedResponse<Comment>, AppError>> getComments(
     String postId,
     int page,

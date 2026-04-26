@@ -59,6 +59,50 @@ class CommentRepositoryImpl implements CommentRepository {
     }
   }
 
+  // createReply ---------------------------------------------------------------
+  @override
+  Future<Result<Comment, AppError>> createReply(
+    String postId,
+    String parentCommentId,
+    String comment,
+  ) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [createReply]");
+
+    try {
+      // Get authenticated user
+      final userResult = await _userRepositoryImpl.getAuthenticatedUser();
+      if (!userResult.isSuccess || userResult.data == null) {
+        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
+        return Result.failure(
+          AppError(message: AuthErrorConstants.userIsNotAuthenticated),
+        );
+      }
+
+      final createReplyResult = await _commentService.createReply(
+        userResult.data!.token,
+        postId,
+        parentCommentId,
+        comment,
+      );
+
+      if (!createReplyResult.isSuccess || createReplyResult.data == null) {
+        return Result.failure(
+          AppError(
+            message: createReplyResult.error?.message ?? "Create reply failed",
+          ),
+        );
+      }
+
+      final response = createReplyResult.data!;
+      return Result.success(response.toComment());
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "createReply", e, stack);
+      return Result.failure(
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
+      );
+    }
+  }
+
   // getComments ---------------------------------------------------------------
   @override
   Future<Result<PagedResponse<Comment>, AppError>> getComments(

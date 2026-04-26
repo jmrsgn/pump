@@ -107,6 +107,53 @@ class CommentService {
     }
   }
 
+  // createReply ---------------------------------------------------------------
+  Future<Result<CommentResponse, ApiErrorResponse>> createReply(
+    String token,
+    String postId,
+    String parentCommentId,
+    String comment,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConstants.getCommentRepliesUrl(postId, parentCommentId)),
+        headers: {
+          ...ApiConstants.headerTypeTextPlain,
+          'Authorization': 'Bearer $token',
+        },
+        body: comment,
+      );
+
+      final json = response.body.isEmpty ? {} : jsonDecode(response.body);
+
+      if (response.statusCode == HttpStatus.ok ||
+          response.statusCode == HttpStatus.created) {
+        return Result.success(CommentResponse.fromJson(json['data']));
+      }
+
+      final errorJson = json['error'] ?? {};
+      final error = ApiErrorResponse.fromJson(errorJson);
+
+      return Result.failure(
+        ApiErrorResponse(
+          status: error.status,
+          message: error.message,
+          error: error.error,
+        ),
+      );
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "createReply", e, stack);
+
+      return Result.failure(
+        ApiErrorResponse(
+          status: HttpStatus.internalServerError,
+          message: SystemErrorConstants.internalServerError,
+          error: SystemErrorConstants.anUnexpectedErrorOccurred,
+        ),
+      );
+    }
+  }
+
   // getReplies
   Future<Result<PagedResponse<CommentResponse>, ApiErrorResponse>> getReplies(
     String token,
