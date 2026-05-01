@@ -16,6 +16,7 @@ class PostResponse {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isLikedByCurrentUser;
+  final bool isOwnedByCurrentUser;
 
   const PostResponse({
     required this.id,
@@ -32,6 +33,7 @@ class PostResponse {
     required this.createdAt,
     required this.updatedAt,
     required this.isLikedByCurrentUser,
+    required this.isOwnedByCurrentUser,
   });
 
   factory PostResponse.fromJson(Map<String, dynamic> json) {
@@ -47,6 +49,7 @@ class PostResponse {
       commentsCount: json['commentsCount'] ?? 0,
       sharesCount: json['sharesCount'] ?? 0,
       isLikedByCurrentUser: json['isLikedByCurrentUser'] ?? false,
+      isOwnedByCurrentUser: json['isOwnedByCurrentUser'] ?? false,
       comments: (json['comments'] as List? ?? [])
           .map((e) => CommentResponse.fromJson(e))
           .toList(),
@@ -69,6 +72,7 @@ class PostResponse {
       sharesCount: sharesCount,
       comments: comments.map((e) => e.toComment()).toList(),
       isLikedByCurrentUser: isLikedByCurrentUser,
+      isOwnedByCurrentUser: isOwnedByCurrentUser,
     );
   }
 }

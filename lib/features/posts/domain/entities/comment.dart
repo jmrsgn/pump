@@ -28,7 +28,7 @@ class Comment {
     required this.repliesCount,
     this.replies = const [],
     this.currentRepliesPage = 0,
-    this.hasMoreReplies = true,
+    this.hasMoreReplies = false,
     this.isRepliesLoaded = false,
     required this.createdAt,
     required this.updatedAt,
@@ -36,27 +36,50 @@ class Comment {
   });
 
   Comment copyWith({
+    String? id,
+    String? postId,
+    String? parentCommentId,
+    String? author,
+    String? authorProfileImageUrl,
+    String? comment,
+    int? likesCount,
+    int? repliesCount,
     List<Comment>? replies,
     int? currentRepliesPage,
     bool? hasMoreReplies,
     bool? isRepliesLoaded,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isLikedByCurrentUser,
   }) {
     return Comment(
-      id: id,
-      postId: postId,
-      parentCommentId: parentCommentId,
-      author: author,
-      authorProfileImageUrl: authorProfileImageUrl,
-      comment: comment,
-      likesCount: likesCount,
-      repliesCount: repliesCount,
+      id: id ?? this.id,
+      postId: postId ?? this.postId,
+      parentCommentId: parentCommentId ?? this.parentCommentId,
+      author: author ?? this.author,
+      authorProfileImageUrl:
+          authorProfileImageUrl ?? this.authorProfileImageUrl,
+      comment: comment ?? this.comment,
+      likesCount: likesCount ?? this.likesCount,
+      repliesCount: repliesCount ?? this.repliesCount,
       replies: replies ?? this.replies,
       currentRepliesPage: currentRepliesPage ?? this.currentRepliesPage,
       hasMoreReplies: hasMoreReplies ?? this.hasMoreReplies,
       isRepliesLoaded: isRepliesLoaded ?? this.isRepliesLoaded,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-      isLikedByCurrentUser: isLikedByCurrentUser,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isLikedByCurrentUser: isLikedByCurrentUser ?? this.isLikedByCurrentUser,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is Comment && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }

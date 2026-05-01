@@ -13,6 +13,7 @@ class Post {
   final int sharesCount;
   final List<Comment> comments;
   final bool isLikedByCurrentUser;
+  final bool isOwnedByCurrentUser;
 
   const Post({
     required this.id,
@@ -27,6 +28,7 @@ class Post {
     required this.sharesCount,
     required this.comments,
     required this.isLikedByCurrentUser,
+    required this.isOwnedByCurrentUser,
   });
 
   Post copyWith({
@@ -42,6 +44,7 @@ class Post {
     int? sharesCount,
     List<Comment>? comments,
     bool? isLikedByCurrentUser,
+    bool? isOwnedByCurrentUser,
   }) {
     return Post(
       id: id ?? this.id,
@@ -56,6 +59,7 @@ class Post {
       sharesCount: sharesCount ?? this.sharesCount,
       comments: comments ?? this.comments,
       isLikedByCurrentUser: isLikedByCurrentUser ?? this.isLikedByCurrentUser,
+      isOwnedByCurrentUser: isOwnedByCurrentUser ?? this.isOwnedByCurrentUser,
     );
   }
 
@@ -72,5 +76,6 @@ class Post {
     sharesCount: 0,
     comments: const [],
     isLikedByCurrentUser: false,
+    isOwnedByCurrentUser: false,
   );
 }

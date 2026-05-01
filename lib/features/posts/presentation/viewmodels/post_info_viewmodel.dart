@@ -38,9 +38,6 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
   }
 
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
   void _setLoading(bool value) {
     state = state.copyWith(isLoading: value);
   }
@@ -55,6 +52,19 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
 
   void clearCommentReplyingTo() {
     state = state.copyWith(commentReplyingTo: null);
+  }
+
+  void resetComments() {
+    state = state.copyWith(
+      comments: [],
+      currentPage: 0,
+      hasNext: true,
+      errorMessage: null,
+    );
+  }
+
+  bool isReplyingTo(String commentId) {
+    return state.commentReplyingTo?.id == commentId;
   }
 
   void _addLocalComment(Comment c) {
@@ -97,13 +107,10 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     final updated = state.comments.map((c) {
       if (c.id == parentId) {
         final replies = List<Comment>.from(c.replies);
-
         final index = replies.indexWhere((r) => r.createdAt == temp.createdAt);
-
         if (index != -1) {
           replies[index] = actual;
         }
-
         return c.copyWith(replies: replies);
       }
       return c;
@@ -137,15 +144,14 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       "Execute method: [createComment] comment: [$comment]",
     );
 
-    // Prevent double taps
     if (state.isLoading) return;
-
-    _setLoading(true);
 
     final trimmedComment = comment.trim();
     if (trimmedComment.isEmpty) {
       return emitError(ValidationErrorConstants.aCommentIsRequired);
     }
+
+    _setLoading(true);
 
     Comment? tempComment;
 
@@ -156,7 +162,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       }
 
       final currentUser = userResult.data!.user;
-      final commentReplyingTo = state.commentReplyingTo;
+      final replyingTo = state.commentReplyingTo;
 
       tempComment = Comment(
         id: '',
@@ -168,64 +174,72 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         postId: postId,
-        parentCommentId: commentReplyingTo?.id,
+        parentCommentId: replyingTo?.id,
         isLikedByCurrentUser: false,
       );
 
-      if (commentReplyingTo != null) {
-        _addLocalReply(tempComment, commentReplyingTo.id);
+      if (replyingTo != null) {
+        final parentIndex = state.comments.indexWhere(
+          (c) => c.id == replyingTo.id,
+        );
+
+        if (parentIndex != -1) {
+          final parent = state.comments[parentIndex];
+
+          if (!parent.isRepliesLoaded && parent.repliesCount > 0) {
+            await getReplies(postId, parent.id);
+          }
+        }
+
+        _addLocalReply(tempComment, replyingTo.id);
       } else {
         _addLocalComment(tempComment);
       }
 
-      final result = commentReplyingTo != null
+      final result = replyingTo != null
           ? await _createReplyUseCase.execute(
               postId,
-              commentReplyingTo.id,
+              replyingTo.id,
               trimmedComment,
             )
           : await _createCommentUseCase.execute(postId, trimmedComment);
 
       if (!result.isSuccess || result.data == null) {
-        if (commentReplyingTo != null) {
-          _removeLocalReply(tempComment, commentReplyingTo.id);
+        if (replyingTo != null) {
+          _removeLocalReply(tempComment, replyingTo.id);
         } else {
           _removeLocalComment(tempComment);
         }
-
         return emitError(result.error?.message ?? "Create failed");
       }
 
-      final createdComment = result.data!;
+      final created = result.data!;
 
-      if (commentReplyingTo == null) {
+      if (replyingTo == null) {
         ref
             .read(mainFeedViewModelProvider.notifier)
             .incrementCommentCount(postId);
       }
 
-      if (commentReplyingTo != null) {
-        _replaceLocalReply(tempComment, createdComment, commentReplyingTo.id);
+      if (replyingTo != null) {
+        _replaceLocalReply(tempComment, created, replyingTo.id);
       } else {
-        final updatedComments = List.of(state.comments);
-
-        final index = updatedComments.indexWhere(
+        final updated = List<Comment>.from(state.comments);
+        final index = updated.indexWhere(
           (c) => c.createdAt == tempComment?.createdAt,
         );
-
         if (index != -1) {
-          updatedComments[index] = createdComment;
+          updated[index] = created;
         }
-
-        state = state.copyWith(
-          comments: updatedComments,
-          createdComment: createdComment,
-          errorMessage: null,
-          isLoading: false,
-        );
+        state = state.copyWith(comments: updated);
       }
 
-      state = state.copyWith(commentReplyingTo: null);
+      state = state.copyWith(
+        createdComment: created,
+        commentReplyingTo: null,
+        errorMessage: null,
+        isLoading: false,
+      );
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "createComment", e, stack);
 
@@ -249,7 +263,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
 
     if (state.isLoading) return;
 
-    setLoading(true);
+    _setLoading(true);
 
     try {
       final nextPage = isLoadMore ? state.currentPage + 1 : 0;
@@ -257,7 +271,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       final result = await _getCommentsUseCase.execute(postId, nextPage);
 
       if (!result.isSuccess || result.data == null) {
-        setLoading(false);
+        _setLoading(false);
         return emitError(result.error!.message);
       }
 
@@ -278,14 +292,13 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     }
   }
 
-  // likePost (optimistic update) ----------------------------------------------
+  // likePost ------------------------------------------------------------------
   Future<void> likePost(String postId) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [likePost]");
 
-    final originalPost = state.post; // backup
+    final originalPost = state.post;
     final wasLiked = originalPost.isLikedByCurrentUser;
 
-    // Optimistic update
     if (wasLiked) {
       _applyLocalUnlike();
     } else {
@@ -296,22 +309,17 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       final result = await _likePostUseCase.execute(postId);
 
       if (!result.isSuccess || result.data == null) {
-        // rollback exact state
         state = state.copyWith(post: originalPost);
         return emitError(result.error?.message ?? "Like post failed");
       }
 
-      final updatedPost = result.data!;
-
-      // replace with updated post
       state = state.copyWith(
-        post: updatedPost,
+        post: result.data!,
         errorMessage: null,
         isLoading: false,
       );
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "likePost", e, stack);
-      // rollback exact state
       state = state.copyWith(post: originalPost);
       emitUnexpectedError();
     }
@@ -327,21 +335,18 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
 
     if (state.isLoading) return;
 
-    setLoading(true);
+    _setLoading(true);
 
     try {
-      final targetIndex = state.comments.indexWhere((c) => c.id == commentId);
+      final index = state.comments.indexWhere((c) => c.id == commentId);
 
-      if (targetIndex == -1) {
-        LoggerUtility.e(runtimeType.toString(), "Comment not found");
-        setLoading(false);
+      if (index == -1) {
+        _setLoading(false);
         return;
       }
 
-      final targetComment = state.comments[targetIndex];
-
-      final nextPage = isLoadMore ? targetComment.currentRepliesPage + 1 : 0;
-      LoggerUtility.d(runtimeType.toString(), "nextPage: [$nextPage]");
+      final target = state.comments[index];
+      final nextPage = isLoadMore ? target.currentRepliesPage + 1 : 0;
 
       final result = await _getRepliesUseCase.execute(
         postId,
@@ -350,25 +355,31 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       );
 
       if (!result.isSuccess || result.data == null) {
-        setLoading(false);
+        _setLoading(false);
         return emitError(result.error!.message);
       }
 
       final paged = result.data!;
+      final existing = target.replies;
 
-      final updatedReplies = isLoadMore
-          ? [...targetComment.replies, ...paged.content]
+      final mergedReplies = isLoadMore
+          ? [
+              ...existing,
+              ...paged.content.where(
+                (newReply) => !existing.any((r) => r.id == newReply.id),
+              ),
+            ]
           : paged.content;
 
-      final updatedComment = targetComment.copyWith(
-        replies: updatedReplies,
+      final updatedComment = target.copyWith(
+        replies: mergedReplies,
         currentRepliesPage: paged.page,
         hasMoreReplies: (paged.page + 1) * paged.size < paged.totalElements,
         isRepliesLoaded: true,
       );
 
       final updatedComments = List<Comment>.from(state.comments);
-      updatedComments[targetIndex] = updatedComment;
+      updatedComments[index] = updatedComment;
 
       state = state.copyWith(
         isLoading: false,

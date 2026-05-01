@@ -87,7 +87,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
     return CustomScaffold(
       isLoading: createPostState.isLoading,
-      appBarTitle: AppStrings.createPost,
+      appBarTitle: AppStrings.createPostTitle,
       appBarActions: [
         IconButton(
           icon: const Icon(

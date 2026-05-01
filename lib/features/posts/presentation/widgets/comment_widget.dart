@@ -13,8 +13,14 @@ import '../../domain/entities/comment.dart';
 class CommentWidget extends ConsumerStatefulWidget {
   final Comment comment;
   final void Function(Comment comment)? onReply;
+  final bool isReplying;
 
-  const CommentWidget({super.key, required this.comment, this.onReply});
+  const CommentWidget({
+    super.key,
+    required this.comment,
+    this.onReply,
+    this.isReplying = false,
+  });
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _CommentWidgetState();
@@ -73,13 +79,19 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
               children: [
                 Text(
                   widget.comment.author,
-                  style: AppTextStyles.bodySmall.copyWith(
+                  style: AppTextStyles.caption.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: AppColors.textOnPrimary,
                     height: AppDimens.textHeight1,
                   ),
                 ),
                 UiUtils.addVerticalSpaceS(),
-                Text(widget.comment.comment, style: AppTextStyles.bodySmall),
+                Text(
+                  widget.comment.comment,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
                 UiUtils.addVerticalSpaceXS(),
                 Row(
                   children: [

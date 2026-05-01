@@ -26,6 +26,11 @@ class AppStrings {
   static const somethingWentWrongPleaseTryAgain =
       "Something went wrong. Please try again.";
 
+  // Post related
+  static const editPost = "Edit post";
+  static const deletePost = "Delete post";
+  static const createPostTitle = "Create Post";
+
   // Login Page
   static const login = 'Login';
   static const emailAndPasswordAreRequired = "Email and password are required";

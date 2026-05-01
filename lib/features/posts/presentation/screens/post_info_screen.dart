@@ -33,7 +33,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
 
-  PostInfoViewModel get _postInfoViewModel =>
+  PostInfoViewModel get _viewModel =>
       ref.read(postInfoViewModelProvider.notifier);
 
   @override
@@ -41,20 +41,18 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
     super.initState();
     startMinuteRebuild();
 
-    // Get comments on initial load
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Assign post param to state post
-      _postInfoViewModel.setPost(widget.post);
-      _postInfoViewModel.getComments(widget.post.id);
+      _viewModel.resetComments();
+      _viewModel.setPost(widget.post);
+      _viewModel.getComments(widget.post.id);
     });
 
     _scrollController.addListener(() {
-      final postInfoState = ref.read(postInfoViewModelProvider);
-
+      final state = ref.read(postInfoViewModelProvider);
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
-        if (postInfoState.hasNext && !postInfoState.isLoading) {
-          _postInfoViewModel.getComments(widget.post.id, isLoadMore: true);
+        if (state.hasNext && !state.isLoading) {
+          _viewModel.getComments(widget.post.id, isLoadMore: true);
         }
       }
     });
@@ -71,13 +69,9 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
 
   @override
   Widget build(BuildContext context) {
-    final postInfoState = ref.watch(postInfoViewModelProvider);
-
-    final post = postInfoState.post;
-
+    final state = ref.watch(postInfoViewModelProvider);
+    final post = state.post;
     final relativeTime = TimeUtils.timeAgo(post.createdAt);
-
-    final topLevelComments = postInfoState.comments;
 
     ref.listen<PostInfoState>(postInfoViewModelProvider, (previous, next) {
       final wasLoading = previous?.isLoading ?? false;
@@ -102,7 +96,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: CustomScaffold(
-        isLoading: postInfoState.isLoading,
+        isLoading: state.isLoading,
         backgroundColor: AppColors.surface,
         body: Column(
           children: [
@@ -128,28 +122,35 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
                 ],
               ),
             ),
-
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppDimens.dimen8,
                 ),
-                itemCount: topLevelComments.length,
+                itemCount: state.comments.length,
                 itemBuilder: (context, index) {
-                  final comment = topLevelComments[index];
+                  final comment = state.comments[index];
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CommentWidget(
                         comment: comment,
+                        isReplying: state.commentReplyingTo?.id == comment.id,
                         onReply: (selectedComment) {
-                          // Show keyboard and focus
+                          _viewModel.setCommentReplyingTo(selectedComment);
+
+                          if (!comment.isRepliesLoaded &&
+                              comment.repliesCount > 0) {
+                            _viewModel.getReplies(post.id, comment.id);
+                          }
+
                           _focusNode.requestFocus();
 
                           _commentController.text =
                               "@${selectedComment.author} ";
+
                           _commentController.selection =
                               TextSelection.fromPosition(
                                 TextPosition(
@@ -158,30 +159,28 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
                               );
                         },
                       ),
-
-                      (comment.repliesCount > 0 && !comment.isRepliesLoaded)
-                          ? _buildCommentReplies(
-                              comment: comment,
-                              replies: comment.replies,
-                              postId: post.id,
-                            )
-                          : SizedBox.shrink(),
+                      if (comment.repliesCount > 0 ||
+                          comment.replies.isNotEmpty)
+                        _buildCommentReplies(
+                          comment: comment,
+                          replies: comment.replies,
+                          postId: post.id,
+                          state: state,
+                        ),
                     ],
                   );
                 },
               ),
             ),
-
             AppTextInput(
               controller: _commentController,
               focusNode: _focusNode,
               onSend: () {
-                _postInfoViewModel.createComment(
+                _viewModel.createComment(
                   post.id,
                   _commentController.text.trim(),
                 );
                 _commentController.clear();
-                // Hide keyboard
                 _focusNode.unfocus();
               },
               onAttach: () {},
@@ -196,39 +195,57 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
     required Comment comment,
     required List<Comment> replies,
     required String postId,
+    required PostInfoState state,
   }) {
     final hasSingleReply = comment.repliesCount == 1;
     final label = hasSingleReply ? "reply" : "replies";
 
+    final text = comment.isRepliesLoaded
+        ? (comment.hasMoreReplies ? "View more replies" : "No more replies")
+        : "View ${comment.repliesCount} $label";
+
+    final canLoadMore = !comment.isRepliesLoaded || comment.hasMoreReplies;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(
-            left: AppDimens.dimen40,
-            top: AppDimens.dimen4,
-          ),
-          child: InkWell(
-            onTap: () {
-              _postInfoViewModel.getReplies(postId, comment.id);
-            },
-            child: Text(
-              "View ${comment.repliesCount} $label",
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textDisabled,
-                fontWeight: FontWeight.w500,
+        if (comment.repliesCount > 0)
+          Padding(
+            padding: const EdgeInsets.only(
+              left: AppDimens.dimen40,
+              top: AppDimens.dimen4,
+            ),
+            child: InkWell(
+              onTap: canLoadMore
+                  ? () {
+                      final isLoadMore =
+                          comment.isRepliesLoaded && comment.hasMoreReplies;
+
+                      _viewModel.getReplies(
+                        postId,
+                        comment.id,
+                        isLoadMore: isLoadMore,
+                      );
+                    }
+                  : null,
+              child: Text(
+                text,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textDisabled,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),
-        ),
-
         ...replies.map(
           (reply) => Padding(
             padding: const EdgeInsets.only(left: AppDimens.dimen40),
-            child: CommentWidget(comment: reply),
+            child: CommentWidget(
+              comment: reply,
+              isReplying: state.commentReplyingTo?.id == reply.id,
+            ),
           ),
         ),
-
         UiUtils.addVerticalSpaceL(),
       ],
     );
@@ -263,6 +280,17 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
             ),
           ],
         ),
+        const Spacer(),
+        if (post.isOwnedByCurrentUser)
+          IconButton(
+            icon: const Icon(
+              FontAwesomeIcons.ellipsis,
+              size: AppDimens.dimen16,
+            ),
+            onPressed: () {
+              _showPostOptions(context, post);
+            },
+          ),
       ],
     );
   }
@@ -316,7 +344,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
     final isLiked = post.isLikedByCurrentUser;
 
     return InkWell(
-      onTap: () => _postInfoViewModel.likePost(post.id),
+      onTap: () => _viewModel.likePost(post.id),
       borderRadius: BorderRadius.circular(AppDimens.dimen4),
       child: Row(
         children: [
@@ -374,6 +402,45 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
           ),
         ),
       ],
+    );
+  }
+
+  void _showPostOptions(BuildContext context, Post post) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              tileColor: AppColors.surface,
+              leading: const Icon(
+                FontAwesomeIcons.pen,
+                size: AppDimens.dimen16,
+              ),
+              title: Text(AppStrings.editPost, style: AppTextStyles.bodySmall),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              tileColor: AppColors.surface,
+              leading: const Icon(
+                FontAwesomeIcons.trash,
+                size: AppDimens.dimen16,
+                color: AppColors.error,
+              ),
+              title: Text(
+                AppStrings.deletePost,
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
