@@ -237,6 +237,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
               ),
             ),
           ),
+        UiUtils.addVerticalSpaceS(),
         ...replies.map(
           (reply) => Padding(
             padding: const EdgeInsets.only(left: AppDimens.dimen40),
