@@ -4,7 +4,7 @@ import 'package:pump/features/posts/domain/usecases/like_post_usecase.dart';
 import 'package:pump/features/posts/presentation/providers/main_feed_state.dart';
 
 import '../../../../core/utilities/logger_utility.dart';
-import '../../domain/helpers/post_like_helpers.dart';
+import '../../domain/helpers/post_comment_helper.dart';
 
 class MainFeedViewModel extends BaseViewModel<MainFeedState> {
   final GetPostsUseCase _getPostsUseCase;
@@ -21,14 +21,12 @@ class MainFeedViewModel extends BaseViewModel<MainFeedState> {
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
-  void incrementCommentCount(String postId) {
+  void incrementPostCommentsCount(String postId) {
     state = state.copyWith(
-      posts: state.posts.map((post) {
-        if (post.id == postId) {
-          return post.copyWith(commentsCount: post.commentsCount + 1);
-        }
-        return post;
-      }).toList(),
+      posts: PostCommentHelper.incrementPostCommentsCountInList(
+        state.posts,
+        postId,
+      ),
     );
   }
 
@@ -79,12 +77,11 @@ class MainFeedViewModel extends BaseViewModel<MainFeedState> {
 
     final originalPosts = List.of(state.posts); // backup
     final currentPost = state.posts[postIndex];
-    final wasLiked = currentPost.isLikedByCurrentUser;
 
     // Optimistic UI update
-    final updatedPosts = wasLiked
-        ? PostLikeHelpers.applyLocalUnlikeToList(state.posts, postId)
-        : PostLikeHelpers.applyLocalLikeToList(state.posts, postId);
+    final updatedPosts = currentPost.isLikedByCurrentUser
+        ? PostCommentHelper.applyLocalUnlikeToPostInList(state.posts, postId)
+        : PostCommentHelper.applyLocalLikeToPostInList(state.posts, postId);
 
     state = state.copyWith(posts: updatedPosts);
 
@@ -94,7 +91,7 @@ class MainFeedViewModel extends BaseViewModel<MainFeedState> {
       if (!result.isSuccess || result.data == null) {
         // rollback correctly
         state = state.copyWith(posts: originalPosts);
-        return emitError(result.error?.message ?? "Like post failed");
+        return emitError(result.error!.message);
       }
 
       final updatedPost = result.data!;

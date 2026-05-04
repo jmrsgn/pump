@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pump/core/constants/error/validation_error_constants.dart';
+import 'package:pump/core/data/dto/response/paged_response.dart';
 import 'package:pump/core/domain/usecases/get_authenticated_user_usecase.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/features/posts/domain/entities/post.dart';
+import 'package:pump/features/posts/domain/helpers/post_comment_helper.dart';
 import 'package:pump/features/posts/domain/usecases/create_comment_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/create_reply_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_comments_usecase.dart';
@@ -10,6 +12,9 @@ import 'package:pump/features/posts/domain/usecases/get_replies_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_post_usecase.dart';
 import 'package:pump/features/posts/presentation/providers/post_info_state.dart';
 
+import '../../../../core/constants/error/auth_error_constants.dart';
+import '../../../../core/data/dto/response/result.dart';
+import '../../../../core/errors/app_error.dart';
 import '../../../../core/utilities/logger_utility.dart';
 import '../../domain/entities/comment.dart';
 import '../providers/post_providers.dart';
@@ -38,23 +43,32 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
   }
 
-  void _setLoading(bool value) {
-    state = state.copyWith(isLoading: value);
-  }
-
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
   void setPost(Post post) {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [setPost]");
     state = state.copyWith(post: post);
   }
 
   void setCommentReplyingTo(Comment comment) {
+    LoggerUtility.d(
+      runtimeType.toString(),
+      "Execute method: [setCommentReplyingTo]",
+    );
     state = state.copyWith(commentReplyingTo: comment);
   }
 
   void clearCommentReplyingTo() {
+    LoggerUtility.d(
+      runtimeType.toString(),
+      "Execute method: [clearCommentReplyingTo]",
+    );
     state = state.copyWith(commentReplyingTo: null);
   }
 
   void resetComments() {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [resetComments]");
     state = state.copyWith(
       comments: [],
       currentPage: 0,
@@ -64,78 +78,78 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
   }
 
   bool isReplyingTo(String commentId) {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [isReplyingTo]");
     return state.commentReplyingTo?.id == commentId;
   }
 
-  void _addLocalComment(Comment c) {
+  Future<Result<Comment, AppError>> getCreateCommentResult(
+    Comment tempComment,
+    String postId,
+    String comment,
+  ) async {
+    LoggerUtility.d(
+      runtimeType.toString(),
+      "Execute method: [getCreateCommentResult]",
+    );
     state = state.copyWith(
-      comments: [...state.comments, c],
+      comments: PostCommentHelper.addComment(state.comments, tempComment),
       post: state.post.copyWith(commentsCount: state.post.commentsCount + 1),
     );
+    return await _createCommentUseCase.execute(postId, comment);
   }
 
-  void _removeLocalComment(Comment c) {
-    state = state.copyWith(
-      comments: state.comments.where((x) => x != c).toList(),
-      post: state.post.copyWith(commentsCount: state.post.commentsCount - 1),
+  Future<Result<Comment, AppError>> getCreateReplyResult(
+    Comment tempComment,
+    String postId,
+    String parentCommentId,
+    String comment,
+  ) async {
+    LoggerUtility.d(
+      runtimeType.toString(),
+      "Execute method: [getCreateReplyResult]",
     );
-  }
 
-  void _addLocalReply(Comment reply, String parentId) {
-    final updated = state.comments.map((c) {
-      if (c.id == parentId) {
-        return c.copyWith(replies: [...c.replies, reply]);
+    final parentIndex = state.comments.indexWhere(
+      (comment) => comment.id == parentCommentId,
+    );
+
+    if (parentIndex != -1) {
+      LoggerUtility.d(runtimeType.toString(), "parent comment is valid");
+      final parent = state.comments[parentIndex];
+
+      // If parent comment's replies are not loaded, and replies are not empty, get replies of that comment
+      if (!parent.isRepliesLoaded && parent.repliesCount > 0) {
+        await getReplies(postId, parent.id);
       }
-      return c;
-    }).toList();
+    }
 
-    state = state.copyWith(comments: updated);
-  }
-
-  void _removeLocalReply(Comment reply, String parentId) {
-    final updated = state.comments.map((c) {
-      if (c.id == parentId) {
-        return c.copyWith(replies: c.replies.where((r) => r != reply).toList());
-      }
-      return c;
-    }).toList();
-
-    state = state.copyWith(comments: updated);
-  }
-
-  void _replaceLocalReply(Comment temp, Comment actual, String parentId) {
-    final updated = state.comments.map((c) {
-      if (c.id == parentId) {
-        final replies = List<Comment>.from(c.replies);
-        final index = replies.indexWhere((r) => r.createdAt == temp.createdAt);
-        if (index != -1) {
-          replies[index] = actual;
-        }
-        return c.copyWith(replies: replies);
-      }
-      return c;
-    }).toList();
-
-    state = state.copyWith(comments: updated);
-  }
-
-  void _applyLocalLike() {
     state = state.copyWith(
-      post: state.post.copyWith(
-        likesCount: state.post.likesCount + 1,
-        isLikedByCurrentUser: true,
+      comments: PostCommentHelper.addReply(
+        state.comments,
+        parentCommentId,
+        tempComment,
       ),
     );
+
+    return await _createReplyUseCase.execute(postId, parentCommentId, comment);
   }
 
-  void _applyLocalUnlike() {
-    state = state.copyWith(
-      post: state.post.copyWith(
-        likesCount: state.post.likesCount - 1,
-        isLikedByCurrentUser: false,
-      ),
-    );
+  Future<Result<PagedResponse<Comment>, AppError>> _executePagedFetch({
+    required Future<Result<PagedResponse<Comment>, AppError>> Function()
+    request,
+  }) async {
+    final result = await request();
+
+    if (!result.isSuccess || result.data == null) {
+      emitError(result.error!.message);
+    }
+
+    return result;
   }
+
+  // ---------------------------------------------------------------------------
+  // Core methods
+  // ---------------------------------------------------------------------------
 
   // createComment -------------------------------------------------------------
   Future<void> createComment(String postId, String comment) async {
@@ -144,25 +158,28 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       "Execute method: [createComment] comment: [$comment]",
     );
 
+    // Prevent double taps
     if (state.isLoading) return;
 
     final trimmedComment = comment.trim();
+    LoggerUtility.d(runtimeType.toString(), "trimmedComment: $trimmedComment");
     if (trimmedComment.isEmpty) {
       return emitError(ValidationErrorConstants.aCommentIsRequired);
     }
 
-    _setLoading(true);
-
+    setLoading(true);
     Comment? tempComment;
 
     try {
       final userResult = await _getAuthenticatedUserUseCase.execute();
       if (!userResult.isSuccess || userResult.data?.user == null) {
-        return emitUnexpectedError();
+        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
+        emitError(AuthErrorConstants.userIsNotAuthenticated);
+        return;
       }
 
       final currentUser = userResult.data!.user;
-      final replyingTo = state.commentReplyingTo;
+      final commentReplyingTo = state.commentReplyingTo;
 
       tempComment = Comment(
         id: '',
@@ -174,68 +191,81 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         postId: postId,
-        parentCommentId: replyingTo?.id,
+        // can be null
+        parentCommentId: commentReplyingTo?.id,
         isLikedByCurrentUser: false,
       );
 
-      if (replyingTo != null) {
-        final parentIndex = state.comments.indexWhere(
-          (c) => c.id == replyingTo.id,
-        );
+      LoggerUtility.d(runtimeType.toString(), "tempComment created");
 
-        if (parentIndex != -1) {
-          final parent = state.comments[parentIndex];
-
-          if (!parent.isRepliesLoaded && parent.repliesCount > 0) {
-            await getReplies(postId, parent.id);
-          }
-        }
-
-        _addLocalReply(tempComment, replyingTo.id);
-      } else {
-        _addLocalComment(tempComment);
-      }
-
-      final result = replyingTo != null
-          ? await _createReplyUseCase.execute(
+      final result = commentReplyingTo == null
+          ? await getCreateCommentResult(tempComment, postId, trimmedComment)
+          : await getCreateReplyResult(
+              tempComment,
               postId,
-              replyingTo.id,
+              commentReplyingTo.id,
               trimmedComment,
-            )
-          : await _createCommentUseCase.execute(postId, trimmedComment);
+            );
 
       if (!result.isSuccess || result.data == null) {
-        if (replyingTo != null) {
-          _removeLocalReply(tempComment, replyingTo.id);
+        if (commentReplyingTo == null) {
+          state = state.copyWith(
+            comments: PostCommentHelper.removeComment(
+              state.comments,
+              tempComment,
+            ),
+            post: state.post.copyWith(
+              commentsCount: state.post.commentsCount - 1,
+            ),
+          );
         } else {
-          _removeLocalComment(tempComment);
+          state = state.copyWith(
+            comments: PostCommentHelper.removeReply(
+              state.comments,
+              commentReplyingTo.id,
+              tempComment,
+            ),
+          );
         }
-        return emitError(result.error?.message ?? "Create failed");
+        return emitError(result.error!.message);
       }
 
-      final created = result.data!;
+      final createdComment = result.data!;
+      LoggerUtility.d(runtimeType.toString(), "createdComment: ${result.data}");
 
-      if (replyingTo == null) {
+      // Update comments count of the post in main feed screen
+      if (commentReplyingTo == null) {
         ref
             .read(mainFeedViewModelProvider.notifier)
-            .incrementCommentCount(postId);
-      }
+            .incrementPostCommentsCount(postId);
 
-      if (replyingTo != null) {
-        _replaceLocalReply(tempComment, created, replyingTo.id);
-      } else {
-        final updated = List<Comment>.from(state.comments);
-        final index = updated.indexWhere(
-          (c) => c.createdAt == tempComment?.createdAt,
+        final updatedComments = List<Comment>.from(state.comments);
+        final createdCommentIndex = updatedComments.indexWhere(
+          (comment) => comment.createdAt == tempComment?.createdAt,
         );
-        if (index != -1) {
-          updated[index] = created;
+        LoggerUtility.d(
+          runtimeType.toString(),
+          "created comment index: [$createdCommentIndex]",
+        );
+        if (createdCommentIndex != -1) {
+          // Update local comment from updated comments with server truth
+          updatedComments[createdCommentIndex] = createdComment;
         }
-        state = state.copyWith(comments: updated);
+        state = state.copyWith(comments: updatedComments);
+      } else {
+        state = state.copyWith(
+          comments: PostCommentHelper.replaceReply(
+            state.comments,
+            commentReplyingTo.id,
+            tempComment,
+            createdComment,
+          ),
+        );
       }
 
+      // Update state
       state = state.copyWith(
-        createdComment: created,
+        createdComment: createdComment,
         commentReplyingTo: null,
         errorMessage: null,
         isLoading: false,
@@ -243,51 +273,29 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "createComment", e, stack);
 
-      final replyingTo = state.commentReplyingTo;
+      final commentReplyingTo = state.commentReplyingTo;
 
       if (tempComment != null) {
-        if (replyingTo != null) {
-          _removeLocalReply(tempComment, replyingTo.id);
+        if (commentReplyingTo == null) {
+          state = state.copyWith(
+            comments: PostCommentHelper.removeComment(
+              state.comments,
+              tempComment,
+            ),
+            post: state.post.copyWith(
+              commentsCount: state.post.commentsCount - 1,
+            ),
+          );
         } else {
-          _removeLocalComment(tempComment);
+          state = state.copyWith(
+            comments: PostCommentHelper.removeReply(
+              state.comments,
+              commentReplyingTo.id,
+              tempComment,
+            ),
+          );
         }
       }
-
-      emitUnexpectedError();
-    }
-  }
-
-  // getComments ---------------------------------------------------------------
-  Future<void> getComments(String postId, {bool isLoadMore = false}) async {
-    LoggerUtility.d(runtimeType.toString(), "Execute method: [getComments]");
-
-    if (state.isLoading) return;
-
-    _setLoading(true);
-
-    try {
-      final nextPage = isLoadMore ? state.currentPage + 1 : 0;
-
-      final result = await _getCommentsUseCase.execute(postId, nextPage);
-
-      if (!result.isSuccess || result.data == null) {
-        _setLoading(false);
-        return emitError(result.error!.message);
-      }
-
-      final paged = result.data!;
-
-      state = state.copyWith(
-        isLoading: false,
-        currentPage: paged.page,
-        hasNext: (paged.page + 1) * paged.size < paged.totalElements,
-        comments: isLoadMore
-            ? [...state.comments, ...paged.content]
-            : paged.content,
-        errorMessage: null,
-      );
-    } catch (e, stack) {
-      LoggerUtility.e(runtimeType.toString(), "getComments", e, stack);
       emitUnexpectedError();
     }
   }
@@ -299,28 +307,64 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     final originalPost = state.post;
     final wasLiked = originalPost.isLikedByCurrentUser;
 
-    if (wasLiked) {
-      _applyLocalUnlike();
-    } else {
-      _applyLocalLike();
-    }
+    // Optimistic UI update
+    final updatedPost = wasLiked
+        ? PostCommentHelper.applyLocalUnlikeToPost(originalPost)
+        : PostCommentHelper.applyLocalLikeToPost(originalPost);
+
+    state = state.copyWith(post: updatedPost);
 
     try {
       final result = await _likePostUseCase.execute(postId);
 
       if (!result.isSuccess || result.data == null) {
+        // rollback
         state = state.copyWith(post: originalPost);
-        return emitError(result.error?.message ?? "Like post failed");
+        return emitError(result.error!.message);
       }
 
-      state = state.copyWith(
-        post: result.data!,
-        errorMessage: null,
-        isLoading: false,
-      );
+      // Replace with server truth
+      state = state.copyWith(post: result.data!, errorMessage: null);
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "likePost", e, stack);
+
+      // rollback
       state = state.copyWith(post: originalPost);
+      emitUnexpectedError();
+    }
+  }
+
+  // getComments ---------------------------------------------------------------
+  Future<void> getComments(String postId, {bool isLoadMore = false}) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [getComments]");
+
+    // Prevent double taps
+    if (state.isLoading) return;
+
+    setLoading(true);
+
+    try {
+      final nextPage = isLoadMore ? state.currentPage + 1 : 0;
+
+      final result = await _executePagedFetch(
+        request: () => _getCommentsUseCase.execute(postId, nextPage),
+      );
+
+      final pagedResult = result.data!;
+      bool hasNext =
+          (pagedResult.page + 1) * pagedResult.size < pagedResult.totalElements;
+
+      state = state.copyWith(
+        isLoading: false,
+        currentPage: pagedResult.page,
+        hasNext: hasNext,
+        comments: isLoadMore
+            ? [...state.comments, ...pagedResult.content]
+            : pagedResult.content,
+        errorMessage: null,
+      );
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "getComments", e, stack);
       emitUnexpectedError();
     }
   }
@@ -333,53 +377,49 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
   }) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [getReplies]");
 
+    // Prevent double taps
     if (state.isLoading) return;
 
-    _setLoading(true);
+    setLoading(true);
 
     try {
-      final index = state.comments.indexWhere((c) => c.id == commentId);
+      final commentIndex = state.comments.indexWhere((c) => c.id == commentId);
 
-      if (index == -1) {
-        _setLoading(false);
+      if (commentIndex == -1) {
+        LoggerUtility.d(
+          runtimeType.toString(),
+          "comment index is invalid, will not proceed with API call",
+        );
         return;
       }
 
-      final target = state.comments[index];
-      final nextPage = isLoadMore ? target.currentRepliesPage + 1 : 0;
+      final targetComment = state.comments[commentIndex];
+      final nextPage = isLoadMore ? targetComment.currentRepliesPage + 1 : 0;
 
-      final result = await _getRepliesUseCase.execute(
-        postId,
-        commentId,
-        nextPage,
+      final result = await _executePagedFetch(
+        request: () => _getRepliesUseCase.execute(postId, commentId, nextPage),
       );
 
-      if (!result.isSuccess || result.data == null) {
-        _setLoading(false);
-        return emitError(result.error!.message);
-      }
+      final pagedResult = result.data!;
+      final existingReplies = targetComment.replies;
 
-      final paged = result.data!;
-      final existing = target.replies;
-
-      final mergedReplies = isLoadMore
-          ? [
-              ...existing,
-              ...paged.content.where(
-                (newReply) => !existing.any((r) => r.id == newReply.id),
-              ),
-            ]
-          : paged.content;
-
-      final updatedComment = target.copyWith(
-        replies: mergedReplies,
-        currentRepliesPage: paged.page,
-        hasMoreReplies: (paged.page + 1) * paged.size < paged.totalElements,
+      // If loading more replies, append only new replies that don't already exist (prevents duplicates)
+      // Otherwise (first load), replace the entire replies list with the fetched content
+      final updatedComment = targetComment.copyWith(
+        replies: PostCommentHelper.mergeReplies(
+          existingReplies: existingReplies,
+          newReplies: pagedResult.content,
+          isLoadMore: isLoadMore,
+        ),
+        currentRepliesPage: pagedResult.page,
+        hasMoreReplies:
+            (pagedResult.page + 1) * pagedResult.size <
+            pagedResult.totalElements,
         isRepliesLoaded: true,
       );
 
       final updatedComments = List<Comment>.from(state.comments);
-      updatedComments[index] = updatedComment;
+      updatedComments[commentIndex] = updatedComment;
 
       state = state.copyWith(
         isLoading: false,
