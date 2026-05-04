@@ -109,6 +109,8 @@ class CommentRepositoryImpl implements CommentRepository {
     String postId,
     int page,
   ) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [getComments]");
+
     try {
       // Get authenticated user
       final userResult = await _userRepositoryImpl.getAuthenticatedUser();
@@ -158,6 +160,8 @@ class CommentRepositoryImpl implements CommentRepository {
     String commentId,
     int page,
   ) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [getReplies]");
+
     try {
       // Get authenticated user
       final userResult = await _userRepositoryImpl.getAuthenticatedUser();
@@ -195,6 +199,48 @@ class CommentRepositoryImpl implements CommentRepository {
       return Result.success(paged);
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "getReplies", e, stack);
+      return Result.failure(
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
+      );
+    }
+  }
+
+  // likeComment ---------------------------------------------------------------
+  @override
+  Future<Result<Comment, AppError>> likeComment(
+    String postId,
+    String commentId,
+  ) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [likeComment]");
+
+    try {
+      // Get authenticated user
+      final userResult = await _userRepositoryImpl.getAuthenticatedUser();
+      if (!userResult.isSuccess || userResult.data == null) {
+        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
+        return Result.failure(
+          AppError(message: AuthErrorConstants.userIsNotAuthenticated),
+        );
+      }
+
+      final likeCommentResult = await _commentService.likeComment(
+        userResult.data!.token,
+        postId,
+        commentId,
+      );
+
+      if (!likeCommentResult.isSuccess || likeCommentResult.data == null) {
+        return Result.failure(
+          AppError(
+            message: likeCommentResult.error?.message ?? "Like comment failed",
+          ),
+        );
+      }
+
+      final response = likeCommentResult.data!;
+      return Result.success(response.toComment());
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "likeComment", e, stack);
       return Result.failure(
         AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );

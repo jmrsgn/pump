@@ -205,4 +205,48 @@ class CommentService {
       );
     }
   }
+
+  // likeComment ---------------------------------------------------------------
+  Future<Result<CommentResponse, ApiErrorResponse>> likeComment(
+    String token,
+    String postId,
+    String commentId,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConstants.getLikeCommentUrl(postId, commentId)),
+        headers: {
+          ...ApiConstants.headerTypeJson,
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final json = response.body.isEmpty ? {} : jsonDecode(response.body);
+
+      if (response.statusCode == HttpStatus.ok ||
+          response.statusCode == HttpStatus.created) {
+        return Result.success(CommentResponse.fromJson(json['data']));
+      }
+
+      final errorJson = json['error'] ?? {};
+      final error = ApiErrorResponse.fromJson(errorJson);
+
+      return Result.failure(
+        ApiErrorResponse(
+          status: error.status,
+          message: error.message,
+          error: error.error,
+        ),
+      );
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "likeComment", e, stack);
+      return Result.failure(
+        ApiErrorResponse(
+          status: HttpStatus.internalServerError,
+          message: SystemErrorConstants.internalServerError,
+          error: SystemErrorConstants.anUnexpectedErrorOccurred,
+        ),
+      );
+    }
+  }
 }

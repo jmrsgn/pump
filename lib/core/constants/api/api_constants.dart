@@ -30,4 +30,7 @@ class ApiConstants {
 
   static String getCommentRepliesUrl(String postId, String commentId) =>
       "${getCommentsUrl(postId)}/$commentId/replies";
+
+  static String getLikeCommentUrl(String postId, String commentId) =>
+      "$postUrl/$postId/comment/$commentId/like";
 }

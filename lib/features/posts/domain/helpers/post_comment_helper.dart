@@ -73,24 +73,89 @@ class PostCommentHelper {
     return post.copyWith(commentsCount: post.commentsCount + 1);
   }
 
+  /// Replace post in list of posts
+  static List<Post> replacePostInList(List<Post> posts, Post post) {
+    return posts.map((p) {
+      if (p.id == post.id) {
+        return post;
+      }
+      return p;
+    }).toList();
+  }
+
   // ---------------------------------------------------------------------------
   // Comment helpers
   // ---------------------------------------------------------------------------
+  /// Apply local like to a specific comment in the list using commentId
+  static List<Comment> applyLocalLikeToCommentInList(
+    List<Comment> comments,
+    String commentId,
+  ) {
+    return comments.map((c) {
+      if (c.id == commentId) {
+        return c.copyWith(
+          likesCount: c.likesCount + 1,
+          isLikedByCurrentUser: true,
+        );
+      }
+      return c;
+    }).toList();
+  }
+
+  /// Apply local unlike to a specific comment in the list using commentId
+  static List<Comment> applyLocalUnlikeToCommentInList(
+    List<Comment> comments,
+    String commentId,
+  ) {
+    return comments.map((c) {
+      if (c.id == commentId) {
+        return c.copyWith(
+          likesCount: c.likesCount > 0 ? c.likesCount - 1 : 0,
+          isLikedByCurrentUser: false,
+        );
+      }
+      return c;
+    }).toList();
+  }
+
   /// Add comment to existing list of comments
-  static List<Comment> addComment(List<Comment> comments, Comment newComment) {
+  static List<Comment> addCommentInList(
+    List<Comment> comments,
+    Comment newComment,
+  ) {
     return [...comments, newComment];
   }
 
   /// Remove comment from existing list of comments
-  static List<Comment> removeComment(
+  static List<Comment> removeCommentInList(
     List<Comment> comments,
     Comment targetComment,
   ) {
     return comments.where((c) => c != targetComment).toList();
   }
 
+  /// Replace comment from existing list of comments
+  static List<Comment> replaceCommentInList(
+    List<Comment> comments,
+    Comment updatedComment,
+  ) {
+    return comments.map((c) {
+      if (c.id == updatedComment.id) {
+        return updatedComment;
+      }
+
+      if (c.replies.isNotEmpty) {
+        return c.copyWith(
+          replies: replaceCommentInList(c.replies, updatedComment),
+        );
+      }
+
+      return c;
+    }).toList();
+  }
+
   /// Add reply to existing list of replies
-  static List<Comment> addReply(
+  static List<Comment> addReplyInList(
     List<Comment> comments,
     String parentCommentId,
     Comment reply,
@@ -104,7 +169,7 @@ class PostCommentHelper {
   }
 
   /// Remove reply from existing list of replies
-  static List<Comment> removeReply(
+  static List<Comment> removeReplyInList(
     List<Comment> comments,
     String parentCommentId,
     Comment reply,
@@ -118,7 +183,7 @@ class PostCommentHelper {
   }
 
   /// Replace temporary reply with actual reply from server
-  static List<Comment> replaceReply(
+  static List<Comment> replaceReplyInList(
     List<Comment> comments,
     String parentId,
     Comment tempReply,

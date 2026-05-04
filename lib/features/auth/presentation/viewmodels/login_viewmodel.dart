@@ -16,6 +16,10 @@ class LoginViewModel extends BaseViewModel<UiState> {
     return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
   }
 
+  // ---------------------------------------------------------------------------
+  // Core methods
+  // ---------------------------------------------------------------------------
+
   // login ---------------------------------------------------------------------
   Future<void> login(String email, String password) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [login]");

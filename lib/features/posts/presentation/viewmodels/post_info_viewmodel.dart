@@ -9,6 +9,7 @@ import 'package:pump/features/posts/domain/usecases/create_comment_usecase.dart'
 import 'package:pump/features/posts/domain/usecases/create_reply_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_comments_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_replies_usecase.dart';
+import 'package:pump/features/posts/domain/usecases/like_comment_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_post_usecase.dart';
 import 'package:pump/features/posts/presentation/providers/post_info_state.dart';
 
@@ -27,6 +28,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
   final GetCommentsUseCase _getCommentsUseCase;
   final GetRepliesUseCase _getRepliesUseCase;
   final LikePostUseCase _likePostUseCase;
+  final LikeCommentUseCase _likeCommentUseCase;
 
   PostInfoViewModel(
     this.ref,
@@ -36,6 +38,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     this._getCommentsUseCase,
     this._getRepliesUseCase,
     this._likePostUseCase,
+    this._likeCommentUseCase,
   ) : super(PostInfoState.initial());
 
   @override
@@ -92,7 +95,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       "Execute method: [getCreateCommentResult]",
     );
     state = state.copyWith(
-      comments: PostCommentHelper.addComment(state.comments, tempComment),
+      comments: PostCommentHelper.addCommentInList(state.comments, tempComment),
       post: state.post.copyWith(commentsCount: state.post.commentsCount + 1),
     );
     return await _createCommentUseCase.execute(postId, comment);
@@ -124,7 +127,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     }
 
     state = state.copyWith(
-      comments: PostCommentHelper.addReply(
+      comments: PostCommentHelper.addReplyInList(
         state.comments,
         parentCommentId,
         tempComment,
@@ -194,6 +197,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
         // can be null
         parentCommentId: commentReplyingTo?.id,
         isLikedByCurrentUser: false,
+        isOwnedByCurrentUser: true,
       );
 
       LoggerUtility.d(runtimeType.toString(), "tempComment created");
@@ -210,7 +214,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       if (!result.isSuccess || result.data == null) {
         if (commentReplyingTo == null) {
           state = state.copyWith(
-            comments: PostCommentHelper.removeComment(
+            comments: PostCommentHelper.removeCommentInList(
               state.comments,
               tempComment,
             ),
@@ -220,7 +224,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
           );
         } else {
           state = state.copyWith(
-            comments: PostCommentHelper.removeReply(
+            comments: PostCommentHelper.removeReplyInList(
               state.comments,
               commentReplyingTo.id,
               tempComment,
@@ -254,7 +258,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
         state = state.copyWith(comments: updatedComments);
       } else {
         state = state.copyWith(
-          comments: PostCommentHelper.replaceReply(
+          comments: PostCommentHelper.replaceReplyInList(
             state.comments,
             commentReplyingTo.id,
             tempComment,
@@ -278,7 +282,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       if (tempComment != null) {
         if (commentReplyingTo == null) {
           state = state.copyWith(
-            comments: PostCommentHelper.removeComment(
+            comments: PostCommentHelper.removeCommentInList(
               state.comments,
               tempComment,
             ),
@@ -288,7 +292,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
           );
         } else {
           state = state.copyWith(
-            comments: PostCommentHelper.removeReply(
+            comments: PostCommentHelper.removeReplyInList(
               state.comments,
               commentReplyingTo.id,
               tempComment,
@@ -305,10 +309,9 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [likePost]");
 
     final originalPost = state.post;
-    final wasLiked = originalPost.isLikedByCurrentUser;
 
     // Optimistic UI update
-    final updatedPost = wasLiked
+    final updatedPost = originalPost.isLikedByCurrentUser
         ? PostCommentHelper.applyLocalUnlikeToPost(originalPost)
         : PostCommentHelper.applyLocalLikeToPost(originalPost);
 
@@ -323,13 +326,77 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
         return emitError(result.error!.message);
       }
 
-      // Replace with server truth
-      state = state.copyWith(post: result.data!, errorMessage: null);
+      final updatedPostFromServer = result.data!;
+      state = state.copyWith(post: updatedPostFromServer, errorMessage: null);
+
+      // Update post likes count in main feed screen
+      ref
+          .read(mainFeedViewModelProvider.notifier)
+          .updatePostInList(updatedPostFromServer);
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "likePost", e, stack);
 
       // rollback
       state = state.copyWith(post: originalPost);
+      emitUnexpectedError();
+    }
+  }
+
+  // likeComment ------------------------------------------------------------------
+  Future<void> likeComment(String commentId) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [likeComment]");
+
+    final commentIndex = state.comments.indexWhere((c) => c.id == commentId);
+
+    if (commentIndex == -1) {
+      LoggerUtility.d(
+        runtimeType.toString(),
+        "Comment with id $commentId not found",
+      );
+      return;
+    }
+
+    final originalComments = List<Comment>.from(state.comments);
+    final targetComment = state.comments[commentIndex];
+
+    // Optimistic UI update
+    final updatedComments = targetComment.isLikedByCurrentUser
+        ? PostCommentHelper.applyLocalUnlikeToCommentInList(
+            originalComments,
+            targetComment.id,
+          )
+        : PostCommentHelper.applyLocalLikeToCommentInList(
+            originalComments,
+            targetComment.id,
+          );
+
+    state = state.copyWith(comments: updatedComments);
+
+    try {
+      final result = await _likeCommentUseCase.execute(
+        state.post.id,
+        commentId,
+      );
+
+      if (!result.isSuccess || result.data == null) {
+        // rollback
+        state = state.copyWith(comments: originalComments);
+        return emitError(result.error!.message);
+      }
+
+      final updatedComment = result.data!;
+
+      final newComments = PostCommentHelper.replaceCommentInList(
+        state.comments,
+        updatedComment,
+      );
+
+      state = state.copyWith(comments: newComments, errorMessage: null);
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "likeComment", e, stack);
+
+      // rollback
+      state = state.copyWith(comments: originalComments);
       emitUnexpectedError();
     }
   }

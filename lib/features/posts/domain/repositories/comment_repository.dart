@@ -26,4 +26,9 @@ abstract class CommentRepository {
     String commentId,
     int page,
   );
+
+  Future<Result<Comment, AppError>> likeComment(
+    String postId,
+    String commentId,
+  );
 }

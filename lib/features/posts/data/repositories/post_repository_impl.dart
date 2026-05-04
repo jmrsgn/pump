@@ -63,6 +63,8 @@ class PostRepositoryImpl implements PostRepository {
   // getPosts ------------------------------------------------------------------
   @override
   Future<Result<PagedResponse<Post>, AppError>> getPosts(int page) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [getPosts]");
+
     try {
       // Get authenticated user
       final userResult = await _userRepositoryImpl.getAuthenticatedUser();

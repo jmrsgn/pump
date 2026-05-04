@@ -16,6 +16,7 @@ class Comment {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isLikedByCurrentUser;
+  final bool isOwnedByCurrentUser;
 
   const Comment({
     required this.id,
@@ -33,6 +34,7 @@ class Comment {
     required this.createdAt,
     required this.updatedAt,
     required this.isLikedByCurrentUser,
+    required this.isOwnedByCurrentUser,
   });
 
   Comment copyWith({
@@ -51,6 +53,7 @@ class Comment {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isLikedByCurrentUser,
+    bool? isOwnedByCurrentUser,
   }) {
     return Comment(
       id: id ?? this.id,
@@ -69,6 +72,7 @@ class Comment {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isLikedByCurrentUser: isLikedByCurrentUser ?? this.isLikedByCurrentUser,
+      isOwnedByCurrentUser: isOwnedByCurrentUser ?? this.isOwnedByCurrentUser,
     );
   }
 

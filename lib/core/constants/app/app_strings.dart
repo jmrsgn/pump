@@ -29,7 +29,11 @@ class AppStrings {
   // Post related
   static const editPost = "Edit post";
   static const deletePost = "Delete post";
-  static const createPostTitle = "Create Post";
+  static const createPost = "Create post";
+
+  // Comment related
+  static const editComment = "Edit comment";
+  static const deleteComment = "Delete comment";
 
   // Login Page
   static const login = 'Login';
@@ -54,9 +58,6 @@ class AppStrings {
   // Main Feed Page
   static const comment = "Comment";
   static const share = "Share";
-
-  // Create Post Page
-  static const createPost = "Create Post";
 
   // About Page
   static const about = "About";

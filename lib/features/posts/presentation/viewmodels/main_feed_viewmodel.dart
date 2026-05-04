@@ -4,6 +4,7 @@ import 'package:pump/features/posts/domain/usecases/like_post_usecase.dart';
 import 'package:pump/features/posts/presentation/providers/main_feed_state.dart';
 
 import '../../../../core/utilities/logger_utility.dart';
+import '../../domain/entities/post.dart';
 import '../../domain/helpers/post_comment_helper.dart';
 
 class MainFeedViewModel extends BaseViewModel<MainFeedState> {
@@ -29,6 +30,16 @@ class MainFeedViewModel extends BaseViewModel<MainFeedState> {
       ),
     );
   }
+
+  void updatePostInList(Post post) {
+    state = state.copyWith(
+      posts: PostCommentHelper.replacePostInList(state.posts, post),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Core methods
+  // ---------------------------------------------------------------------------
 
   // getPosts ------------------------------------------------------------------
   Future<void> getPosts({bool isLoadMore = false}) async {

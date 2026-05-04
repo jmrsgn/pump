@@ -94,8 +94,9 @@ class AppRoutes {
           if (user == null) {
             return MaterialPageRoute(builder: (_) => InvalidRouteScreen());
           }
+          final post = extractPostArg(settings);
           return MaterialPageRoute(
-            builder: (_) => CreatePostScreen(currentUser: user),
+            builder: (_) => CreatePostScreen(currentUser: user, post: post),
           );
 
         case postInfo:
@@ -129,13 +130,8 @@ class AppRoutes {
         default:
           return MaterialPageRoute(builder: (_) => InvalidRouteScreen());
       }
-    } catch (e, stackTrace) {
-      LoggerUtility.e(
-        "AppRoutes",
-        AppStrings.routeError,
-        e.toString(),
-        stackTrace,
-      );
+    } catch (e, stack) {
+      LoggerUtility.e("AppRoutes", AppStrings.routeError, e.toString(), stack);
       return MaterialPageRoute(builder: (_) => InvalidRouteScreen());
     }
   }

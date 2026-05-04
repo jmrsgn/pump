@@ -12,6 +12,7 @@ class CommentResponse {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isLikedByCurrentUser;
+  final bool isOwnedByCurrentUser;
 
   const CommentResponse({
     required this.id,
@@ -25,6 +26,7 @@ class CommentResponse {
     required this.createdAt,
     required this.updatedAt,
     required this.isLikedByCurrentUser,
+    required this.isOwnedByCurrentUser,
   });
 
   factory CommentResponse.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,7 @@ class CommentResponse {
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
       isLikedByCurrentUser: json['isLikedByCurrentUser'] ?? false,
+      isOwnedByCurrentUser: json['isOwnedByCurrentUser'] ?? false,
     );
   }
 
@@ -56,6 +59,7 @@ class CommentResponse {
       createdAt: createdAt,
       updatedAt: updatedAt,
       isLikedByCurrentUser: isLikedByCurrentUser,
+      isOwnedByCurrentUser: isOwnedByCurrentUser,
     );
   }
 }

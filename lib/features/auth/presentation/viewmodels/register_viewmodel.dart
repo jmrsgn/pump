@@ -16,6 +16,10 @@ class RegisterViewModel extends BaseViewModel<UiState> {
     return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
   }
 
+  // ---------------------------------------------------------------------------
+  // Core methods
+  // ---------------------------------------------------------------------------
+
   // register ------------------------------------------------------------------
   Future<void> register(
     String firstName,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pump/core/constants/app/ui_constants.dart';
 import 'package:pump/core/enums/app_menu_item.dart';
+import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 
 import '../../constants/app/app_dimens.dart';
@@ -161,9 +162,13 @@ class AppDrawer extends StatelessWidget {
       selected: isSelected,
       selectedTileColor: AppColors.drawerSelected,
       onTap: () {
-        Navigator.pop(context);
+        NavigationUtils.pop(context);
         if (selectedRoute != item.route) {
-          Navigator.pushNamed(context, item.route, arguments: currentUser);
+          NavigationUtils.navigateTo(
+            context,
+            item.route,
+            arguments: currentUser,
+          );
         }
       },
     );

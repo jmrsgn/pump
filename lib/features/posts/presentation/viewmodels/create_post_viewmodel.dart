@@ -48,4 +48,13 @@ class CreatePostViewModel extends BaseViewModel<UiState> {
       emitUnexpectedError();
     }
   }
+
+  // updatePost ---------------------------------------------------------------
+  Future<void> updatePost(
+    String postId,
+    String title,
+    String description,
+  ) async {
+    // TODO: continue
+  }
 }

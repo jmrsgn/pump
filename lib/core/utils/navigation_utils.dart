@@ -30,4 +30,11 @@ class NavigationUtils {
   static void navigateAndRemoveAll(BuildContext context, String routeName) {
     Navigator.pushNamedAndRemoveUntil(context, routeName, (route) => false);
   }
+
+  // Safely pops the current route and optionally returns a result
+  static void pop<T extends Object?>(BuildContext context, [T? result]) {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop(result);
+    }
+  }
 }

@@ -6,6 +6,7 @@ import 'package:pump/core/utils/ui_utils.dart';
 
 import '../../../../core/constants/app/app_strings.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
+import '../../../../core/utils/navigation_utils.dart';
 
 class ProgressAndAnalyticsScreen extends StatelessWidget {
   const ProgressAndAnalyticsScreen({super.key});
@@ -192,7 +193,7 @@ class ProgressAndAnalyticsScreen extends StatelessWidget {
                       UiUtils.addHorizontalSpaceL(),
                       // Close Button
                       TextButton.icon(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => NavigationUtils.pop(context),
                         icon: const Icon(Icons.close, color: AppColors.primary),
                         label: Text(
                           AppStrings.close,

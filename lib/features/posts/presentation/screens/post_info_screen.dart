@@ -5,6 +5,8 @@ import 'package:pump/core/constants/app/app_dimens.dart';
 import 'package:pump/core/constants/app/ui_constants.dart';
 import 'package:pump/core/presentation/theme/app_colors.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
+import 'package:pump/core/routes.dart';
+import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/time_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/posts/domain/entities/post.dart';
@@ -33,7 +35,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
 
-  PostInfoViewModel get _viewModel =>
+  PostInfoViewModel get _postInfoViewModel =>
       ref.read(postInfoViewModelProvider.notifier);
 
   @override
@@ -42,9 +44,9 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
     startMinuteRebuild();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.resetComments();
-      _viewModel.setPost(widget.post);
-      _viewModel.getComments(widget.post.id);
+      _postInfoViewModel.resetComments();
+      _postInfoViewModel.setPost(widget.post);
+      _postInfoViewModel.getComments(widget.post.id);
     });
 
     _scrollController.addListener(() {
@@ -52,7 +54,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
         if (state.hasNext && !state.isLoading) {
-          _viewModel.getComments(widget.post.id, isLoadMore: true);
+          _postInfoViewModel.getComments(widget.post.id, isLoadMore: true);
         }
       }
     });
@@ -139,11 +141,13 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
                         comment: comment,
                         isReplying: state.commentReplyingTo?.id == comment.id,
                         onReply: (selectedComment) {
-                          _viewModel.setCommentReplyingTo(selectedComment);
+                          _postInfoViewModel.setCommentReplyingTo(
+                            selectedComment,
+                          );
 
                           if (!comment.isRepliesLoaded &&
                               comment.repliesCount > 0) {
-                            _viewModel.getReplies(post.id, comment.id);
+                            _postInfoViewModel.getReplies(post.id, comment.id);
                           }
 
                           _focusNode.requestFocus();
@@ -158,6 +162,8 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
                                 ),
                               );
                         },
+                        onLikeTap: () =>
+                            _postInfoViewModel.likeComment(comment.id),
                       ),
                       if (comment.repliesCount > 0 ||
                           comment.replies.isNotEmpty)
@@ -176,7 +182,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
               controller: _commentController,
               focusNode: _focusNode,
               onSend: () {
-                _viewModel.createComment(
+                _postInfoViewModel.createComment(
                   post.id,
                   _commentController.text.trim(),
                 );
@@ -221,7 +227,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
                       final isLoadMore =
                           comment.isRepliesLoaded && comment.hasMoreReplies;
 
-                      _viewModel.getReplies(
+                      _postInfoViewModel.getReplies(
                         postId,
                         comment.id,
                         isLoadMore: isLoadMore,
@@ -345,7 +351,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
     final isLiked = post.isLikedByCurrentUser;
 
     return InkWell(
-      onTap: () => _viewModel.likePost(post.id),
+      onTap: () => _postInfoViewModel.likePost(post.id),
       borderRadius: BorderRadius.circular(AppDimens.dimen4),
       child: Row(
         children: [
@@ -421,7 +427,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
               ),
               title: Text(AppStrings.editPost, style: AppTextStyles.bodySmall),
               onTap: () {
-                Navigator.pop(context);
+                _onEditPost(post);
               },
             ),
             ListTile(
@@ -436,7 +442,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
                 style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
               ),
               onTap: () {
-                Navigator.pop(context);
+                _onDeletePost();
               },
             ),
           ],
@@ -444,4 +450,10 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
       },
     );
   }
+
+  void _onEditPost(Post post) {
+    NavigationUtils.navigateTo(context, AppRoutes.createPost, arguments: post);
+  }
+
+  void _onDeletePost() {}
 }

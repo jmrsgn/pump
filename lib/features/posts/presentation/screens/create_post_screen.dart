@@ -15,11 +15,13 @@ import '../../../../core/presentation/widgets/custom_scaffold.dart';
 import '../../../../core/routes.dart';
 import '../../../../core/utils/navigation_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
+import '../../domain/entities/post.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
   final User currentUser;
+  final Post? post;
 
-  const CreatePostScreen({super.key, required this.currentUser});
+  const CreatePostScreen({super.key, required this.currentUser, this.post});
 
   @override
   ConsumerState<CreatePostScreen> createState() => _CreatePostScreenState();
@@ -32,10 +34,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   CreatePostViewModel get _createPostViewModel =>
       ref.read(createPostViewModelProvider.notifier);
 
-  void _onSubmitPost() {
-    final title = _titleController.text.trim();
-    final description = _descriptionController.text.trim();
-    _createPostViewModel.createPost(title, description);
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.post != null) {
+      _titleController.text = widget.post!.title;
+      _descriptionController.text = widget.post!.description;
+    }
   }
 
   @override
@@ -87,7 +93,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
     return CustomScaffold(
       isLoading: createPostState.isLoading,
-      appBarTitle: AppStrings.createPostTitle,
+      appBarTitle: widget.post == null
+          ? AppStrings.createPost
+          : AppStrings.editPost,
       appBarActions: [
         IconButton(
           icon: const Icon(
@@ -163,5 +171,16 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         ),
       ),
     );
+  }
+
+  void _onSubmitPost() {
+    final title = _titleController.text.trim();
+    final description = _descriptionController.text.trim();
+
+    if (widget.post == null) {
+      _createPostViewModel.createPost(title, description);
+    } else {
+      _createPostViewModel.updatePost(widget.post!.id, title, description);
+    }
   }
 }
