@@ -18,106 +18,249 @@ class UserProfileScreen extends StatelessWidget {
     return CustomScaffold(
       appBarTitle: AppStrings.profile,
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(AppDimens.paddingScreen),
+        padding: const EdgeInsets.all(AppDimens.paddingScreen),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              alignment: Alignment.center,
-              child: Column(
-                children: [
-                  UiUtils.addVerticalSpaceS(),
-                  currentUser.profileImageUrl == null
-                      ? CircleAvatar(
-                          backgroundColor: AppColors.primary,
-                          radius: AppDimens.radius48,
-                          child: Text(
-                            currentUser.firstName[0],
-                            style: AppTextStyles.heading1.copyWith(
-                              fontSize: AppDimens.textSize48,
-                            ),
-                          ),
-                        )
-                      : CircleAvatar(
-                          backgroundImage: AssetImage(
-                            currentUser.profileImageUrl!,
-                          ),
-                          radius: AppDimens.radius48,
-                        ),
+            _buildProfileHeader(),
 
-                  UiUtils.addVerticalSpaceM(),
-
-                  Text(
-                    "${currentUser.firstName} ${currentUser.lastName}",
-                    style: AppTextStyles.heading2,
-                  ),
-                  Text(currentUser.email, style: AppTextStyles.bodySmall),
-
-                  UiUtils.addVerticalSpaceS(),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.circle,
-                        color: AppColors.success,
-                        size: AppDimens.dimen8,
-                      ),
-                      UiUtils.addHorizontalSpaceXS(),
-                      Text(AppStrings.active, style: AppTextStyles.bodySmall),
-                    ],
-                  ),
-                ],
-              ),
-            ),
             UiUtils.addVerticalSpaceXL(),
-            _buildProfileSettingsTitle(
+
+            _buildStatsSection(),
+
+            UiUtils.addVerticalSpaceXL(),
+
+            _buildSectionTitle("Account"),
+
+            UiUtils.addVerticalSpaceM(),
+
+            _buildProfileTile(
               title: AppStrings.editProfile,
-              leading: Icon(Icons.edit),
+              subtitle: "Update profile information and preferences",
+              leading: Icons.edit_outlined,
             ),
-            UiUtils.addVerticalSpaceXS(),
-            _buildProfileSettingsTitle(
+
+            UiUtils.addVerticalSpaceS(),
+
+            _buildProfileTile(
               title: AppStrings.paymentMethod,
-              leading: Icon(Icons.payment),
+              subtitle: "Manage billing and payment methods",
+              leading: Icons.payment_outlined,
             ),
-            UiUtils.addVerticalSpaceXS(),
-            _buildProfileSettingsTitle(
+
+            UiUtils.addVerticalSpaceXL(),
+
+            _buildSectionTitle("Fitness"),
+
+            UiUtils.addVerticalSpaceM(),
+
+            _buildProfileTile(
               title: AppStrings.clients,
-              leading: Icon(Icons.group),
+              subtitle: "Manage clients and coaching sessions",
+              leading: Icons.groups_outlined,
             ),
-            UiUtils.addVerticalSpaceXS(),
-            _buildProfileSettingsTitle(
+
+            UiUtils.addVerticalSpaceS(),
+
+            _buildProfileTile(
               title: AppStrings.coach,
-              leading: Icon(Icons.person),
+              subtitle: "View coaching profile and settings",
+              leading: Icons.fitness_center_outlined,
             ),
-            UiUtils.addVerticalSpaceXS(),
-            _buildProfileSettingsTitle(
+
+            UiUtils.addVerticalSpaceXL(),
+
+            _buildSectionTitle("Support"),
+
+            UiUtils.addVerticalSpaceM(),
+
+            _buildProfileTile(
               title: AppStrings.help,
-              leading: Icon(Icons.help),
+              subtitle: "Get help and support resources",
+              leading: Icons.help_outline,
             ),
+
+            UiUtils.addVerticalSpaceXXL(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProfileSettingsTitle({
+  Widget _buildProfileHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppDimens.dimen24),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppDimens.radius24),
+      ),
+      child: Column(
+        children: [
+          currentUser.profileImageUrl == ""
+              ? CircleAvatar(
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                  radius: AppDimens.dimen56,
+                  child: Text(
+                    currentUser.firstName[0],
+                    style: AppTextStyles.heading1.copyWith(
+                      fontSize: AppDimens.textSize48,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                )
+              : CircleAvatar(
+                  backgroundImage: AssetImage(currentUser.profileImageUrl),
+                  radius: AppDimens.dimen56,
+                ),
+
+          UiUtils.addVerticalSpaceL(),
+
+          Text(
+            "${currentUser.firstName} ${currentUser.lastName}",
+            style: AppTextStyles.heading2,
+            textAlign: TextAlign.center,
+          ),
+
+          UiUtils.addVerticalSpaceXS(),
+
+          Text(
+            currentUser.email,
+            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+
+          UiUtils.addVerticalSpaceM(),
+
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimens.dimen14,
+              vertical: AppDimens.dimen8,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.circle,
+                  color: AppColors.success,
+                  size: AppDimens.dimen8,
+                ),
+
+                UiUtils.addHorizontalSpaceXS(),
+
+                Text(
+                  AppStrings.active,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.success,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsSection() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(title: "Programs", value: "12"),
+        ),
+
+        UiUtils.addHorizontalSpaceS(),
+
+        Expanded(
+          child: _buildStatCard(title: "Clients", value: "24"),
+        ),
+
+        UiUtils.addHorizontalSpaceS(),
+
+        Expanded(
+          child: _buildStatCard(title: "Progress", value: "92%"),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard({required String title, required String value}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: AppDimens.dimen18),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppDimens.radius16),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: AppTextStyles.heading3.copyWith(color: AppColors.primary),
+          ),
+
+          UiUtils.addVerticalSpaceXS(),
+
+          Text(
+            title,
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(title, style: AppTextStyles.heading3);
+  }
+
+  Widget _buildProfileTile({
     required String title,
-    required Widget leading,
+    required String subtitle,
+    required IconData leading,
   }) {
-    return ListTile(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppDimens.radius8),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppDimens.dimen18),
       ),
-      tileColor: AppColors.surface,
-      leading: leading,
-      trailing: IconButton(
-        onPressed: null,
-        icon: Icon(Icons.keyboard_arrow_right),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppDimens.dimen16,
+          vertical: AppDimens.dimen4,
+        ),
+        leading: Container(
+          padding: const EdgeInsets.all(AppDimens.dimen10),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(AppDimens.dimen12),
+          ),
+          child: Icon(leading, color: AppColors.primary),
+        ),
+        trailing: Icon(
+          Icons.keyboard_arrow_right,
+          color: AppColors.textDisabled,
+        ),
+        title: Text(
+          title,
+          style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: AppDimens.dimen4),
+          child: Text(
+            subtitle,
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
       ),
-      title: Text(title),
     );
   }
 }

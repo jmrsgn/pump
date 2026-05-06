@@ -39,8 +39,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _onLoginPressed() {
-    final email = _emailController.text;
-    final password = _passwordController.text;
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
     _loginViewModel.login(email, password);
   }
 
@@ -71,93 +72,170 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         body: Stack(
           fit: StackFit.expand,
           children: [
+            // Background image
             Image.asset('assets/images/home.png', fit: BoxFit.cover),
-            Container(color: AppColors.overlay),
 
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppDimens.dimen16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppConstants.appName.toUpperCase(),
-                      style: AppTextStyles.heading1.copyWith(
-                        fontSize: AppDimens.dimen32,
-                      ),
-                    ),
-
-                    UiUtils.addVerticalSpaceXL(),
-
-                    _buildForm(),
-
-                    UiUtils.addVerticalSpaceM(),
-
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: SizedBox(
-                        width: AppDimens.dimen120,
-                        child: CustomButton(
-                          onPressed: uiState.isLoading ? null : _onLoginPressed,
-                          label: AppStrings.login,
-                        ),
-                      ),
-                    ),
+            // Dark overlay
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.70),
+                    Colors.black.withValues(alpha: 0.82),
+                    Colors.black.withValues(alpha: 0.92),
                   ],
                 ),
               ),
             ),
+            SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimens.dimen24,
+                vertical: AppDimens.dimen20,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight:
+                      MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).padding.top -
+                      MediaQuery.of(context).padding.bottom -
+                      AppDimens.dimen40,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          UiUtils.addVerticalSpaceXXL(),
 
-            _buildFooter(context),
+                          // Hero
+                          Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(AppDimens.dimen20),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.12,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                AppConstants.appName[0],
+                                style: AppTextStyles.heading1.copyWith(
+                                  fontSize: AppDimens.textSize48,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          UiUtils.addVerticalSpaceXXL(),
+
+                          Text("Welcome Back", style: AppTextStyles.heading1),
+
+                          UiUtils.addVerticalSpaceS(),
+
+                          Text(
+                            "Continue your journey with Pump and stay connected with your fitness community.",
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+
+                          UiUtils.addVerticalSpaceXXL(),
+
+                          // Login section
+                          Text("Login", style: AppTextStyles.heading3),
+
+                          UiUtils.addVerticalSpaceL(),
+
+                          _buildForm(),
+
+                          UiUtils.addVerticalSpaceXL(),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: CustomButton(
+                              onPressed: uiState.isLoading
+                                  ? null
+                                  : _onLoginPressed,
+                              label: AppStrings.login,
+                            ),
+                          ),
+
+                          UiUtils.addVerticalSpaceL(),
+
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              "Forgot password?",
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      Column(
+                        children: [
+                          Center(
+                            child: RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                text: "Don't have an account? ",
+                                style: AppTextStyles.bodySmall,
+                                children: [
+                                  TextSpan(
+                                    text: "Register here",
+                                    style: AppTextStyles.bodySmall.copyWith(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        NavigationUtils.navigateTo(
+                                          context,
+                                          AppRoutes.register,
+                                        );
+                                      },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          UiUtils.addVerticalSpaceL(),
+                          Center(child: UiUtils.addCopyright()),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  // UI Components
   Widget _buildForm() {
-    return Center(
-      child: Column(
-        children: [
-          CustomTextField(hint: AppStrings.email, controller: _emailController),
-          UiUtils.addVerticalSpaceM(),
-          CustomTextField(
-            hint: AppStrings.password,
-            controller: _passwordController,
-            obscureText: true,
-          ),
-        ],
-      ),
-    );
-  }
+    return Column(
+      children: [
+        CustomTextField(hint: AppStrings.email, controller: _emailController),
 
-  Widget _buildFooter(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: AppDimens.dimen32),
-        child: RichText(
-          text: TextSpan(
-            text: "Don't have an account? ",
-            style: AppTextStyles.bodySmall,
-            children: [
-              TextSpan(
-                text: "Register here",
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    NavigationUtils.navigateTo(context, AppRoutes.register);
-                  },
-              ),
-            ],
-          ),
+        UiUtils.addVerticalSpaceM(),
+
+        CustomTextField(
+          hint: AppStrings.password,
+          controller: _passwordController,
+          obscureText: true,
         ),
-      ),
+      ],
     );
   }
 }

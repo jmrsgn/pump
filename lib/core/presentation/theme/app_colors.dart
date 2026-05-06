@@ -24,7 +24,7 @@ class AppColors {
   static const Color success = Color(0xFF19A65C); // Strong, not too neon
   static const Color warning = Color(0xFFE08E1A); // Warmer warning
   static const Color error = Color(0xFFD6453A); // Deeper, strong red
-  static const Color info = Color(0xFF3AA7D9); // Clean blue
+  static const Color info = Color(0xFF4DA3FF); // Clean blue
 
   // Component Colors
   static const Color appBar = background;

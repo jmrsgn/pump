@@ -264,11 +264,14 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
     return Row(
       children: [
         CircleAvatar(
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.primary.withValues(alpha: 0.12),
           radius: AppDimens.dimen16,
           child: Text(
             initial,
-            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+            style: AppTextStyles.body.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
           ),
         ),
         UiUtils.addHorizontalSpaceM(),

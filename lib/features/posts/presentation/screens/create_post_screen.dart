@@ -54,11 +54,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   Widget _buildAvatar(User user) {
     return user.profileImageUrl == ""
         ? CircleAvatar(
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.primary.withValues(alpha: 0.12),
             radius: AppDimens.radius16,
             child: Text(
               user.firstName[0],
-              style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+              style: AppTextStyles.body.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
             ),
           )
         : CircleAvatar(
@@ -109,63 +112,140 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Padding(
-          padding: const EdgeInsets.all(AppDimens.paddingScreen),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimens.dimen20,
+            vertical: AppDimens.dimen16,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // User info
+              // Author section
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _buildAvatar(user),
-                  UiUtils.addHorizontalSpaceS(),
+
+                  UiUtils.addHorizontalSpaceM(),
+
                   Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${user.firstName} ${user.lastName}',
+                          style: AppTextStyles.body.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        UiUtils.addVerticalSpaceXS(),
+
+                        Text(
+                          widget.post == null
+                              ? "Creating a new post"
+                              : "Editing your post",
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimens.dimen10,
+                      vertical: AppDimens.dimen6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                     child: Text(
-                      '${user.firstName} ${user.lastName}',
-                      style: AppTextStyles.body.copyWith(
-                        fontWeight: FontWeight.bold,
+                      "Public",
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
 
-              UiUtils.addVerticalSpaceM(),
+              UiUtils.addVerticalSpaceXL(),
 
-              // Title
+              // Title field
               TextField(
                 controller: _titleController,
                 maxLines: UIConstants.maxLines1,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: "What's on your mind?",
+                  hintStyle: AppTextStyles.heading2.copyWith(
+                    color: AppColors.textDisabled,
+                  ),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: AppDimens.padding8,
-                  ),
+                  contentPadding: EdgeInsets.zero,
                 ),
-                style: AppTextStyles.heading3,
+                style: AppTextStyles.heading2,
               ),
 
-              UiUtils.addVerticalSpaceS(),
+              UiUtils.addVerticalSpaceM(),
 
-              // Description
+              Divider(color: AppColors.primary.withValues(alpha: 0.08)),
+
+              UiUtils.addVerticalSpaceM(),
+
+              // Description field
               Expanded(
                 child: TextField(
                   controller: _descriptionController,
                   maxLines: null,
                   expands: true,
                   textAlignVertical: TextAlignVertical.top,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                    hintText:
+                        "Share your thoughts, progress, ideas, or anything meaningful with the community...",
+                    hintStyle: AppTextStyles.body.copyWith(
+                      color: AppColors.textDisabled,
+                    ),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
                     contentPadding: EdgeInsets.zero,
                   ),
-                  style: AppTextStyles.bodySmall,
+                  style: AppTextStyles.body,
                 ),
+              ),
+
+              UiUtils.addVerticalSpaceM(),
+
+              Divider(color: AppColors.primary.withValues(alpha: 0.08)),
+
+              UiUtils.addVerticalSpaceM(),
+
+              Row(
+                children: [
+                  Icon(
+                    Icons.auto_awesome,
+                    size: AppDimens.dimen18,
+                    color: AppColors.primary,
+                  ),
+
+                  UiUtils.addHorizontalSpaceS(),
+
+                  Expanded(
+                    child: Text(
+                      "Posts help build meaningful discussions within the Pump community.",
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

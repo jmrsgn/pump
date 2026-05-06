@@ -50,6 +50,10 @@ class UiUtils {
     return SizedBox(height: AppDimens.dimen32);
   }
 
+  static Widget addVerticalSpaceXXXL() {
+    return SizedBox(height: AppDimens.dimen48);
+  }
+
   // Horizontal Spaces
   static Widget addHorizontalSpaceXS() {
     return SizedBox(width: AppDimens.dimen4);

@@ -78,6 +78,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           context,
           message: "User registered successfully",
         );
+
         NavigationUtils.replaceWith(context, AppRoutes.login);
       } else {
         UiUtils.showSnackBarError(context, message: next.errorMessage!);
@@ -92,40 +93,107 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppDimens.paddingScreen),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimens.dimen24,
+                  vertical: AppDimens.dimen20,
+                ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Hero
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(AppDimens.dimen18),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.person_add_alt_1,
+                          color: AppColors.primary,
+                          size: AppDimens.dimen30,
+                        ),
+                      ),
+                    ),
+
+                    UiUtils.addVerticalSpaceXL(),
+
+                    Text("Join Pump", style: AppTextStyles.heading1),
+
                     UiUtils.addVerticalSpaceS(),
 
                     Text(
-                      AppStrings.userRegistration,
-                      style: AppTextStyles.heading2,
+                      "Create your account and become part of a modern fitness ecosystem designed for coaches and clients.",
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
 
                     UiUtils.addVerticalSpaceXXL(),
 
+                    // Personal Information
+                    _buildSectionLabel("Personal Information"),
+
+                    UiUtils.addVerticalSpaceL(),
+
                     _buildNameFields(),
+
                     UiUtils.addVerticalSpaceM(),
 
                     _buildEmailField(),
+
                     UiUtils.addVerticalSpaceM(),
 
                     _buildPhoneField(),
-                    UiUtils.addVerticalSpaceM(),
 
-                    _buildPasswordField(),
-                    UiUtils.addVerticalSpaceM(),
+                    UiUtils.addVerticalSpaceXXL(),
 
-                    _buildRoleSwitch(),
+                    // Security
+                    _buildSectionLabel("Security"),
+
                     UiUtils.addVerticalSpaceL(),
 
-                    _buildRegisterButton(uiState),
+                    _buildPasswordField(),
+
+                    UiUtils.addVerticalSpaceXXL(),
+
+                    // Role Selection
+                    _buildSectionLabel("Account Type"),
+
+                    UiUtils.addVerticalSpaceL(),
+
+                    _buildRoleSelection(),
+
+                    UiUtils.addVerticalSpaceXXL(),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: CustomButton(
+                        onPressed: uiState.isLoading
+                            ? null
+                            : _onRegisterPressed,
+                        label: AppStrings.register,
+                      ),
+                    ),
+
+                    UiUtils.addVerticalSpaceXL(),
+
+                    Center(
+                      child: Text(
+                        "By creating an account, you agree to become part of the Pump community.",
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textDisabled,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
 
                     UiUtils.addVerticalSpaceXXL(),
                   ],
                 ),
               ),
             ),
+
             _buildFooter(),
           ],
         ),
@@ -133,7 +201,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  // UI Components
+  // SECTION LABEL
+  Widget _buildSectionLabel(String title) {
+    return Text(title, style: AppTextStyles.heading3);
+  }
+
+  // NAME FIELDS
   Widget _buildNameFields() {
     return Row(
       children: [
@@ -143,7 +216,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             controller: _firstNameController,
           ),
         ),
+
         UiUtils.addHorizontalSpaceS(),
+
         Expanded(
           child: CustomTextField(
             hint: AppStrings.lastName,
@@ -154,6 +229,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
+  // EMAIL FIELD
   Widget _buildEmailField() {
     return CustomTextField(
       hint: AppStrings.email,
@@ -161,6 +237,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
+  // PHONE FIELD
   Widget _buildPhoneField() {
     return CustomTextField(
       hint: AppStrings.phone,
@@ -168,6 +245,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
+  // PASSWORD FIELD
   Widget _buildPasswordField() {
     return CustomTextField(
       hint: AppStrings.password,
@@ -176,45 +254,91 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  Widget _buildRoleSwitch() {
+  // ROLE SELECTION
+  Widget _buildRoleSelection() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        RichText(
-          text: TextSpan(
-            text: "${AppStrings.iAmSigningUpAsA} ",
-            style: AppTextStyles.body,
-            children: [
-              TextSpan(
-                text: isCoach ? AppStrings.coach : AppStrings.client,
-                style: AppTextStyles.body.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-            ],
+        Expanded(
+          child: _buildRoleCard(
+            title: "Client",
+            subtitle: "Track progress and work with coaches",
+            icon: Icons.person_outline,
+            isSelected: !isCoach,
+            onTap: () => setState(() => isCoach = false),
           ),
         ),
-        UiUtils.addHorizontalSpaceXS(),
-        Switch(
-          activeThumbColor: AppColors.primary,
-          value: isCoach,
-          onChanged: (value) => setState(() => isCoach = value),
+
+        UiUtils.addHorizontalSpaceM(),
+
+        Expanded(
+          child: _buildRoleCard(
+            title: "Coach",
+            subtitle: "Manage and guide clients",
+            icon: Icons.fitness_center_outlined,
+            isSelected: isCoach,
+            onTap: () => setState(() => isCoach = true),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildRegisterButton(UiState uiState) {
-    return SizedBox(
-      width: AppDimens.dimen180,
-      child: CustomButton(
-        onPressed: uiState.isLoading ? null : _onRegisterPressed,
-        label: AppStrings.register,
+  // ROLE CARD
+  Widget _buildRoleCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppDimens.dimen20),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.all(AppDimens.dimen18),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.08)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppDimens.dimen20),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppColors.primary : AppColors.textSecondary,
+            ),
+
+            UiUtils.addVerticalSpaceM(),
+
+            Text(
+              title,
+              style: AppTextStyles.body.copyWith(
+                fontWeight: FontWeight.bold,
+                color: isSelected ? AppColors.primary : AppColors.textPrimary,
+              ),
+            ),
+
+            UiUtils.addVerticalSpaceXS(),
+
+            Text(
+              subtitle,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
 
+  // FOOTER
   Widget _buildFooter() {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimens.padding8),

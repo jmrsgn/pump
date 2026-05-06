@@ -63,12 +63,15 @@ class _PostWidgetState extends ConsumerState<PostWidget>
                   widget.post.userProfileImageUrl == null ||
                           widget.post.userProfileImageUrl!.isEmpty
                       ? CircleAvatar(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: AppColors.primary.withValues(
+                            alpha: 0.12,
+                          ),
                           radius: AppDimens.dimen16,
                           child: Text(
                             widget.post.userName[0],
                             style: AppTextStyles.body.copyWith(
                               fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
                             ),
                           ),
                         )

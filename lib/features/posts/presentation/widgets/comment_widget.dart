@@ -66,12 +66,13 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
             widget.comment.authorProfileImageUrl == null ||
                     widget.comment.authorProfileImageUrl!.isEmpty
                 ? CircleAvatar(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.12),
                     radius: AppDimens.dimen16,
                     child: Text(
                       widget.comment.author[0],
                       style: AppTextStyles.body.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: AppColors.primary
                       ),
                     ),
                   )

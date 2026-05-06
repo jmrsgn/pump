@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pump/core/constants/app/ui_constants.dart';
 import 'package:pump/core/enums/app_menu_item.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
@@ -27,115 +26,170 @@ class AppDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       backgroundColor: AppColors.drawerBackground,
-      child: Column(
-        children: [
-          Container(
-            margin: EdgeInsets.only(
-              top:
-                  MediaQuery.of(context).size.height *
-                  UIConstants.percentage0_1,
-            ),
-            padding: EdgeInsets.symmetric(horizontal: AppDimens.padding16),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: currentUser.profileImageUrl == null
-                      ? CircleAvatar(
-                          backgroundColor: AppColors.primary,
-                          radius: AppDimens.radius48,
-                          child: Text(
-                            currentUser.firstName[0],
-                            style: AppTextStyles.heading1.copyWith(
-                              fontSize: AppDimens.textSize48,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimens.dimen16,
+            vertical: AppDimens.dimen12,
+          ),
+          child: Column(
+            children: [
+              _buildDrawerHeader(),
+
+              UiUtils.addVerticalSpaceXL(),
+
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    _buildSectionLabel("FITNESS"),
+
+                    UiUtils.addVerticalSpaceS(),
+
+                    _buildDrawerItem(
+                      context: context,
+                      item: AppMenuItem.values[0],
+                    ),
+
+                    UiUtils.addVerticalSpaceL(),
+
+                    _buildSectionLabel("USER"),
+
+                    UiUtils.addVerticalSpaceS(),
+
+                    ...AppMenuItem.values
+                        .sublist(1, 4)
+                        .map(
+                          (item) => Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: AppDimens.dimen2,
+                            ),
+                            child: _buildDrawerItem(
+                              context: context,
+                              item: item,
                             ),
                           ),
-                        )
-                      : CircleAvatar(
-                          backgroundImage: AssetImage(
-                            currentUser.profileImageUrl!,
-                          ),
-                          radius: AppDimens.radius48,
                         ),
+
+                    UiUtils.addVerticalSpaceL(),
+
+                    _buildSectionLabel("DEVELOPER"),
+
+                    UiUtils.addVerticalSpaceS(),
+
+                    ...AppMenuItem.values
+                        .sublist(4)
+                        .map(
+                          (item) => Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: AppDimens.dimen2,
+                            ),
+                            child: _buildDrawerItem(
+                              context: context,
+                              item: item,
+                            ),
+                          ),
+                        ),
+                  ],
                 ),
-                UiUtils.addHorizontalSpaceL(),
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${currentUser.firstName} ${currentUser.lastName}",
-                        style: AppTextStyles.heading3,
-                      ),
-                      UiUtils.addVerticalSpaceXS(),
-                      Text(currentUser.email, style: AppTextStyles.bodySmall),
-                    ],
+              ),
+
+              UiUtils.addVerticalSpaceM(),
+
+              _buildSignOutButton(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimens.dimen8,
+        vertical: AppDimens.dimen12,
+      ),
+      child: Row(
+        children: [
+          currentUser.profileImageUrl == ""
+              ? CircleAvatar(
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                  radius: AppDimens.dimen48,
+                  child: Text(
+                    currentUser.firstName[0],
+                    style: AppTextStyles.heading1.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                )
+              : CircleAvatar(
+                  backgroundImage: AssetImage(currentUser.profileImageUrl),
+                  radius: AppDimens.dimen40,
+                ),
+
+          UiUtils.addHorizontalSpaceL(),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${currentUser.firstName} ${currentUser.lastName}",
+                  style: AppTextStyles.heading3,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                UiUtils.addVerticalSpaceXS(),
+
+                Text(
+                  currentUser.email,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                UiUtils.addVerticalSpaceM(),
+
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimens.dimen10,
+                    vertical: AppDimens.dimen6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    "Active",
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.success,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-
-          UiUtils.addVerticalSpaceXL(),
-          UiUtils.addDivider(),
-
-          // Expand to have the Sign out tab at the bottom
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                ...AppMenuItem.values.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  AppMenuItem item = entry.value;
-
-                  // Build the drawer item
-                  List<Widget> widgets = [
-                    _buildDrawerItem(context: context, item: item),
-                  ];
-
-                  if (index == 0 || index == 3) {
-                    widgets.add(UiUtils.addDivider());
-                    widgets.add(
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          margin: const EdgeInsets.only(
-                            left: AppDimens.dimen8,
-                            bottom: AppDimens.dimen8,
-                          ),
-                          child: Text(
-                            index == 0
-                                ? AppStrings.user.toUpperCase()
-                                : AppStrings.developer.toUpperCase(),
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.textDisabled,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  return Column(children: widgets);
-                }),
-              ],
-            ),
-          ),
-
-          ListTile(
-            leading: const Icon(
-              FontAwesomeIcons.rightFromBracket,
-              color: AppColors.error,
-            ),
-            title: const Text(
-              AppStrings.signOut,
-              style: TextStyle(color: AppColors.error),
-            ),
-            onTap: onSignOut,
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: AppDimens.dimen8),
+      child: Text(
+        title,
+        style: AppTextStyles.caption.copyWith(
+          color: AppColors.textDisabled,
+          letterSpacing: 1.2,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -146,31 +200,86 @@ class AppDrawer extends StatelessWidget {
   }) {
     final bool isSelected = selectedRoute == item.route;
 
-    return ListTile(
-      leading: Icon(
-        item.icon,
-        color: AppColors.textPrimary,
-        size: AppDimens.dimen20,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? AppColors.primary.withValues(alpha: 0.12)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(AppDimens.dimen18),
       ),
-      title: Text(
-        item.title,
-        style: TextStyle(
-          color: isSelected ? AppColors.textOnPrimary : AppColors.textPrimary,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.dimen18),
         ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppDimens.dimen14,
+          vertical: AppDimens.dimen2,
+        ),
+        leading: Icon(
+          item.icon,
+          color: isSelected ? AppColors.primary : AppColors.textPrimary,
+          size: AppDimens.dimen18,
+        ),
+        title: Text(
+          item.title,
+          style: AppTextStyles.body.copyWith(
+            color: isSelected ? AppColors.primary : AppColors.textPrimary,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+          ),
+        ),
+        trailing: isSelected
+            ? Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+              )
+            : Icon(
+                Icons.keyboard_arrow_right,
+                color: AppColors.textDisabled,
+                size: AppDimens.dimen18,
+              ),
+        onTap: () {
+          NavigationUtils.pop(context);
+
+          if (selectedRoute != item.route) {
+            NavigationUtils.navigateTo(
+              context,
+              item.route,
+              arguments: currentUser,
+            );
+          }
+        },
       ),
-      selected: isSelected,
-      selectedTileColor: AppColors.drawerSelected,
-      onTap: () {
-        NavigationUtils.pop(context);
-        if (selectedRoute != item.route) {
-          NavigationUtils.navigateTo(
-            context,
-            item.route,
-            arguments: currentUser,
-          );
-        }
-      },
+    );
+  }
+
+  Widget _buildSignOutButton() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppDimens.dimen18),
+      ),
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.dimen18),
+        ),
+        leading: const Icon(
+          FontAwesomeIcons.rightFromBracket,
+          color: AppColors.error,
+          size: AppDimens.dimen18,
+        ),
+        title: Text(
+          AppStrings.signOut,
+          style: AppTextStyles.body.copyWith(
+            color: AppColors.error,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        onTap: onSignOut,
+      ),
     );
   }
 }
