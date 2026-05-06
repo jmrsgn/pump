@@ -11,6 +11,7 @@ import 'package:pump/core/data/dto/response/result.dart';
 import '../../../../core/utilities/logger_utility.dart';
 import '../dto/create_post_request_dto.dart';
 import '../dto/post_response_dto.dart';
+import '../dto/update_post_request_dto.dart';
 
 class PostService {
   // getPosts ------------------------------------------------------------------
@@ -21,7 +22,10 @@ class PostService {
     try {
       final response = await http.get(
         Uri.parse("${ApiConstants.postUrl}?page=$page"),
-        headers: {...ApiConstants.headerTypeJson, 'Authorization': 'Bearer $token'},
+        headers: {
+          ...ApiConstants.headerTypeJson,
+          'Authorization': 'Bearer $token',
+        },
       );
 
       final json = response.body.isEmpty ? {} : jsonDecode(response.body);
@@ -64,7 +68,10 @@ class PostService {
     try {
       final response = await http.post(
         Uri.parse(ApiConstants.postUrl),
-        headers: {...ApiConstants.headerTypeJson, 'Authorization': 'Bearer $token'},
+        headers: {
+          ...ApiConstants.headerTypeJson,
+          'Authorization': 'Bearer $token',
+        },
         body: jsonEncode(request.toJson()),
       );
 
@@ -104,7 +111,10 @@ class PostService {
     try {
       final response = await http.post(
         Uri.parse(ApiConstants.getLikePostUrl(postId)),
-        headers: {...ApiConstants.headerTypeJson, 'Authorization': 'Bearer $token'},
+        headers: {
+          ...ApiConstants.headerTypeJson,
+          'Authorization': 'Bearer $token',
+        },
       );
 
       final json = response.body.isEmpty ? {} : jsonDecode(response.body);
@@ -126,6 +136,51 @@ class PostService {
       );
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "likePost", e, stack);
+      return Result.failure(
+        ApiErrorResponse(
+          status: HttpStatus.internalServerError,
+          message: SystemErrorConstants.internalServerError,
+          error: SystemErrorConstants.anUnexpectedErrorOccurred,
+        ),
+      );
+    }
+  }
+
+  // updatePost ----------------------------------------------------------------
+  Future<Result<PostResponse, ApiErrorResponse>> updatePost(
+    String token,
+    String postId,
+    UpdatePostRequest request,
+  ) async {
+    try {
+      final response = await http.put(
+        Uri.parse(ApiConstants.getPostInfoUrl(postId)),
+        headers: {
+          ...ApiConstants.headerTypeJson,
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(request.toJson()),
+      );
+
+      final json = response.body.isEmpty ? {} : jsonDecode(response.body);
+
+      if (response.statusCode == HttpStatus.ok ||
+          response.statusCode == HttpStatus.created) {
+        return Result.success(PostResponse.fromJson(json['data']));
+      }
+
+      final errorJson = json['error'] ?? {};
+      final error = ApiErrorResponse.fromJson(errorJson);
+
+      return Result.failure(
+        ApiErrorResponse(
+          status: error.status,
+          message: error.message,
+          error: error.error,
+        ),
+      );
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "updatePost", e, stack);
       return Result.failure(
         ApiErrorResponse(
           status: HttpStatus.internalServerError,

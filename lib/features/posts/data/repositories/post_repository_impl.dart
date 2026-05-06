@@ -5,6 +5,7 @@ import 'package:pump/core/data/dto/response/result.dart';
 import 'package:pump/core/data/repositories/user_repository_impl.dart';
 import 'package:pump/core/errors/app_error.dart';
 import 'package:pump/features/posts/data/dto/create_post_request_dto.dart';
+import 'package:pump/features/posts/data/dto/update_post_request_dto.dart';
 import 'package:pump/features/posts/data/services/post_service.dart';
 import 'package:pump/features/posts/domain/entities/post.dart';
 
@@ -136,6 +137,51 @@ class PostRepositoryImpl implements PostRepository {
       return Result.success(response.toPost());
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "likePost", e, stack);
+      return Result.failure(
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
+      );
+    }
+  }
+
+  // updatePost ----------------------------------------------------------------
+  @override
+  Future<Result<Post, AppError>> updatePost(
+    String postId,
+    String title,
+    String description,
+  ) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [updatePost]");
+
+    try {
+      // Get authenticated user
+      final userResult = await _userRepositoryImpl.getAuthenticatedUser();
+      if (!userResult.isSuccess || userResult.data == null) {
+        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
+        return Result.failure(
+          AppError(message: AuthErrorConstants.userIsNotAuthenticated),
+        );
+      }
+
+      final request = UpdatePostRequest(title: title, description: description);
+
+      final updatePostResult = await _postService.updatePost(
+        userResult.data!.token,
+        postId,
+        request,
+      );
+
+      if (!updatePostResult.isSuccess) {
+        return Result.failure(
+          AppError(
+            message: updatePostResult.error?.message ?? "Update post failed",
+          ),
+        );
+      }
+
+      final response = updatePostResult.data;
+      return Result.success(response?.toPost());
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "updatePost", e, stack);
       return Result.failure(
         AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );

@@ -23,6 +23,8 @@ class ApiConstants {
   // Post
   static const String postUrl = "$socialServiceBaseUrl/post";
 
+  static String getPostInfoUrl(String postId) => "$postUrl/$postId";
+
   static String getLikePostUrl(String postId) => "$postUrl/$postId/like";
 
   // Comment

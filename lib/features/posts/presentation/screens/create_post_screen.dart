@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pump/core/constants/app/ui_constants.dart';
+import 'package:pump/core/domain/entities/user.dart';
 import 'package:pump/features/posts/presentation/providers/post_providers.dart';
 import 'package:pump/features/posts/presentation/viewmodels/create_post_viewmodel.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';
-import '../../../../core/domain/entities/user.dart';
 import '../../../../core/presentation/providers/ui_state.dart';
+import '../../../../core/presentation/providers/user_providers.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/custom_scaffold.dart';
@@ -18,10 +19,9 @@ import '../../../../core/utils/ui_utils.dart';
 import '../../domain/entities/post.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
-  final User currentUser;
   final Post? post;
 
-  const CreatePostScreen({super.key, required this.currentUser, this.post});
+  const CreatePostScreen({super.key, this.post});
 
   @override
   ConsumerState<CreatePostScreen> createState() => _CreatePostScreenState();
@@ -51,19 +51,18 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     super.dispose();
   }
 
-  Widget _buildAvatar() {
-    final user = widget.currentUser;
+  Widget _buildAvatar(User user) {
     return user.profileImageUrl == ""
         ? CircleAvatar(
             backgroundColor: AppColors.primary,
             radius: AppDimens.radius16,
             child: Text(
-              widget.currentUser.firstName[0],
+              user.firstName[0],
               style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
             ),
           )
         : CircleAvatar(
-            backgroundImage: AssetImage(widget.currentUser.profileImageUrl),
+            backgroundImage: AssetImage(user.profileImageUrl),
             radius: AppDimens.radius16,
           );
   }
@@ -71,6 +70,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
     final createPostState = ref.watch(createPostViewModelProvider);
+    final userState = ref.watch(userViewModelProvider);
+    final user = userState.user!;
 
     // Listeners
     ref.listen<UiState>(createPostViewModelProvider, (previous, next) {
@@ -115,11 +116,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               // User info
               Row(
                 children: [
-                  _buildAvatar(),
+                  _buildAvatar(user),
                   UiUtils.addHorizontalSpaceS(),
                   Expanded(
                     child: Text(
-                      '${widget.currentUser.firstName} ${widget.currentUser.lastName}',
+                      '${user.firstName} ${user.lastName}',
                       style: AppTextStyles.body.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

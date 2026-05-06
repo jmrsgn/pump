@@ -415,7 +415,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
   void _showPostOptions(BuildContext context, Post post) {
     showModalBottomSheet(
       context: context,
-      builder: (_) {
+      builder: (bottomSheetContext) {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -427,6 +427,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
               ),
               title: Text(AppStrings.editPost, style: AppTextStyles.bodySmall),
               onTap: () {
+                NavigationUtils.pop(bottomSheetContext);
                 _onEditPost(post);
               },
             ),
@@ -442,6 +443,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
                 style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
               ),
               onTap: () {
+                NavigationUtils.pop(bottomSheetContext);
                 _onDeletePost();
               },
             ),

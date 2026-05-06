@@ -90,13 +90,9 @@ class AppRoutes {
           return MaterialPageRoute(builder: (_) => const LikedPostsScreen());
 
         case createPost:
-          final user = extractUserArg(settings);
-          if (user == null) {
-            return MaterialPageRoute(builder: (_) => InvalidRouteScreen());
-          }
           final post = extractPostArg(settings);
           return MaterialPageRoute(
-            builder: (_) => CreatePostScreen(currentUser: user, post: post),
+            builder: (_) => CreatePostScreen(post: post),
           );
 
         case postInfo:

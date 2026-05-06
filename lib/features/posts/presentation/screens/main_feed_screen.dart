@@ -134,19 +134,15 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
               ),
       ),
 
-      floatingActionButton: userState.user != null
-          ? FloatingActionButton(
+      floatingActionButton: userState.user == null
+          ? null
+          : FloatingActionButton(
               backgroundColor: AppColors.primary,
               onPressed: () {
-                NavigationUtils.navigateTo(
-                  context,
-                  AppRoutes.createPost,
-                  arguments: userState.user,
-                );
+                NavigationUtils.navigateTo(context, AppRoutes.createPost);
               },
               child: const Icon(Icons.add),
-            )
-          : null,
+            ),
     );
   }
 }

@@ -10,6 +10,7 @@ import 'package:pump/features/posts/domain/usecases/get_posts_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_replies_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_comment_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_post_usecase.dart';
+import 'package:pump/features/posts/domain/usecases/update_post_usecase.dart';
 import 'package:pump/features/posts/presentation/providers/main_feed_state.dart';
 import 'package:pump/features/posts/presentation/providers/post_info_state.dart';
 import 'package:pump/features/posts/presentation/viewmodels/create_post_viewmodel.dart';
@@ -45,6 +46,10 @@ final commentRepositoryProvider = Provider<CommentRepositoryImpl>(
 // UseCases
 final createPostUseCaseProvider = Provider<CreatePostUseCase>(
   (ref) => CreatePostUseCase(ref.watch(postRepositoryProvider)),
+);
+
+final updatePostUseCaseProvider = Provider<UpdatePostUseCase>(
+  (ref) => UpdatePostUseCase(ref.watch(postRepositoryProvider)),
 );
 
 final createCommentUseCaseProvider = Provider<CreateCommentUseCase>(
@@ -83,7 +88,10 @@ final getAuthenticatedUserUseCaseProvider =
 // ViewModels
 final createPostViewModelProvider =
     StateNotifierProvider<CreatePostViewModel, UiState>((ref) {
-      return CreatePostViewModel(ref.watch(createPostUseCaseProvider));
+      return CreatePostViewModel(
+        ref.watch(createPostUseCaseProvider),
+        ref.watch(updatePostUseCaseProvider),
+      );
     });
 
 final mainFeedViewModelProvider =

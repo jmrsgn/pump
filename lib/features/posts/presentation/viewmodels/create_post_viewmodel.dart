@@ -2,13 +2,16 @@ import 'package:pump/core/constants/error/validation_error_constants.dart';
 import 'package:pump/core/presentation/providers/ui_state.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/features/posts/domain/usecases/create_post_usecase.dart';
+import 'package:pump/features/posts/domain/usecases/update_post_usecase.dart';
 
 import '../../../../core/utilities/logger_utility.dart';
 
 class CreatePostViewModel extends BaseViewModel<UiState> {
   final CreatePostUseCase _createPostUseCase;
+  final UpdatePostUseCase _updatePostUseCase;
 
-  CreatePostViewModel(this._createPostUseCase) : super(UiState.initial());
+  CreatePostViewModel(this._createPostUseCase, this._updatePostUseCase)
+    : super(UiState.initial());
 
   @override
   UiState copyWithState({bool? isLoading, String? errorMessage}) {
@@ -55,6 +58,39 @@ class CreatePostViewModel extends BaseViewModel<UiState> {
     String title,
     String description,
   ) async {
-    // TODO: continue
+    LoggerUtility.d(
+      runtimeType.toString(),
+      "Execute method: [updatePost] postId: [$postId] title: [$title] description: [$description]",
+    );
+
+    // Prevent double taps
+    if (state.isLoading) return;
+
+    setLoading(true);
+
+    if (description.isEmpty) {
+      return emitError(ValidationErrorConstants.postDescriptionIsRequired);
+    }
+
+    try {
+      final result = await _updatePostUseCase.execute(
+        postId,
+        title,
+        description,
+      );
+      if (result.isSuccess) {
+        state = state.copyWith(isLoading: false, errorMessage: null);
+      } else {
+        LoggerUtility.d(
+          runtimeType.toString(),
+          "updatePost",
+          result.error!.message,
+        );
+        emitError(result.error!.message);
+      }
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "updatePost", e, stack);
+      emitUnexpectedError();
+    }
   }
 }
