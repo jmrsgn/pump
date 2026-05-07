@@ -51,11 +51,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     super.dispose();
   }
 
+  void _onUploadImage() {
+    // TODO: implement
+  }
+
   Widget _buildAvatar(User user) {
-    return user.profileImageUrl == ""
+    return user.profileImageUrl.isEmpty
         ? CircleAvatar(
             backgroundColor: AppColors.primary.withValues(alpha: 0.12),
-            radius: AppDimens.radius16,
+            radius: AppDimens.dimen16,
             child: Text(
               user.firstName[0],
               style: AppTextStyles.body.copyWith(
@@ -66,7 +70,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           )
         : CircleAvatar(
             backgroundImage: AssetImage(user.profileImageUrl),
-            radius: AppDimens.radius16,
+            radius: AppDimens.dimen16,
           );
   }
 
@@ -143,8 +147,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
                         Text(
                           widget.post == null
-                              ? "Creating a new post"
-                              : "Editing your post",
+                              ? AppStrings.creatingANewPost
+                              : AppStrings.editingYourPost,
                           style: AppTextStyles.caption.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -163,7 +167,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      "Public",
+                      AppStrings.public,
                       style: AppTextStyles.caption.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -181,8 +185,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 maxLines: UIConstants.maxLines1,
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
-                  hintText: "What's on your mind?",
-                  hintStyle: AppTextStyles.heading2.copyWith(
+                  hintText: AppStrings.whatsOnYourMind,
+                  hintStyle: AppTextStyles.heading3.copyWith(
                     color: AppColors.textDisabled,
                   ),
                   border: InputBorder.none,
@@ -190,12 +194,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   focusedBorder: InputBorder.none,
                   contentPadding: EdgeInsets.zero,
                 ),
-                style: AppTextStyles.heading2,
+                style: AppTextStyles.heading3,
               ),
-
-              UiUtils.addVerticalSpaceM(),
-
-              Divider(color: AppColors.primary.withValues(alpha: 0.08)),
 
               UiUtils.addVerticalSpaceM(),
 
@@ -207,9 +207,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   expands: true,
                   textAlignVertical: TextAlignVertical.top,
                   decoration: InputDecoration(
-                    hintText:
-                        "Share your thoughts, progress, ideas, or anything meaningful with the community...",
-                    hintStyle: AppTextStyles.body.copyWith(
+                    hintText: AppStrings.postDescriptionHint,
+                    hintStyle: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.textDisabled,
                     ),
                     border: InputBorder.none,
@@ -223,29 +222,56 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
               UiUtils.addVerticalSpaceM(),
 
-              Divider(color: AppColors.primary.withValues(alpha: 0.08)),
+              // Upload image button
+              AnimatedSwitcher(
+                duration: Duration(milliseconds: UIConstants.milliseconds180),
+                child: MediaQuery.of(context).viewInsets.bottom > 0
+                    ? Container(
+                        key: const ValueKey("keyboard_toolbar"),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppDimens.dimen12,
+                        ),
+                        child: Row(
+                          children: [
+                            InkWell(
+                              borderRadius: BorderRadius.circular(
+                                AppDimens.dimen12,
+                              ),
+                              onTap: _onUploadImage,
+                              child: Container(
+                                padding: const EdgeInsets.all(
+                                  AppDimens.dimen10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.08,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    AppDimens.dimen12,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.image_outlined,
+                                  color: AppColors.primary,
+                                  size: AppDimens.dimen20,
+                                ),
+                              ),
+                            ),
 
-              UiUtils.addVerticalSpaceM(),
+                            UiUtils.addHorizontalSpaceM(),
 
-              Row(
-                children: [
-                  Icon(
-                    Icons.auto_awesome,
-                    size: AppDimens.dimen18,
-                    color: AppColors.primary,
-                  ),
-
-                  UiUtils.addHorizontalSpaceS(),
-
-                  Expanded(
-                    child: Text(
-                      "Posts help build meaningful discussions within the Pump community.",
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
+                            Expanded(
+                              child: Text(
+                                AppStrings.addImagesToYourPost,
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ),
             ],
           ),

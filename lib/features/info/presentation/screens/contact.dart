@@ -54,25 +54,20 @@ class _ContactScreenState extends State<ContactScreen> {
 
               UiUtils.addVerticalSpaceXL(),
 
-              Text(
-                AppStrings.letsTalk,
-                style: AppTextStyles.heading1.copyWith(
-                  fontSize: AppDimens.textSize42,
-                ),
-              ),
+              Text(AppStrings.letsTalk, style: AppTextStyles.heading1),
 
               UiUtils.addVerticalSpaceS(),
 
               Text(
-                "Have questions, suggestions, collaborations, or opportunities? Feel free to send a message and start a conversation.",
-                style: AppTextStyles.body.copyWith(
+                AppStrings.contactGuide,
+                style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                 ),
               ),
 
               UiUtils.addVerticalSpaceXXL(),
 
-              Text("Your Information", style: AppTextStyles.heading3),
+              Text(AppStrings.yourInformation, style: AppTextStyles.heading3),
 
               UiUtils.addVerticalSpaceL(),
 
@@ -97,13 +92,12 @@ class _ContactScreenState extends State<ContactScreen> {
 
               UiUtils.addVerticalSpaceXL(),
 
-              Text("Message", style: AppTextStyles.heading3),
+              Text(AppStrings.message, style: AppTextStyles.heading3),
 
               UiUtils.addVerticalSpaceL(),
 
               CustomTextField(
-                hint:
-                    "Tell us how we can help, collaborate, or work together...",
+                hint: AppStrings.contactHint,
                 controller: _messageController,
                 isMultiline: true,
               ),
@@ -115,32 +109,16 @@ class _ContactScreenState extends State<ContactScreen> {
                 child: CustomButton(onPressed: () {}, label: AppStrings.submit),
               ),
 
-              UiUtils.addVerticalSpaceXXL(),
+              UiUtils.addVerticalSpaceXL(),
 
-              Divider(color: AppColors.primary.withValues(alpha: 0.08)),
+              UiUtils.addDivider(),
 
               UiUtils.addVerticalSpaceL(),
 
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.auto_awesome,
-                    color: AppColors.primary,
-                    size: AppDimens.dimen18,
-                  ),
-
-                  UiUtils.addHorizontalSpaceS(),
-
-                  Expanded(
-                    child: Text(
-                      "Pump is always open to meaningful collaborations, feedback, and innovative ideas related to fitness technology and modern software solutions.",
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
+              Text(
+                AppStrings.contactAdditionalInfo,
+                style: AppTextStyles.caption,
+                textAlign: TextAlign.center,
               ),
 
               UiUtils.addVerticalSpaceXL(),

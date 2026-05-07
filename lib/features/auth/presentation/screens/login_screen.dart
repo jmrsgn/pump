@@ -45,6 +45,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _loginViewModel.login(email, password);
   }
 
+  void _onForgotPasswordPressed() {
+    // TODO: Implement forgot password
+  }
+
   @override
   Widget build(BuildContext context) {
     final uiState = ref.watch(loginViewModelProvider);
@@ -94,126 +98,128 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 horizontal: AppDimens.dimen24,
                 vertical: AppDimens.dimen20,
               ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight:
-                      MediaQuery.of(context).size.height -
-                      MediaQuery.of(context).padding.top -
-                      MediaQuery.of(context).padding.bottom -
-                      AppDimens.dimen40,
-                ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          UiUtils.addVerticalSpaceXXL(),
+              child: SizedBox(
+                height:
+                    MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top -
+                    MediaQuery.of(context).padding.bottom -
+                    AppDimens.dimen40,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        UiUtils.addVerticalSpaceXXL(),
 
-                          // Hero
-                          Center(
-                            child: Container(
-                              padding: const EdgeInsets.all(AppDimens.dimen20),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(
-                                  alpha: 0.12,
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Text(
-                                AppConstants.appName[0],
-                                style: AppTextStyles.heading1.copyWith(
-                                  fontSize: AppDimens.textSize48,
-                                  color: AppColors.primary,
-                                ),
-                              ),
+                        // Hero
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(AppDimens.dimen20),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
                             ),
-                          ),
-
-                          UiUtils.addVerticalSpaceXXL(),
-
-                          Text("Welcome Back", style: AppTextStyles.heading1),
-
-                          UiUtils.addVerticalSpaceS(),
-
-                          Text(
-                            "Continue your journey with Pump and stay connected with your fitness community.",
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-
-                          UiUtils.addVerticalSpaceXXL(),
-
-                          // Login section
-                          Text("Login", style: AppTextStyles.heading3),
-
-                          UiUtils.addVerticalSpaceL(),
-
-                          _buildForm(),
-
-                          UiUtils.addVerticalSpaceXL(),
-
-                          SizedBox(
-                            width: double.infinity,
-                            child: CustomButton(
-                              onPressed: uiState.isLoading
-                                  ? null
-                                  : _onLoginPressed,
-                              label: AppStrings.login,
-                            ),
-                          ),
-
-                          UiUtils.addVerticalSpaceL(),
-
-                          Align(
-                            alignment: Alignment.centerRight,
                             child: Text(
-                              "Forgot password?",
+                              AppConstants.appName[0],
+                              style: AppTextStyles.heading1.copyWith(
+                                fontSize: AppDimens.textSize48,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        UiUtils.addVerticalSpaceXXL(),
+
+                        Text(
+                          AppStrings.welcomeBack,
+                          style: AppTextStyles.heading1,
+                        ),
+
+                        UiUtils.addVerticalSpaceS(),
+
+                        Text(
+                          AppStrings.welcomeMessage,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+
+                        UiUtils.addVerticalSpaceXXL(),
+
+                        // Login section
+                        Text(AppStrings.login, style: AppTextStyles.heading3),
+
+                        UiUtils.addVerticalSpaceL(),
+
+                        _buildForm(),
+
+                        UiUtils.addVerticalSpaceXL(),
+
+                        SizedBox(
+                          width: double.infinity,
+                          child: CustomButton(
+                            onPressed: uiState.isLoading
+                                ? null
+                                : _onLoginPressed,
+                            label: AppStrings.login,
+                          ),
+                        ),
+
+                        UiUtils.addVerticalSpaceL(),
+
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: InkWell(
+                            onTap: () => uiState.isLoading
+                                ? null
+                                : _onForgotPasswordPressed,
+                            child: Text(
+                              AppStrings.forgotPassword,
                               style: AppTextStyles.bodySmall.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
 
-                      Column(
-                        children: [
-                          Center(
-                            child: RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                text: "Don't have an account? ",
-                                style: AppTextStyles.bodySmall,
-                                children: [
-                                  TextSpan(
-                                    text: "Register here",
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        NavigationUtils.navigateTo(
-                                          context,
-                                          AppRoutes.register,
-                                        );
-                                      },
+                    Column(
+                      children: [
+                        Center(
+                          child: RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              text: "${AppStrings.dontHaveAnAccount} ",
+                              style: AppTextStyles.bodySmall,
+                              children: [
+                                TextSpan(
+                                  text: AppStrings.registerHere,
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                ],
-                              ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      NavigationUtils.navigateTo(
+                                        context,
+                                        AppRoutes.register,
+                                      );
+                                    },
+                                ),
+                              ],
                             ),
                           ),
-                          UiUtils.addVerticalSpaceL(),
-                          Center(child: UiUtils.addCopyright()),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                        UiUtils.addVerticalSpaceL(),
+                        Center(child: UiUtils.addCopyright()),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -223,6 +229,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
+  // FORMS
   Widget _buildForm() {
     return Column(
       children: [

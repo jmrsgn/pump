@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pump/core/constants/app/app_strings.dart';
 import 'package:pump/core/enums/app_menu_item.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 
 import '../../constants/app/app_dimens.dart';
-import '../../constants/app/app_strings.dart';
 import '../../domain/entities/user.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
@@ -42,7 +42,7 @@ class AppDrawer extends StatelessWidget {
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
-                    _buildSectionLabel("FITNESS"),
+                    _buildSectionLabel(AppStrings.labelFitness),
 
                     UiUtils.addVerticalSpaceS(),
 
@@ -53,7 +53,7 @@ class AppDrawer extends StatelessWidget {
 
                     UiUtils.addVerticalSpaceL(),
 
-                    _buildSectionLabel("USER"),
+                    _buildSectionLabel(AppStrings.labelUser),
 
                     UiUtils.addVerticalSpaceS(),
 
@@ -73,7 +73,7 @@ class AppDrawer extends StatelessWidget {
 
                     UiUtils.addVerticalSpaceL(),
 
-                    _buildSectionLabel("DEVELOPER"),
+                    _buildSectionLabel(AppStrings.labelDeveloper),
 
                     UiUtils.addVerticalSpaceS(),
 
@@ -113,7 +113,7 @@ class AppDrawer extends StatelessWidget {
       ),
       child: Row(
         children: [
-          currentUser.profileImageUrl == ""
+          currentUser.profileImageUrl.isEmpty
               ? CircleAvatar(
                   backgroundColor: AppColors.primary.withValues(alpha: 0.12),
                   radius: AppDimens.dimen48,

@@ -30,10 +30,9 @@ class AboutScreen extends StatelessWidget {
             UiUtils.addVerticalSpaceXL(),
 
             _buildSection(
-              title: "What is Pump?",
+              title: AppStrings.whatIsPump,
               icon: Icons.favorite_outline,
-              description:
-                  "Pump is designed to solve one of the biggest problems in the fitness industry — the fragmented experience between coaches and clients.\n\nInstead of relying on multiple platforms for messaging, nutrition tracking, progress check-ins, workout programming, and coaching management, Pump brings everything into one centralized ecosystem.\n\nThe goal is to simplify communication, improve accountability, and provide both coaches and clients with powerful tools to achieve better fitness results through technology.",
+              description: AppStrings.pumpDescription,
             ),
 
             UiUtils.addVerticalSpaceXL(),
@@ -43,24 +42,6 @@ class AboutScreen extends StatelessWidget {
             UiUtils.addVerticalSpaceXL(),
 
             _buildWorkflowSection(),
-
-            UiUtils.addVerticalSpaceXL(),
-
-            _buildSection(
-              title: AppStrings.inspiration,
-              description:
-                  "Pump was inspired by the idea of creating a lightweight and modern social platform where users can freely share thoughts, interact through meaningful discussions, and build communities in real time.",
-              icon: Icons.lightbulb_outline,
-            ),
-
-            UiUtils.addVerticalSpaceL(),
-
-            _buildSection(
-              title: AppStrings.howItWorks,
-              description:
-                  "Users can create posts, interact using comments and replies, react through likes, and engage with a responsive and scalable architecture powered by Flutter and Spring Boot.",
-              icon: Icons.auto_awesome,
-            ),
 
             UiUtils.addVerticalSpaceXL(),
 
@@ -91,7 +72,7 @@ class AboutScreen extends StatelessWidget {
       padding: const EdgeInsets.all(AppDimens.dimen24),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimens.radius24),
+        borderRadius: BorderRadius.circular(AppDimens.dimen24),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
       ),
       child: Column(
@@ -115,8 +96,10 @@ class AboutScreen extends StatelessWidget {
           UiUtils.addVerticalSpaceS(),
 
           Text(
-            "An all-in-one platform for modern fitness coaching.",
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            AppStrings.pumpSubDescription,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
 
@@ -127,10 +110,10 @@ class AboutScreen extends StatelessWidget {
             runSpacing: AppDimens.dimen8,
             alignment: WrapAlignment.center,
             children: [
-              _buildHighlightChip("Nutrition"),
-              _buildHighlightChip("Coaching"),
-              _buildHighlightChip("Check-ins"),
-              _buildHighlightChip("Programs"),
+              _buildHighlightChip(AppStrings.nutrition),
+              _buildHighlightChip(AppStrings.coaching),
+              _buildHighlightChip(AppStrings.checkIns),
+              _buildHighlightChip(AppStrings.programs),
             ],
           ),
         ],
@@ -142,15 +125,28 @@ class AboutScreen extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _buildStatCard(title: "AI", subtitle: "Ready"),
+          child: _buildStatCard(
+            title: AppStrings.programs,
+            subtitle: AppStrings.managed,
+          ),
         ),
+
         UiUtils.addHorizontalSpaceS(),
+
         Expanded(
-          child: _buildStatCard(title: "Real-time", subtitle: "Updates"),
+          child: _buildStatCard(
+            title: AppStrings.coach,
+            subtitle: AppStrings.focused,
+          ),
         ),
+
         UiUtils.addHorizontalSpaceS(),
+
         Expanded(
-          child: _buildStatCard(title: "Cross", subtitle: "Platform"),
+          child: _buildStatCard(
+            title: AppStrings.client,
+            subtitle: AppStrings.centered,
+          ),
         ),
       ],
     );
@@ -161,7 +157,7 @@ class AboutScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppDimens.dimen16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimens.radius16),
+        borderRadius: BorderRadius.circular(AppDimens.dimen16),
       ),
       child: Column(
         children: [
@@ -188,7 +184,7 @@ class AboutScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Core Features", style: AppTextStyles.heading2),
+        Text(AppStrings.coreFeatures, style: AppTextStyles.heading2),
 
         UiUtils.addVerticalSpaceM(),
 
@@ -202,23 +198,23 @@ class AboutScreen extends StatelessWidget {
           children: [
             _buildFeatureCard(
               icon: Icons.restaurant_menu,
-              title: "Nutrition",
-              subtitle: "Track meals and nutrition progress.",
+              title: AppStrings.nutrition,
+              subtitle: AppStrings.nutritionFeature,
             ),
             _buildFeatureCard(
               icon: Icons.fitness_center,
-              title: "Programs",
-              subtitle: "Manage personalized workout programs.",
+              title: AppStrings.programs,
+              subtitle: AppStrings.programsFeature,
             ),
             _buildFeatureCard(
               icon: Icons.analytics_outlined,
-              title: "Check-ins",
-              subtitle: "Monitor client progress in real-time.",
+              title: AppStrings.checkIns,
+              subtitle: AppStrings.checkInsFeature,
             ),
             _buildFeatureCard(
               icon: Icons.groups_outlined,
-              title: "Coaching",
-              subtitle: "Centralized coach and client management.",
+              title: AppStrings.coaching,
+              subtitle: AppStrings.coachingFeature,
             ),
           ],
         ),
@@ -235,7 +231,7 @@ class AboutScreen extends StatelessWidget {
       padding: const EdgeInsets.all(AppDimens.dimen16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimens.radius16),
+        borderRadius: BorderRadius.circular(AppDimens.dimen16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,38 +264,47 @@ class AboutScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("How Pump Works", style: AppTextStyles.heading2),
+          Text(AppStrings.howPumpWorks, style: AppTextStyles.heading2),
 
-          UiUtils.addVerticalSpaceL(),
+          UiUtils.addVerticalSpaceS(),
+
+          Text(
+            AppStrings.pumpWorksInfo,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+
+          UiUtils.addVerticalSpaceXXL(),
+
+          _buildWorkflowItem(
+            icon: Icons.groups_outlined,
+            title: "1. ${AppStrings.connect}",
+            subtitle: AppStrings.connectWorksInfo,
+          ),
+
+          _buildWorkflowDivider(),
 
           _buildWorkflowItem(
             icon: Icons.assignment_outlined,
-            title: "1. Create Program",
-            subtitle: "Coaches build personalized plans.",
+            title: "2. ${AppStrings.buildPrograms}",
+            subtitle: AppStrings.buildProgramsWorksInfo,
           ),
 
           _buildWorkflowDivider(),
 
           _buildWorkflowItem(
             icon: Icons.monitor_weight_outlined,
-            title: "2. Track Progress",
-            subtitle: "Clients submit updates and check-ins.",
+            title: "3. ${AppStrings.trackProgress}",
+            subtitle: AppStrings.trackProgressWorksInfo,
           ),
 
           _buildWorkflowDivider(),
 
           _buildWorkflowItem(
-            icon: Icons.insights_outlined,
-            title: "3. Analyze Results",
-            subtitle: "Monitor improvements and performance.",
-          ),
-
-          _buildWorkflowDivider(),
-
-          _buildWorkflowItem(
-            icon: Icons.auto_awesome_outlined,
-            title: "4. AI Assistance",
-            subtitle: "Future intelligent coaching integration.",
+            icon: Icons.sync_alt_outlined,
+            title: "4. ${AppStrings.adjustAndImprove}",
+            subtitle: AppStrings.adjustAndImproveWorksInfo,
           ),
         ],
       ),
@@ -375,7 +380,7 @@ class AboutScreen extends StatelessWidget {
           UiUtils.addVerticalSpaceM(),
 
           Text(
-            "The Future of Coaching",
+            AppStrings.theFutureOfFitnessCoaching,
             style: AppTextStyles.heading2,
             textAlign: TextAlign.center,
           ),
@@ -383,7 +388,7 @@ class AboutScreen extends StatelessWidget {
           UiUtils.addVerticalSpaceM(),
 
           Text(
-            "Pump aims to become a complete ecosystem for fitness professionals and clients through intelligent tools, centralized workflows, automation, and AI-powered coaching experiences.",
+            AppStrings.pumpVision,
             style: AppTextStyles.bodySmall,
             textAlign: TextAlign.center,
           ),
@@ -422,7 +427,7 @@ class AboutScreen extends StatelessWidget {
       padding: const EdgeInsets.all(AppDimens.dimen16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimens.radius16),
+        borderRadius: BorderRadius.circular(AppDimens.dimen16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -430,7 +435,7 @@ class AboutScreen extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 4,
+                width: 3,
                 height: 20,
                 decoration: BoxDecoration(
                   color: AppColors.primary,
@@ -438,11 +443,11 @@ class AboutScreen extends StatelessWidget {
                 ),
               ),
 
-              UiUtils.addHorizontalSpaceS(),
+              UiUtils.addHorizontalSpaceM(),
 
               Icon(icon, size: AppDimens.dimen20),
 
-              UiUtils.addHorizontalSpaceS(),
+              UiUtils.addHorizontalSpaceM(),
 
               Expanded(child: Text(title, style: AppTextStyles.heading3)),
             ],
@@ -467,18 +472,18 @@ class AboutScreen extends StatelessWidget {
       child: Column(
         children: [
           const CircleAvatar(
-            radius: AppDimens.radius48,
+            radius: AppDimens.dimen48,
             backgroundImage: AssetImage("assets/images/jm.jpg"),
           ),
 
           UiUtils.addVerticalSpaceM(),
 
-          Text("John Martin Marasigan", style: AppTextStyles.heading3),
+          Text(AppStrings.devName, style: AppTextStyles.heading3),
 
           UiUtils.addVerticalSpaceXS(),
 
           Text(
-            "Full Stack Developer",
+            AppStrings.devTitle,
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.textDisabled,
             ),
@@ -487,36 +492,12 @@ class AboutScreen extends StatelessWidget {
           UiUtils.addVerticalSpaceM(),
 
           Text(
-            "Passionate about building scalable applications, modern user experiences, and intelligent systems that solve real-world problems.",
+            AppStrings.devTitleInfo,
             style: AppTextStyles.bodySmall,
             textAlign: TextAlign.center,
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildContactTile({
-    required String title,
-    required String subtitle,
-    required Widget leading,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppDimens.dimen16,
-        vertical: AppDimens.dimen4,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppDimens.radius16),
-      ),
-      tileColor: AppColors.surface,
-      leading: leading,
-      trailing: const Icon(Icons.open_in_new),
-      title: Text(
-        title,
-        style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
-      ),
-      subtitle: Text(subtitle),
     );
   }
 
@@ -531,12 +512,17 @@ class AboutScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(child: Text("Connect With Me", style: AppTextStyles.heading2)),
+          Center(
+            child: Text(
+              AppStrings.connectWithMe,
+              style: AppTextStyles.heading2,
+            ),
+          ),
 
           UiUtils.addVerticalSpaceS(),
 
           Text(
-            "Feel free to reach out for collaborations, opportunities, or discussions about development and fitness technology.",
+            AppStrings.connectDescription,
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -547,7 +533,7 @@ class AboutScreen extends StatelessWidget {
 
           _buildSocialCard(
             icon: Icons.email_outlined,
-            title: "Email",
+            title: AppStrings.email,
             subtitle: AppStrings.devEmail,
           ),
 
@@ -555,7 +541,7 @@ class AboutScreen extends StatelessWidget {
 
           _buildSocialCard(
             icon: Icons.call_outlined,
-            title: "Phone",
+            title: AppStrings.phone,
             subtitle: AppStrings.devMobileNo,
           ),
 
@@ -563,7 +549,7 @@ class AboutScreen extends StatelessWidget {
 
           _buildSocialCard(
             icon: FontAwesomeIcons.github,
-            title: "GitHub",
+            title: AppStrings.github,
             subtitle: AppStrings.devGithubUsername,
           ),
         ],
@@ -580,7 +566,7 @@ class AboutScreen extends StatelessWidget {
       padding: const EdgeInsets.all(AppDimens.dimen16),
       decoration: BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.circular(AppDimens.radius16),
+        borderRadius: BorderRadius.circular(AppDimens.dimen16),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
       ),
       child: Row(

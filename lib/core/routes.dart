@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pump/core/constants/app/app_strings.dart';
 import 'package:pump/core/presentation/screens/invalid_route.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 import 'package:pump/features/auth/presentation/screens/login_screen.dart';
@@ -52,7 +51,6 @@ class AppRoutes {
 
     LoggerUtility.e(
       "AppRoutes",
-      AppStrings.routeError,
       "Route ${settings.name} requires a User argument, got: ${args?.runtimeType}",
     );
     return null;
@@ -65,7 +63,6 @@ class AppRoutes {
 
     LoggerUtility.e(
       "AppRoutes",
-      AppStrings.routeError,
       "Route ${settings.name} requires a Post argument, got: ${args?.runtimeType}",
     );
     return null;
@@ -127,7 +124,7 @@ class AppRoutes {
           return MaterialPageRoute(builder: (_) => InvalidRouteScreen());
       }
     } catch (e, stack) {
-      LoggerUtility.e("AppRoutes", AppStrings.routeError, e.toString(), stack);
+      LoggerUtility.e("AppRoutes", e.toString(), stack);
       return MaterialPageRoute(builder: (_) => InvalidRouteScreen());
     }
   }

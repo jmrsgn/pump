@@ -51,34 +51,25 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
               UiUtils.addVerticalSpaceXL(),
 
-              Text(
-                "Help Improve Pump",
-                style: AppTextStyles.heading1.copyWith(
-                  fontSize: AppDimens.textSize42,
-                ),
-              ),
+              Text(AppStrings.helpImprovePump, style: AppTextStyles.heading1),
 
               UiUtils.addVerticalSpaceS(),
 
               Text(
-                "Your feedback helps shape the future of Pump. Share bugs, feature ideas, improvements, or anything that can make the platform better.",
-                style: AppTextStyles.body.copyWith(
+                AppStrings.feedbackGuide,
+                style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                 ),
               ),
 
               UiUtils.addVerticalSpaceXXL(),
 
-              Text(
-                "Your Feedback",
-                style: AppTextStyles.heading3,
-              ),
+              Text(AppStrings.yourFeedback, style: AppTextStyles.heading3),
 
               UiUtils.addVerticalSpaceL(),
 
               CustomTextField(
-                hint:
-                "Tell us what you liked, what can be improved, or what features you'd love to see next...",
+                hint: AppStrings.feedbackHint,
                 controller: _messageController,
                 isMultiline: true,
               ),
@@ -87,40 +78,19 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
               SizedBox(
                 width: double.infinity,
-                child: CustomButton(
-                  onPressed: () {},
-                  label: AppStrings.submit,
-                ),
+                child: CustomButton(onPressed: () {}, label: AppStrings.submit),
               ),
 
-              UiUtils.addVerticalSpaceXXL(),
+              UiUtils.addVerticalSpaceXL(),
 
-              Divider(
-                color: AppColors.primary.withValues(alpha: 0.08),
-              ),
+              UiUtils.addDivider(),
 
               UiUtils.addVerticalSpaceL(),
 
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.favorite_outline,
-                    color: AppColors.primary,
-                    size: AppDimens.dimen18,
-                  ),
-
-                  UiUtils.addHorizontalSpaceS(),
-
-                  Expanded(
-                    child: Text(
-                      "Every suggestion and feedback contributes to building a better experience for coaches, clients, and the future of Pump.",
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
+              Text(
+                AppStrings.feedbackAdditionalInfo,
+                style: AppTextStyles.caption,
+                textAlign: TextAlign.center,
               ),
 
               UiUtils.addVerticalSpaceXL(),

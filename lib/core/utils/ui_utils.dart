@@ -9,7 +9,10 @@ class UiUtils {
   UiUtils._();
 
   static Widget addDivider() {
-    return Divider(color: AppColors.divider, thickness: AppDimens.dimen1);
+    return Divider(
+      color: AppColors.divider.withValues(alpha: 0.6),
+      thickness: AppDimens.dimen1,
+    );
   }
 
   static Widget addCopyright() {

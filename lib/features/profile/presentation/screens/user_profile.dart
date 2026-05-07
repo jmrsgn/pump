@@ -26,17 +26,13 @@ class UserProfileScreen extends StatelessWidget {
 
             UiUtils.addVerticalSpaceXL(),
 
-            _buildStatsSection(),
-
-            UiUtils.addVerticalSpaceXL(),
-
-            _buildSectionTitle("Account"),
+            _buildSectionTitle(AppStrings.account),
 
             UiUtils.addVerticalSpaceM(),
 
             _buildProfileTile(
               title: AppStrings.editProfile,
-              subtitle: "Update profile information and preferences",
+              subtitle: AppStrings.updateProfileInformation,
               leading: Icons.edit_outlined,
             ),
 
@@ -44,19 +40,19 @@ class UserProfileScreen extends StatelessWidget {
 
             _buildProfileTile(
               title: AppStrings.paymentMethod,
-              subtitle: "Manage billing and payment methods",
+              subtitle: AppStrings.manageBillingAndPaymentMethods,
               leading: Icons.payment_outlined,
             ),
 
             UiUtils.addVerticalSpaceXL(),
 
-            _buildSectionTitle("Fitness"),
+            _buildSectionTitle(AppStrings.fitness),
 
             UiUtils.addVerticalSpaceM(),
 
             _buildProfileTile(
               title: AppStrings.clients,
-              subtitle: "Manage clients and coaching sessions",
+              subtitle: AppStrings.manageClientsAndCoachingSessions,
               leading: Icons.groups_outlined,
             ),
 
@@ -64,19 +60,19 @@ class UserProfileScreen extends StatelessWidget {
 
             _buildProfileTile(
               title: AppStrings.coach,
-              subtitle: "View coaching profile and settings",
+              subtitle: AppStrings.viewCoachingProfileAndSettings,
               leading: Icons.fitness_center_outlined,
             ),
 
             UiUtils.addVerticalSpaceXL(),
 
-            _buildSectionTitle("Support"),
+            _buildSectionTitle(AppStrings.support),
 
             UiUtils.addVerticalSpaceM(),
 
             _buildProfileTile(
               title: AppStrings.help,
-              subtitle: "Get help and support resources",
+              subtitle: AppStrings.getHelpAndSupportResources,
               leading: Icons.help_outline,
             ),
 
@@ -93,11 +89,11 @@ class UserProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.all(AppDimens.dimen24),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimens.radius24),
+        borderRadius: BorderRadius.circular(AppDimens.dimen24),
       ),
       child: Column(
         children: [
-          currentUser.profileImageUrl == ""
+          currentUser.profileImageUrl.isEmpty
               ? CircleAvatar(
                   backgroundColor: AppColors.primary.withValues(alpha: 0.12),
                   radius: AppDimens.dimen56,
@@ -167,34 +163,12 @@ class UserProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsSection() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(title: "Programs", value: "12"),
-        ),
-
-        UiUtils.addHorizontalSpaceS(),
-
-        Expanded(
-          child: _buildStatCard(title: "Clients", value: "24"),
-        ),
-
-        UiUtils.addHorizontalSpaceS(),
-
-        Expanded(
-          child: _buildStatCard(title: "Progress", value: "92%"),
-        ),
-      ],
-    );
-  }
-
   Widget _buildStatCard({required String title, required String value}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: AppDimens.dimen18),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimens.radius16),
+        borderRadius: BorderRadius.circular(AppDimens.dimen16),
       ),
       child: Column(
         children: [

@@ -3,4 +3,5 @@ class SystemErrorConstants {
 
   static const anUnexpectedErrorOccurred = "An unexpected error occurred";
   static const internalServerError = "Internal server error";
+  static const routeNotFound = "Route not found";
 }

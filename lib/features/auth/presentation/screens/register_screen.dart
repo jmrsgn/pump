@@ -6,6 +6,7 @@ import 'package:pump/features/auth/presentation/viewmodels/register_viewmodel.da
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';
+import '../../../../core/constants/app/ui_constants.dart';
 import '../../../../core/presentation/providers/ui_state.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
@@ -118,12 +119,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                     UiUtils.addVerticalSpaceXL(),
 
-                    Text("Join Pump", style: AppTextStyles.heading1),
+                    Text(AppStrings.joinPump, style: AppTextStyles.heading1),
 
                     UiUtils.addVerticalSpaceS(),
 
                     Text(
-                      "Create your account and become part of a modern fitness ecosystem designed for coaches and clients.",
+                      AppStrings.registerMessage,
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -132,7 +133,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     UiUtils.addVerticalSpaceXXL(),
 
                     // Personal Information
-                    _buildSectionLabel("Personal Information"),
+                    _buildSectionLabel(AppStrings.personalInformation),
 
                     UiUtils.addVerticalSpaceL(),
 
@@ -149,7 +150,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     UiUtils.addVerticalSpaceXXL(),
 
                     // Security
-                    _buildSectionLabel("Security"),
+                    _buildSectionLabel(AppStrings.security),
 
                     UiUtils.addVerticalSpaceL(),
 
@@ -158,7 +159,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     UiUtils.addVerticalSpaceXXL(),
 
                     // Role Selection
-                    _buildSectionLabel("Account Type"),
+                    _buildSectionLabel(AppStrings.accountType),
 
                     UiUtils.addVerticalSpaceL(),
 
@@ -178,9 +179,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                     UiUtils.addVerticalSpaceXL(),
 
+                    // TODO: add agreement
                     Center(
                       child: Text(
-                        "By creating an account, you agree to become part of the Pump community.",
+                        AppStrings.registerAdditionalInfo,
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.textDisabled,
                         ),
@@ -260,8 +262,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       children: [
         Expanded(
           child: _buildRoleCard(
-            title: "Client",
-            subtitle: "Track progress and work with coaches",
+            title: AppStrings.client,
+            subtitle: AppStrings.registerClientInfo,
             icon: Icons.person_outline,
             isSelected: !isCoach,
             onTap: () => setState(() => isCoach = false),
@@ -272,8 +274,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
         Expanded(
           child: _buildRoleCard(
-            title: "Coach",
-            subtitle: "Manage and guide clients",
+            title: AppStrings.coach,
+            subtitle: AppStrings.registerCoachInfo,
             icon: Icons.fitness_center_outlined,
             isSelected: isCoach,
             onTap: () => setState(() => isCoach = true),
@@ -295,8 +297,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       borderRadius: BorderRadius.circular(AppDimens.dimen20),
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.all(AppDimens.dimen18),
+        duration: Duration(milliseconds: UIConstants.milliseconds180),
+        padding: EdgeInsets.all(AppDimens.dimen18),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary.withValues(alpha: 0.08)

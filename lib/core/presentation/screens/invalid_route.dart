@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pump/core/constants/error/system_error_constants.dart';
 
 import '../../constants/app/app_dimens.dart';
-import '../../constants/app/app_strings.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/custom_scaffold.dart';
@@ -21,7 +21,10 @@ class InvalidRouteScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(height: AppDimens.dimen12),
-                Text(AppStrings.routeNotFound, style: AppTextStyles.body),
+                Text(
+                  SystemErrorConstants.routeNotFound,
+                  style: AppTextStyles.body,
+                ),
               ],
             ),
           ),
