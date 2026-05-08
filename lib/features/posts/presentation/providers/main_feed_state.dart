@@ -7,6 +7,7 @@ class MainFeedState extends UiState {
   final Post post;
   final int currentPage;
   final bool hasNext;
+  final String? successMessage;
 
   const MainFeedState({
     required super.isLoading,
@@ -15,6 +16,7 @@ class MainFeedState extends UiState {
     required this.post,
     required this.currentPage,
     required this.hasNext,
+    this.successMessage,
   });
 
   @override
@@ -25,6 +27,7 @@ class MainFeedState extends UiState {
     Post? post,
     int? currentPage,
     bool? hasNext,
+    String? successMessage,
   }) {
     return MainFeedState(
       isLoading: isLoading ?? this.isLoading,
@@ -33,6 +36,7 @@ class MainFeedState extends UiState {
       post: post ?? this.post,
       currentPage: currentPage ?? this.currentPage,
       hasNext: hasNext ?? this.hasNext,
+      successMessage: successMessage ?? this.successMessage,
     );
   }
 
@@ -43,7 +47,9 @@ class MainFeedState extends UiState {
       posts: const [],
       post: Post.empty(),
       currentPage: 0,
-      hasNext: true, // Assume more data initially
+      hasNext: true,
+      // Assume more data initially
+      successMessage: null,
     );
   }
 }

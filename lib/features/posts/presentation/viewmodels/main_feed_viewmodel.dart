@@ -37,6 +37,20 @@ class MainFeedViewModel extends BaseViewModel<MainFeedState> {
     );
   }
 
+  void removePostFromList(String postId) {
+    state = state.copyWith(
+      posts: state.posts.where((post) => post.id != postId).toList(),
+    );
+  }
+
+  void setSuccessMessage(String message) {
+    state = state.copyWith(successMessage: message);
+  }
+
+  void clearSuccessMessage() {
+    state = state.copyWith(successMessage: null);
+  }
+
   // ---------------------------------------------------------------------------
   // Core methods
   // ---------------------------------------------------------------------------

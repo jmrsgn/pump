@@ -16,4 +16,6 @@ abstract class PostRepository {
     String title,
     String description,
   );
+
+  Future<Result<void, AppError>> deletePost(String postId);
 }

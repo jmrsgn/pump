@@ -250,6 +250,10 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
             child: CommentWidget(
               comment: reply,
               isReplying: state.commentReplyingTo?.id == reply.id,
+              onLikeTap: () => _postInfoViewModel.likeReply(
+                reply.parentCommentId!,
+                reply.id,
+              ),
             ),
           ),
         ),
@@ -460,5 +464,8 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
     NavigationUtils.navigateTo(context, AppRoutes.createPost, arguments: post);
   }
 
-  void _onDeletePost() {}
+  void _onDeletePost() {
+    _postInfoViewModel.deletePost(widget.post.id);
+    NavigationUtils.navigateTo(context, AppRoutes.mainFeed);
+  }
 }

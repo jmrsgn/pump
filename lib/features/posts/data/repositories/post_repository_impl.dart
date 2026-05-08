@@ -187,4 +187,41 @@ class PostRepositoryImpl implements PostRepository {
       );
     }
   }
+
+  // deletePost ----------------------------------------------------------------
+  @override
+  Future<Result<void, AppError>> deletePost(String postId) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [deletePost]");
+
+    try {
+      // Get authenticated user
+      final userResult = await _userRepositoryImpl.getAuthenticatedUser();
+      if (!userResult.isSuccess || userResult.data == null) {
+        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
+        return Result.failure(
+          AppError(message: AuthErrorConstants.userIsNotAuthenticated),
+        );
+      }
+
+      final deletePostResult = await _postService.deletePost(
+        userResult.data!.token,
+        postId,
+      );
+
+      if (!deletePostResult.isSuccess) {
+        return Result.failure(
+          AppError(
+            message: deletePostResult.error?.message ?? "Delete post failed",
+          ),
+        );
+      }
+
+      return Result.success(null);
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "deletePost", e, stack);
+      return Result.failure(
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
+      );
+    }
+  }
 }

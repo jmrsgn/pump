@@ -7,6 +7,7 @@ import 'package:pump/features/posts/domain/entities/post.dart';
 import 'package:pump/features/posts/domain/helpers/post_comment_helper.dart';
 import 'package:pump/features/posts/domain/usecases/create_comment_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/create_reply_usecase.dart';
+import 'package:pump/features/posts/domain/usecases/delete_post_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_comments_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_replies_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_comment_usecase.dart';
@@ -29,6 +30,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
   final GetRepliesUseCase _getRepliesUseCase;
   final LikePostUseCase _likePostUseCase;
   final LikeCommentUseCase _likeCommentUseCase;
+  final DeletePostUseCase _deletePostUseCase;
 
   PostInfoViewModel(
     this.ref,
@@ -39,6 +41,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     this._getRepliesUseCase,
     this._likePostUseCase,
     this._likeCommentUseCase,
+    this._deletePostUseCase,
   ) : super(PostInfoState.initial());
 
   @override
@@ -177,8 +180,7 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       final userResult = await _getAuthenticatedUserUseCase.execute();
       if (!userResult.isSuccess || userResult.data?.user == null) {
         LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
-        emitError(AuthErrorConstants.userIsNotAuthenticated);
-        return;
+        return emitError(AuthErrorConstants.userIsNotAuthenticated);
       }
 
       final currentUser = userResult.data!.user;
@@ -401,6 +403,97 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
     }
   }
 
+  // likeReply -----------------------------------------------------------------
+  Future<void> likeReply(String parentCommentId, String replyId) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [likeReply]");
+
+    final parentIndex = state.comments.indexWhere(
+      (c) => c.id == parentCommentId,
+    );
+
+    if (parentIndex == -1) {
+      LoggerUtility.d(
+        runtimeType.toString(),
+        "Parent comment with id $parentCommentId not found",
+      );
+      return;
+    }
+
+    final parentComment = state.comments[parentIndex];
+
+    final replyIndex = parentComment.replies.indexWhere(
+      (reply) => reply.id == replyId,
+    );
+
+    if (replyIndex == -1) {
+      LoggerUtility.d(
+        runtimeType.toString(),
+        "Reply with id $replyId not found",
+      );
+      return;
+    }
+
+    final originalComments = List<Comment>.from(state.comments);
+    final targetReply = parentComment.replies[replyIndex];
+
+    // Optimistic UI update
+    final updatedReply = targetReply.isLikedByCurrentUser
+        ? targetReply.copyWith(
+            likesCount: targetReply.likesCount > 0
+                ? targetReply.likesCount - 1
+                : 0,
+            isLikedByCurrentUser: false,
+          )
+        : targetReply.copyWith(
+            likesCount: targetReply.likesCount + 1,
+            isLikedByCurrentUser: true,
+          );
+
+    final updatedReplies = List<Comment>.from(parentComment.replies);
+    updatedReplies[replyIndex] = updatedReply;
+
+    final updatedParent = parentComment.copyWith(replies: updatedReplies);
+
+    final optimisticComments = List<Comment>.from(state.comments);
+    optimisticComments[parentIndex] = updatedParent;
+
+    state = state.copyWith(comments: optimisticComments);
+
+    try {
+      final result = await _likeCommentUseCase.execute(state.post.id, replyId);
+
+      if (!result.isSuccess || result.data == null) {
+        // rollback
+        state = state.copyWith(comments: originalComments);
+        return emitError(result.error!.message);
+      }
+
+      final updatedReplyFromServer = result.data!;
+
+      final syncedReplies = List<Comment>.from(
+        optimisticComments[parentIndex].replies,
+      );
+
+      syncedReplies[replyIndex] = updatedReplyFromServer;
+
+      final syncedParent = optimisticComments[parentIndex].copyWith(
+        replies: syncedReplies,
+      );
+
+      final syncedComments = List<Comment>.from(optimisticComments);
+      syncedComments[parentIndex] = syncedParent;
+
+      state = state.copyWith(comments: syncedComments, errorMessage: null);
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "likeReply", e, stack);
+
+      // rollback
+      state = state.copyWith(comments: originalComments);
+
+      emitUnexpectedError();
+    }
+  }
+
   // getComments ---------------------------------------------------------------
   Future<void> getComments(String postId, {bool isLoadMore = false}) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [getComments]");
@@ -495,6 +588,37 @@ class PostInfoViewModel extends BaseViewModel<PostInfoState> {
       );
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "getReplies", e, stack);
+      emitUnexpectedError();
+    }
+  }
+
+  // deletePost ----------------------------------------------------------------
+  Future<void> deletePost(String postId) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [deletePost]");
+
+    // Prevent double taps
+    if (state.isLoading) return;
+
+    setLoading(true);
+
+    try {
+      final result = await _deletePostUseCase.execute(postId);
+
+      if (!result.isSuccess) {
+        return emitError(result.error!.message);
+      }
+
+      // Remove deleted post from main feed
+      ref.read(mainFeedViewModelProvider.notifier).removePostFromList(postId);
+
+      // Add success message for main feed
+      ref
+          .read(mainFeedViewModelProvider.notifier)
+          .setSuccessMessage("Post deleted successfully");
+
+      state = state.copyWith(isLoading: false, errorMessage: null);
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "deletePost", e, stack);
       emitUnexpectedError();
     }
   }

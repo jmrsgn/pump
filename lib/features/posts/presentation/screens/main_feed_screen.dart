@@ -13,6 +13,7 @@ import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/app_drawer.dart';
 import '../../../../core/presentation/widgets/custom_scaffold.dart';
+import '../../../../core/utils/ui_utils.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../widgets/post_widget.dart';
 
@@ -70,6 +71,16 @@ class _MainFeedScreenState extends ConsumerState<MainFeedScreen> {
 
     final posts = feedState.posts;
     final isLoading = userState.isLoading || feedState.isLoading;
+
+    // Listeners
+    ref.listen(mainFeedViewModelProvider, (previous, next) {
+      final successMessage = next.successMessage;
+
+      if (successMessage != null && mounted) {
+        UiUtils.showSnackBarSuccess(context, message: successMessage);
+        _mainFeedViewModel.clearSuccessMessage();
+      }
+    });
 
     return CustomScaffold(
       isLoading: isLoading,

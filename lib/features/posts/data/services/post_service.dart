@@ -152,6 +152,7 @@ class PostService {
     String postId,
     UpdatePostRequest request,
   ) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [updatePost]");
     try {
       final response = await http.put(
         Uri.parse(ApiConstants.getPostInfoUrl(postId)),
@@ -181,6 +182,49 @@ class PostService {
       );
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "updatePost", e, stack);
+      return Result.failure(
+        ApiErrorResponse(
+          status: HttpStatus.internalServerError,
+          message: SystemErrorConstants.internalServerError,
+          error: SystemErrorConstants.anUnexpectedErrorOccurred,
+        ),
+      );
+    }
+  }
+
+  // deletePost ----------------------------------------------------------------
+  Future<Result<void, ApiErrorResponse>> deletePost(
+    String token,
+    String postId,
+  ) async {
+    LoggerUtility.d(runtimeType.toString(), "Execute method: [deletePost]");
+    try {
+      final response = await http.delete(
+        Uri.parse(ApiConstants.getPostInfoUrl(postId)),
+        headers: {
+          ...ApiConstants.headerTypeJson,
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final json = response.body.isEmpty ? {} : jsonDecode(response.body);
+
+      if (response.statusCode == HttpStatus.ok) {
+        return Result.success(null);
+      }
+
+      final errorJson = json['error'] ?? {};
+      final error = ApiErrorResponse.fromJson(errorJson);
+
+      return Result.failure(
+        ApiErrorResponse(
+          status: error.status,
+          message: error.message,
+          error: error.error,
+        ),
+      );
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "deletePost", e, stack);
       return Result.failure(
         ApiErrorResponse(
           status: HttpStatus.internalServerError,

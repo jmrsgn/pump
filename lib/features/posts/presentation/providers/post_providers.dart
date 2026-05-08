@@ -5,6 +5,7 @@ import 'package:pump/features/posts/data/services/comment_service.dart';
 import 'package:pump/features/posts/data/services/post_service.dart';
 import 'package:pump/features/posts/domain/usecases/create_post_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/create_reply_usecase.dart';
+import 'package:pump/features/posts/domain/usecases/delete_post_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_comments_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_posts_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_replies_usecase.dart';
@@ -80,6 +81,10 @@ final likeCommentUseCaseProvider = Provider<LikeCommentUseCase>(
   (ref) => LikeCommentUseCase(ref.watch(commentRepositoryProvider)),
 );
 
+final deletePostUseCaseProvider = Provider<DeletePostUseCase>(
+  (ref) => DeletePostUseCase(ref.watch(postRepositoryProvider)),
+);
+
 final getAuthenticatedUserUseCaseProvider =
     Provider<GetAuthenticatedUserUseCase>(
       (ref) => GetAuthenticatedUserUseCase(ref.watch(userRepositoryProvider)),
@@ -113,5 +118,6 @@ final postInfoViewModelProvider =
         ref.watch(getRepliesUseCaseProvider),
         ref.watch(likePostUseCaseProvider),
         ref.watch(likeCommentUseCaseProvider),
+        ref.watch(deletePostUseCaseProvider),
       );
     });

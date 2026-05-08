@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -14,6 +16,7 @@ import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/custom_scaffold.dart';
 import '../../../../core/routes.dart';
+import '../../../../core/utils/image_picker_utils.dart';
 import '../../../../core/utils/navigation_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
 import '../../domain/entities/post.dart';
@@ -30,6 +33,7 @@ class CreatePostScreen extends ConsumerStatefulWidget {
 class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  File? _selectedImage;
 
   CreatePostViewModel get _createPostViewModel =>
       ref.read(createPostViewModelProvider.notifier);
@@ -51,8 +55,14 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     super.dispose();
   }
 
-  void _onUploadImage() {
-    // TODO: implement
+  Future<void> _onUploadImage() async {
+    final image = await ImagePickerUtils.pickImageFromGallery();
+
+    if (image == null) return;
+
+    setState(() {
+      _selectedImage = image;
+    });
   }
 
   Widget _buildAvatar(User user) {
@@ -117,162 +127,132 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppDimens.dimen20,
+            horizontal: AppDimens.dimen10,
             vertical: AppDimens.dimen16,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Author section
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _buildAvatar(user),
-
-                  UiUtils.addHorizontalSpaceM(),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${user.firstName} ${user.lastName}',
-                          style: AppTextStyles.body.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-
-                        UiUtils.addVerticalSpaceXS(),
-
-                        Text(
-                          widget.post == null
-                              ? AppStrings.creatingANewPost
-                              : AppStrings.editingYourPost,
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppDimens.dimen10,
-                      vertical: AppDimens.dimen6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      AppStrings.public,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              UiUtils.addVerticalSpaceXL(),
-
-              // Title field
-              TextField(
-                controller: _titleController,
-                maxLines: UIConstants.maxLines1,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  hintText: AppStrings.whatsOnYourMind,
-                  hintStyle: AppTextStyles.heading3.copyWith(
-                    color: AppColors.textDisabled,
-                  ),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                style: AppTextStyles.heading3,
-              ),
-
-              UiUtils.addVerticalSpaceM(),
-
-              // Description field
               Expanded(
-                child: TextField(
-                  controller: _descriptionController,
-                  maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
-                  decoration: InputDecoration(
-                    hintText: AppStrings.postDescriptionHint,
-                    hintStyle: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textDisabled,
-                    ),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Author section
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          _buildAvatar(user),
+
+                          UiUtils.addHorizontalSpaceM(),
+
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${user.firstName} ${user.lastName}',
+                                  style: AppTextStyles.body.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+
+                                UiUtils.addVerticalSpaceXS(),
+
+                                Text(
+                                  widget.post == null
+                                      ? AppStrings.creatingANewPost
+                                      : AppStrings.editingYourPost,
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppDimens.dimen10,
+                              vertical: AppDimens.dimen6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              AppStrings.public,
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      UiUtils.addVerticalSpaceXL(),
+
+                      // Title field
+                      TextField(
+                        controller: _titleController,
+                        maxLines: UIConstants.maxLines1,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                          hintText: AppStrings.whatsOnYourMind,
+                          hintStyle: AppTextStyles.heading3.copyWith(
+                            color: AppColors.textDisabled,
+                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        style: AppTextStyles.heading3,
+                      ),
+
+                      if (_selectedImage != null) ...[
+                        UiUtils.addVerticalSpaceS(),
+
+                        Image.file(
+                          _selectedImage!,
+                          width: double.infinity,
+                          height: 220,
+                          fit: BoxFit.cover,
+                        ),
+
+                        UiUtils.addVerticalSpaceM(),
+                      ],
+
+                      // Description field
+                      TextField(
+                        controller: _descriptionController,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction: TextInputAction.newline,
+                        maxLines: null,
+                        textAlignVertical: TextAlignVertical.top,
+                        decoration: InputDecoration(
+                          hintText: AppStrings.postDescriptionHint,
+                          hintStyle: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textDisabled,
+                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                          isCollapsed:
+                              true, // Prevent removing of space when description is too long
+                        ),
+                        style: AppTextStyles.body,
+                      ),
+                    ],
                   ),
-                  style: AppTextStyles.body,
                 ),
               ),
-
-              UiUtils.addVerticalSpaceM(),
-
-              // Upload image button
-              AnimatedSwitcher(
-                duration: Duration(milliseconds: UIConstants.milliseconds180),
-                child: MediaQuery.of(context).viewInsets.bottom > 0
-                    ? Container(
-                        key: const ValueKey("keyboard_toolbar"),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: AppDimens.dimen12,
-                        ),
-                        child: Row(
-                          children: [
-                            InkWell(
-                              borderRadius: BorderRadius.circular(
-                                AppDimens.dimen12,
-                              ),
-                              onTap: _onUploadImage,
-                              child: Container(
-                                padding: const EdgeInsets.all(
-                                  AppDimens.dimen10,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.08,
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                    AppDimens.dimen12,
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.image_outlined,
-                                  color: AppColors.primary,
-                                  size: AppDimens.dimen20,
-                                ),
-                              ),
-                            ),
-
-                            UiUtils.addHorizontalSpaceM(),
-
-                            Expanded(
-                              child: Text(
-                                AppStrings.addImagesToYourPost,
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
+              _buildImagePickerButton(),
             ],
           ),
         ),
@@ -289,5 +269,49 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     } else {
       _createPostViewModel.updatePost(widget.post!.id, title, description);
     }
+  }
+
+  Widget _buildImagePickerButton() {
+    // Upload image button
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: UIConstants.milliseconds180),
+      child: MediaQuery.of(context).viewInsets.bottom > 0
+          ? Container(
+              key: const ValueKey("keyboard_toolbar"),
+              padding: const EdgeInsets.symmetric(vertical: AppDimens.dimen12),
+              child: Row(
+                children: [
+                  InkWell(
+                    borderRadius: BorderRadius.circular(AppDimens.dimen12),
+                    onTap: _onUploadImage,
+                    child: Container(
+                      padding: const EdgeInsets.all(AppDimens.dimen10),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(AppDimens.dimen12),
+                      ),
+                      child: Icon(
+                        Icons.image_outlined,
+                        color: AppColors.primary,
+                        size: AppDimens.dimen20,
+                      ),
+                    ),
+                  ),
+
+                  UiUtils.addHorizontalSpaceM(),
+
+                  Expanded(
+                    child: Text(
+                      AppStrings.addImagesToYourPost,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : const SizedBox.shrink(),
+    );
   }
 }
