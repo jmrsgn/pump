@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pump/core/constants/api/api_constants.dart';
 import 'package:pump/core/constants/app/ui_constants.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/posts/domain/entities/post.dart';
@@ -60,15 +61,15 @@ class _PostWidgetState extends ConsumerState<PostWidget>
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  widget.post.userProfileImageUrl == null ||
-                          widget.post.userProfileImageUrl!.isEmpty
+                  widget.post.authorProfileImageUrl == null ||
+                          widget.post.authorProfileImageUrl!.isEmpty
                       ? CircleAvatar(
                           backgroundColor: AppColors.primary.withValues(
                             alpha: 0.12,
                           ),
                           radius: AppDimens.dimen16,
                           child: Text(
-                            widget.post.userName[0],
+                            widget.post.author[0],
                             style: AppTextStyles.body.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,
@@ -77,7 +78,7 @@ class _PostWidgetState extends ConsumerState<PostWidget>
                         )
                       : CircleAvatar(
                           backgroundImage: AssetImage(
-                            widget.post.userProfileImageUrl!,
+                            widget.post.authorProfileImageUrl!,
                           ),
                           radius: AppDimens.dimen16,
                         ),
@@ -91,7 +92,7 @@ class _PostWidgetState extends ConsumerState<PostWidget>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          widget.post.userName,
+                          widget.post.author,
                           style: AppTextStyles.body.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -177,32 +178,61 @@ class _PostWidgetState extends ConsumerState<PostWidget>
   }
 
   Widget _buildPostInfo() {
+    final hasTitle = widget.post.title.isNotEmpty;
+    final hasMedia =
+        widget.post.mediaUrl != null && widget.post.mediaUrl!.isNotEmpty;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: widget.onPostInfoTap,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(AppDimens.dimen4),
-        child: widget.post.title.isEmpty
-            ? Text(
-                widget.post.description,
-                style: AppTextStyles.body,
-                maxLines: UIConstants.maxLines3,
-                overflow: TextOverflow.ellipsis,
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(widget.post.title, style: AppTextStyles.heading3),
-                  UiUtils.addVerticalSpaceS(),
-                  Text(
-                    widget.post.description,
-                    style: AppTextStyles.body,
-                    maxLines: UIConstants.maxLines3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title
+            if (hasTitle) ...[
+              Text(widget.post.title, style: AppTextStyles.heading3),
+
+              UiUtils.addVerticalSpaceS(),
+            ],
+
+            // Description
+            Text(
+              widget.post.description,
+              style: AppTextStyles.body,
+              maxLines: UIConstants.maxLines3,
+              overflow: TextOverflow.ellipsis,
+            ),
+
+            // Media
+            if (hasMedia) ...[
+              UiUtils.addVerticalSpaceM(),
+
+              Image.network(
+                '${ApiConstants.socialServiceHost}${widget.post.mediaUrl!}',
+                width: double.infinity,
+                height: 220,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 220,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(AppDimens.dimen12),
+                    ),
+                    child: Text(
+                      "Failed to load image",
+                      style: AppTextStyles.bodySmall,
+                    ),
+                  );
+                },
               ),
+            ],
+          ],
+        ),
       ),
     );
   }

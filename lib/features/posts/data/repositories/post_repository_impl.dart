@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:pump/core/constants/error/auth_error_constants.dart';
 import 'package:pump/core/constants/error/system_error_constants.dart';
 import 'package:pump/core/data/dto/response/paged_response.dart';
@@ -23,12 +25,14 @@ class PostRepositoryImpl implements PostRepository {
   Future<Result<Post, AppError>> createPost(
     String title,
     String description,
+    File? image,
   ) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [createPost]");
 
     try {
       // Get authenticated user
       final userResult = await _userRepositoryImpl.getAuthenticatedUser();
+
       if (!userResult.isSuccess || userResult.data == null) {
         LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
         return Result.failure(
@@ -41,6 +45,7 @@ class PostRepositoryImpl implements PostRepository {
       final createPostResult = await _postService.createPost(
         userResult.data!.token,
         request,
+        image,
       );
 
       if (!createPostResult.isSuccess) {
@@ -55,6 +60,7 @@ class PostRepositoryImpl implements PostRepository {
       return Result.success(response?.toPost());
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "createPost", e, stack);
+
       return Result.failure(
         AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );
@@ -80,6 +86,7 @@ class PostRepositoryImpl implements PostRepository {
         userResult.data!.token,
         page,
       );
+
       if (!postResult.isSuccess || postResult.data == null) {
         return Result.failure(
           AppError(

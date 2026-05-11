@@ -15,6 +15,7 @@ import 'package:pump/features/posts/presentation/providers/post_providers.dart';
 import 'package:pump/features/posts/presentation/viewmodels/post_info_viewmodel.dart';
 import 'package:pump/features/posts/presentation/widgets/comment_widget.dart';
 
+import '../../../../core/constants/api/api_constants.dart';
 import '../../../../core/constants/app/app_strings.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/app_text_input.dart';
@@ -102,15 +103,19 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
         backgroundColor: AppColors.surface,
         body: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(AppDimens.dimen8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Expanded(
+              child: ListView(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(AppDimens.dimen8),
                 children: [
                   _buildHeader(post, relativeTime),
+
                   UiUtils.addVerticalSpaceM(),
+
                   _buildPostInfo(post),
+
                   UiUtils.addVerticalSpaceM(),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -119,77 +124,99 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
                       _buildShareButton(),
                     ],
                   ),
+
                   UiUtils.addVerticalSpaceL(),
+
                   _buildLikesAndShares(post),
+
+                  UiUtils.addVerticalSpaceL(),
+
+                  ...state.comments.map(
+                    (comment) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CommentWidget(
+                          comment: comment,
+                          isReplying: state.commentReplyingTo?.id == comment.id,
+
+                          onReply: (selectedComment) {
+                            _postInfoViewModel.setCommentReplyingTo(
+                              selectedComment,
+                            );
+
+                            if (!comment.isRepliesLoaded &&
+                                comment.repliesCount > 0) {
+                              _postInfoViewModel.getReplies(
+                                post.id,
+                                comment.id,
+                              );
+                            }
+
+                            _focusNode.requestFocus();
+
+                            _commentController.text =
+                                "@${selectedComment.author} ";
+
+                            _commentController.selection =
+                                TextSelection.fromPosition(
+                                  TextPosition(
+                                    offset: _commentController.text.length,
+                                  ),
+                                );
+
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (_scrollController.hasClients) {
+                                _scrollController.animateTo(
+                                  _scrollController.position.maxScrollExtent,
+                                  duration: Duration(
+                                    milliseconds: UIConstants.milliseconds350,
+                                  ),
+                                  curve: Curves.easeOut,
+                                );
+                              }
+                            });
+                          },
+
+                          onLikeTap: () =>
+                              _postInfoViewModel.likeComment(comment.id),
+                        ),
+
+                        if (comment.repliesCount > 0 ||
+                            comment.replies.isNotEmpty)
+                          _buildCommentReplies(
+                            comment: comment,
+                            replies: comment.replies,
+                            postId: post.id,
+                            state: state,
+                          ),
+                      ],
+                    ),
+                  ),
+
+                  UiUtils.addVerticalSpaceM(),
                 ],
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimens.dimen8,
-                ),
-                itemCount: state.comments.length,
-                itemBuilder: (context, index) {
-                  final comment = state.comments[index];
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CommentWidget(
-                        comment: comment,
-                        isReplying: state.commentReplyingTo?.id == comment.id,
-                        onReply: (selectedComment) {
-                          _postInfoViewModel.setCommentReplyingTo(
-                            selectedComment,
-                          );
+            SafeArea(
+              top: false,
+              child: AppTextInput(
+                controller: _commentController,
+                focusNode: _focusNode,
 
-                          if (!comment.isRepliesLoaded &&
-                              comment.repliesCount > 0) {
-                            _postInfoViewModel.getReplies(post.id, comment.id);
-                          }
-
-                          _focusNode.requestFocus();
-
-                          _commentController.text =
-                              "@${selectedComment.author} ";
-
-                          _commentController.selection =
-                              TextSelection.fromPosition(
-                                TextPosition(
-                                  offset: _commentController.text.length,
-                                ),
-                              );
-                        },
-                        onLikeTap: () =>
-                            _postInfoViewModel.likeComment(comment.id),
-                      ),
-                      if (comment.repliesCount > 0 ||
-                          comment.replies.isNotEmpty)
-                        _buildCommentReplies(
-                          comment: comment,
-                          replies: comment.replies,
-                          postId: post.id,
-                          state: state,
-                        ),
-                    ],
+                onSend: () {
+                  _postInfoViewModel.createComment(
+                    post.id,
+                    _commentController.text.trim(),
                   );
+
+                  _commentController.clear();
+
+                  _focusNode.unfocus();
                 },
+
+                onAttach: () {},
               ),
-            ),
-            AppTextInput(
-              controller: _commentController,
-              focusNode: _focusNode,
-              onSend: () {
-                _postInfoViewModel.createComment(
-                  post.id,
-                  _commentController.text.trim(),
-                );
-                _commentController.clear();
-                _focusNode.unfocus();
-              },
-              onAttach: () {},
             ),
           ],
         ),
@@ -263,7 +290,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
   }
 
   Widget _buildHeader(Post post, String relativeTime) {
-    final initial = post.userName.isNotEmpty ? post.userName[0] : '?';
+    final initial = post.author.isNotEmpty ? post.author[0] : '?';
 
     return Row(
       children: [
@@ -283,7 +310,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              post.userName,
+              post.author,
               style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
             ),
             Text(
@@ -310,6 +337,9 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
   }
 
   Widget _buildPostInfo(Post post) {
+    final hasMedia =
+        widget.post.mediaUrl != null && widget.post.mediaUrl!.isNotEmpty;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppDimens.dimen4),
@@ -321,6 +351,34 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
                 Text(post.title, style: AppTextStyles.heading3),
                 UiUtils.addVerticalSpaceS(),
                 Text(post.description, style: AppTextStyles.body),
+
+                // Media
+                if (hasMedia) ...[
+                  UiUtils.addVerticalSpaceM(),
+
+                  Image.network(
+                    '${ApiConstants.socialServiceHost}${widget.post.mediaUrl!}',
+                    width: double.infinity,
+                    height: 220,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 220,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(
+                            AppDimens.dimen12,
+                          ),
+                        ),
+                        child: Text(
+                          "Failed to load image",
+                          style: AppTextStyles.bodySmall,
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ],
             ),
     );
@@ -382,21 +440,39 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
   }
 
   Widget _buildCommentButton() {
-    return Row(
-      children: [
-        Icon(
-          FontAwesomeIcons.comment,
-          color: AppColors.textDisabled,
-          size: AppDimens.dimen16,
-        ),
-        UiUtils.addHorizontalSpaceS(),
-        Text(
-          AppStrings.comment,
-          style: AppTextStyles.bodySmall.copyWith(
+    return InkWell(
+      onTap: () {
+        _focusNode.requestFocus();
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: Duration(milliseconds: UIConstants.milliseconds350),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+      },
+      borderRadius: BorderRadius.circular(AppDimens.dimen4),
+      child: Row(
+        children: [
+          Icon(
+            FontAwesomeIcons.comment,
             color: AppColors.textDisabled,
+            size: AppDimens.dimen16,
           ),
-        ),
-      ],
+
+          UiUtils.addHorizontalSpaceS(),
+
+          Text(
+            AppStrings.comment,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textDisabled,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

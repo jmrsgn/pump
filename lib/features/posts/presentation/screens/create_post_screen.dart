@@ -214,19 +214,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         style: AppTextStyles.heading3,
                       ),
 
-                      if (_selectedImage != null) ...[
-                        UiUtils.addVerticalSpaceS(),
-
-                        Image.file(
-                          _selectedImage!,
-                          width: double.infinity,
-                          height: 220,
-                          fit: BoxFit.cover,
-                        ),
-
-                        UiUtils.addVerticalSpaceM(),
-                      ],
-
                       // Description field
                       TextField(
                         controller: _descriptionController,
@@ -248,6 +235,17 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         ),
                         style: AppTextStyles.body,
                       ),
+
+                      if (_selectedImage != null) ...[
+                        UiUtils.addVerticalSpaceM(),
+
+                        Image.file(
+                          _selectedImage!,
+                          width: double.infinity,
+                          height: 220,
+                          fit: BoxFit.cover,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -265,7 +263,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     final description = _descriptionController.text.trim();
 
     if (widget.post == null) {
-      _createPostViewModel.createPost(title, description);
+      _createPostViewModel.createPost(title, description, _selectedImage);
     } else {
       _createPostViewModel.updatePost(widget.post!.id, title, description);
     }

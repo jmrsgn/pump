@@ -4,8 +4,10 @@ class Post {
   final String id;
   final String title;
   final String description;
-  final String userName;
-  final String? userProfileImageUrl;
+  final String author;
+  final String? authorProfileImageUrl;
+  final String? mediaUrl;
+  final String? mediaType;
   final DateTime createdAt;
   final DateTime updatedAt;
   final int likesCount;
@@ -19,8 +21,10 @@ class Post {
     required this.id,
     required this.title,
     required this.description,
-    required this.userName,
-    required this.userProfileImageUrl,
+    required this.author,
+    required this.authorProfileImageUrl,
+    this.mediaUrl,
+    this.mediaType,
     required this.createdAt,
     required this.updatedAt,
     required this.likesCount,
@@ -35,8 +39,10 @@ class Post {
     String? id,
     String? title,
     String? description,
-    String? userName,
-    String? userProfileImageUrl,
+    String? author,
+    String? authorProfileImageUrl,
+    String? mediaUrl,
+    String? mediaType,
     DateTime? createdAt,
     DateTime? updatedAt,
     int? likesCount,
@@ -50,8 +56,11 @@ class Post {
       id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
-      userName: userName ?? this.userName,
-      userProfileImageUrl: userProfileImageUrl ?? this.userProfileImageUrl,
+      author: author ?? this.author,
+      authorProfileImageUrl:
+          authorProfileImageUrl ?? this.authorProfileImageUrl,
+      mediaUrl: mediaUrl ?? this.mediaUrl,
+      mediaType: mediaType ?? this.mediaType,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       likesCount: likesCount ?? this.likesCount,
@@ -67,8 +76,8 @@ class Post {
     id: '',
     title: '',
     description: '',
-    userName: '',
-    userProfileImageUrl: null,
+    author: '',
+    authorProfileImageUrl: null,
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
     likesCount: 0,

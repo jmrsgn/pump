@@ -64,16 +64,33 @@ class PostService {
   Future<Result<PostResponse, ApiErrorResponse>> createPost(
     String token,
     CreatePostRequest request,
+    File? image,
   ) async {
     try {
-      final response = await http.post(
+      final multipartRequest = http.MultipartRequest(
+        'POST',
         Uri.parse(ApiConstants.postUrl),
-        headers: {
-          ...ApiConstants.headerTypeJson,
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(request.toJson()),
       );
+
+      // Headers
+      multipartRequest.headers.addAll({'Authorization': 'Bearer $token'});
+
+      // Fields
+      multipartRequest.fields['title'] = request.title;
+      multipartRequest.fields['description'] = request.description;
+
+      // Image
+      if (image != null) {
+        multipartRequest.files.add(
+          await http.MultipartFile.fromPath('image', image.path),
+        );
+      }
+
+      // Send request
+      final streamedResponse = await multipartRequest.send();
+
+      // Convert streamed response
+      final response = await http.Response.fromStream(streamedResponse);
 
       final json = response.body.isEmpty ? {} : jsonDecode(response.body);
 
@@ -83,7 +100,9 @@ class PostService {
       }
 
       final errorJson = json['error'] ?? {};
+
       final error = ApiErrorResponse.fromJson(errorJson);
+
       return Result.failure(
         ApiErrorResponse(
           status: error.status,
@@ -93,6 +112,7 @@ class PostService {
       );
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "createPost", e, stack);
+
       return Result.failure(
         ApiErrorResponse(
           status: HttpStatus.internalServerError,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:pump/core/errors/app_error.dart';
 import 'package:pump/features/posts/domain/entities/post.dart';
 
@@ -12,7 +14,8 @@ class CreatePostUseCase {
   Future<Result<Post, AppError>> execute(
     String title,
     String description,
+    File? image,
   ) async {
-    return await _postRepository.createPost(title, description);
+    return await _postRepository.createPost(title, description, image);
   }
 }

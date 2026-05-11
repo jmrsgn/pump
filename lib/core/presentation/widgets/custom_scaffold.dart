@@ -106,6 +106,7 @@ class CustomScaffold extends StatelessWidget {
         ],
       ),
       floatingActionButton: floatingActionButton,
+      resizeToAvoidBottomInset: true,
     );
   }
 }
