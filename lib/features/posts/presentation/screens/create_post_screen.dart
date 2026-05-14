@@ -214,6 +214,8 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         style: AppTextStyles.heading3,
                       ),
 
+                      UiUtils.addVerticalSpaceS(),
+
                       // Description field
                       TextField(
                         controller: _descriptionController,
@@ -279,15 +281,21 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               padding: const EdgeInsets.symmetric(vertical: AppDimens.dimen12),
               child: Row(
                 children: [
+                  // Upload image
                   InkWell(
                     borderRadius: BorderRadius.circular(AppDimens.dimen12),
+
                     onTap: _onUploadImage,
+
                     child: Container(
                       padding: const EdgeInsets.all(AppDimens.dimen10),
+
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.08),
+
                         borderRadius: BorderRadius.circular(AppDimens.dimen12),
                       ),
+
                       child: Icon(
                         Icons.image_outlined,
                         color: AppColors.primary,
@@ -298,9 +306,59 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
                   UiUtils.addHorizontalSpaceM(),
 
+                  // AI caption
+                  InkWell(
+                    borderRadius: BorderRadius.circular(AppDimens.dimen12),
+
+                    onTap: _onGenerateCaption,
+
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimens.dimen14,
+                        vertical: AppDimens.dimen10,
+                      ),
+
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.primary,
+                            AppColors.primary.withValues(alpha: 0.75),
+                          ],
+                        ),
+
+                        borderRadius: BorderRadius.circular(AppDimens.dimen12),
+                      ),
+
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            FontAwesomeIcons.wandMagicSparkles,
+                            color: Colors.white,
+                            size: AppDimens.dimen14,
+                          ),
+
+                          UiUtils.addHorizontalSpaceS(),
+
+                          Text(
+                            AppStrings.generateCaption,
+                            style: AppTextStyles.caption.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  UiUtils.addHorizontalSpaceM(),
+
                   Expanded(
                     child: Text(
-                      AppStrings.addImagesToYourPost,
+                      _selectedImage == null
+                          ? AppStrings.addImagesToYourPost
+                          : AppStrings.aiCanGenerateCaption,
                       style: AppTextStyles.caption.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -310,6 +368,13 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               ),
             )
           : const SizedBox.shrink(),
+    );
+  }
+
+  void _onGenerateCaption() {
+    UiUtils.showSnackBarSuccess(
+      context,
+      message: "AI Caption Generator coming soon ✨",
     );
   }
 }

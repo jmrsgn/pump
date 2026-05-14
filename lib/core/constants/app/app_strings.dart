@@ -142,6 +142,9 @@ class AppStrings {
   static const createPost = "Create post";
   static const creatingANewPost = "Creating a new post";
   static const editingYourPost = "Editing your post";
+  static const generateCaption = "Generate caption";
+  static const aiCanGenerateCaption =
+      "AI can generate a caption from your image";
   static const whatsOnYourMind = "What's on your mind?";
   static const addImagesToYourPost = "Add images to your post";
   static const postDescriptionHint =
