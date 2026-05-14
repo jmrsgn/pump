@@ -24,14 +24,14 @@ class ApiConstants {
   static const String profileUrl = "$socialServiceBaseUrl/user/profile";
 
   // Post
-  static const String postUrl = "$socialServiceBaseUrl/post";
+  static const String postUrl = "$socialServiceBaseUrl/posts";
 
   static String getPostInfoUrl(String postId) => "$postUrl/$postId";
 
   static String getLikePostUrl(String postId) => "$postUrl/$postId/like";
 
   // Comment
-  static String getCommentsUrl(String postId) => "$postUrl/$postId/comment";
+  static String getCommentsUrl(String postId) => "$postUrl/$postId/comments";
 
   static String getCommentRepliesUrl(String postId, String commentId) =>
       "${getCommentsUrl(postId)}/$commentId/replies";

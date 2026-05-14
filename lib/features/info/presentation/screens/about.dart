@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pump/core/constants/app/app_constants.dart';
 import 'package:pump/core/utils/ui_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';
@@ -535,6 +536,7 @@ class AboutScreen extends StatelessWidget {
             icon: Icons.email_outlined,
             title: AppStrings.email,
             subtitle: AppStrings.devEmail,
+            onTap: _launchEmail,
           ),
 
           UiUtils.addVerticalSpaceM(),
@@ -543,6 +545,7 @@ class AboutScreen extends StatelessWidget {
             icon: Icons.call_outlined,
             title: AppStrings.phone,
             subtitle: AppStrings.devMobileNo,
+            onTap: _launchPhone,
           ),
 
           UiUtils.addVerticalSpaceM(),
@@ -551,6 +554,7 @@ class AboutScreen extends StatelessWidget {
             icon: FontAwesomeIcons.github,
             title: AppStrings.github,
             subtitle: AppStrings.devGithubUsername,
+            onTap: _launchGithub,
           ),
         ],
       ),
@@ -561,56 +565,79 @@ class AboutScreen extends StatelessWidget {
     required IconData icon,
     required String title,
     required String subtitle,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(AppDimens.dimen16),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(AppDimens.dimen16),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppDimens.dimen12),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppDimens.dimen12),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppDimens.dimen16),
+      child: Container(
+        padding: const EdgeInsets.all(AppDimens.dimen16),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(AppDimens.dimen16),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppDimens.dimen12),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppDimens.dimen12),
+              ),
+              child: Icon(
+                icon,
+                color: AppColors.primary,
+                size: AppDimens.dimen20,
+              ),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.primary,
-              size: AppDimens.dimen20,
-            ),
-          ),
 
-          UiUtils.addHorizontalSpaceM(),
+            UiUtils.addHorizontalSpaceM(),
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.bold,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.body.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
 
-                UiUtils.addVerticalSpaceXS(),
+                  UiUtils.addVerticalSpaceXS(),
 
-                Text(subtitle, style: AppTextStyles.caption),
-              ],
+                  Text(subtitle, style: AppTextStyles.caption),
+                ],
+              ),
             ),
-          ),
 
-          Icon(
-            Icons.open_in_new,
-            size: AppDimens.dimen18,
-            color: AppColors.textDisabled,
-          ),
-        ],
+            Icon(
+              Icons.open_in_new,
+              size: AppDimens.dimen18,
+              color: AppColors.textDisabled,
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _launchEmail() async {
+    final Uri emailUri = Uri.parse('mailto:${AppStrings.devEmail}');
+    await launchUrl(emailUri);
+  }
+
+  Future<void> _launchPhone() async {
+    final sanitizedPhoneNumber = AppStrings.devMobileNo.replaceAll(' ', '');
+    final Uri phoneUri = Uri.parse('tel:$sanitizedPhoneNumber');
+    await launchUrl(phoneUri);
+  }
+
+  Future<void> _launchGithub() async {
+    final Uri githubUri = Uri.parse(
+      'https://github.com/${AppStrings.devGithubUsername}',
+    );
+    await launchUrl(githubUri, mode: LaunchMode.externalApplication);
   }
 }
