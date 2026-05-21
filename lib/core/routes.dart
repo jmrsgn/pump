@@ -12,6 +12,7 @@ import 'package:pump/features/posts/presentation/screens/create_post_screen.dart
 import 'package:pump/features/posts/presentation/screens/liked_posts_screen.dart';
 import 'package:pump/features/posts/presentation/screens/post_info_screen.dart';
 
+import '../features/coaching/presentation/screens/enroll_client_screen.dart';
 import '../features/info/presentation/screens/about.dart';
 import '../features/posts/domain/entities/post.dart';
 import '../features/posts/presentation/screens/main_feed_screen.dart';
@@ -28,6 +29,7 @@ class AppRoutes {
   // Coaching
   static const String coaching = '/coaching';
   static const String clientOverview = '/client_overview';
+  static const String enrollClient = '/enroll_client';
 
   // Posts
   static const String mainFeed = '/main_feed';
@@ -81,6 +83,8 @@ class AppRoutes {
           return MaterialPageRoute(
             builder: (_) => const ClientOverviewScreen(),
           );
+        case enrollClient:
+          return MaterialPageRoute(builder: (_) => const EnrollClientScreen());
         case mainFeed:
           return MaterialPageRoute(builder: (_) => MainFeedScreen());
         case likedPosts:
