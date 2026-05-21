@@ -126,7 +126,7 @@ class AppDrawer extends StatelessWidget {
                 )
               : CircleAvatar(
                   backgroundImage: AssetImage(currentUser.profileImageUrl),
-                  radius: AppDimens.dimen40,
+                  radius: AppDimens.dimen48,
                 ),
 
           UiUtils.addHorizontalSpaceL(),

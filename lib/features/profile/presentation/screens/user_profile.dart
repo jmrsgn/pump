@@ -137,25 +137,12 @@ class UserProfileScreen extends StatelessWidget {
               color: AppColors.success.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(999),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.circle,
-                  color: AppColors.success,
-                  size: AppDimens.dimen8,
-                ),
-
-                UiUtils.addHorizontalSpaceXS(),
-
-                Text(
-                  AppStrings.active,
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.success,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+            child: Text(
+              AppStrings.active,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.success,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

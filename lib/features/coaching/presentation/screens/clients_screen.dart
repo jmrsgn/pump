@@ -212,7 +212,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
           borderRadius: BorderRadius.circular(AppDimens.dimen24),
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _buildProfileAvatar(name: name, profileImageUrl: profileImageUrl),
 
@@ -234,6 +234,32 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                           ),
                         ),
                       ),
+
+                      UiUtils.addHorizontalSpaceM(),
+
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppDimens.dimen10,
+                          vertical: AppDimens.dimen4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isActive
+                              ? AppColors.success.withValues(alpha: 0.12)
+                              : AppColors.error.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(
+                            AppDimens.dimen50,
+                          ),
+                        ),
+                        child: Text(
+                          status,
+                          style: AppTextStyles.caption.copyWith(
+                            color: isActive
+                                ? AppColors.success
+                                : AppColors.error,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
 
@@ -244,29 +270,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                     ),
                   ),
 
-                  UiUtils.addVerticalSpaceXS(),
-
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: AppDimens.dimen10,
-                      vertical: AppDimens.dimen4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isActive
-                          ? AppColors.success.withValues(alpha: 0.12)
-                          : AppColors.error.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(AppDimens.dimen50),
-                    ),
-                    child: Text(
-                      status,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: isActive ? AppColors.success : AppColors.error,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-
-                  UiUtils.addVerticalSpaceXL(),
+                  UiUtils.addVerticalSpaceM(),
 
                   Row(
                     children: [
@@ -286,14 +290,6 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                 ],
               ),
             ),
-
-            UiUtils.addHorizontalSpaceS(),
-
-            Icon(
-              FontAwesomeIcons.chevronRight,
-              size: AppDimens.dimen14,
-              color: AppColors.primary,
-            ),
           ],
         ),
       ),
@@ -306,19 +302,19 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
   }) {
     if (profileImageUrl.isEmpty) {
       return CircleAvatar(
-        radius: AppDimens.dimen28,
-        backgroundColor: AppColors.primary,
+        radius: AppDimens.dimen36,
+        backgroundColor: AppColors.primary.withValues(alpha: 0.12),
         child: Text(
           name[0],
-          style: AppTextStyles.bodyLarge.copyWith(
-            color: Colors.white,
+          style: AppTextStyles.heading2.copyWith(
+            color: AppColors.primary,
             fontWeight: FontWeight.w700,
           ),
         ),
       );
     }
     return CircleAvatar(
-      radius: AppDimens.dimen28,
+      radius: AppDimens.dimen36,
       backgroundImage: AssetImage(profileImageUrl),
     );
   }
