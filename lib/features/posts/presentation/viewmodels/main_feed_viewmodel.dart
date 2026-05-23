@@ -1,11 +1,11 @@
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/features/posts/domain/usecases/get_posts_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_post_usecase.dart';
-import 'package:pump/features/posts/presentation/providers/main_feed_state.dart';
 
 import '../../../../core/utilities/logger_utility.dart';
-import '../../domain/entities/post.dart';
+import '../../domain/entity/post.dart';
 import '../../domain/helpers/post_comment_helper.dart';
+import '../state/main_feed_state.dart';
 
 class MainFeedViewModel extends BaseViewModel<MainFeedState> {
   final GetPostsUseCase _getPostsUseCase;

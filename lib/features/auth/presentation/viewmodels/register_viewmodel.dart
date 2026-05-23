@@ -3,7 +3,7 @@ import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 
 import '../../../../core/constants/app/ui_constants.dart';
-import '../../../../core/presentation/providers/ui_state.dart';
+import '../../../../core/presentation/state/ui_state.dart';
 import '../../domain/usecases/register_usecase.dart';
 
 class RegisterViewModel extends BaseViewModel<UiState> {
@@ -21,14 +21,14 @@ class RegisterViewModel extends BaseViewModel<UiState> {
   // ---------------------------------------------------------------------------
 
   // register ------------------------------------------------------------------
-  Future<void> register(
-    String firstName,
-    String lastName,
-    String email,
-    String phone,
-    int role,
-    String password,
-  ) async {
+  Future<void> register({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String? phone,
+    required int? role,
+    required String password,
+  }) async {
     LoggerUtility.d(runtimeType.toString(), "Execute method: [register]");
 
     // Prevent double taps
@@ -42,7 +42,7 @@ class RegisterViewModel extends BaseViewModel<UiState> {
       email,
       phone,
       password,
-    ].any((e) => e.trim().isEmpty)) {
+    ].any((e) => e!.trim().isEmpty)) {
       emitError(ValidationErrorConstants.allFieldsAreRequired);
       return;
     }
@@ -62,8 +62,8 @@ class RegisterViewModel extends BaseViewModel<UiState> {
         firstName,
         lastName,
         email,
-        phone,
-        role,
+        phone!,
+        role!,
         password,
       );
 

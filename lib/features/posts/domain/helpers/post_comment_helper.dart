@@ -1,5 +1,5 @@
-import '../entities/comment.dart';
-import '../entities/post.dart';
+import '../entity/comment.dart';
+import '../entity/post.dart';
 
 class PostCommentHelper {
   PostCommentHelper._();

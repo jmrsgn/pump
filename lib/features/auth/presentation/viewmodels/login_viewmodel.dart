@@ -3,7 +3,7 @@ import 'package:pump/core/constants/error/validation_error_constants.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 
-import '../../../../core/presentation/providers/ui_state.dart';
+import '../../../../core/presentation/state/ui_state.dart';
 import '../../domain/usecases/login_usecase.dart';
 
 class LoginViewModel extends BaseViewModel<UiState> {

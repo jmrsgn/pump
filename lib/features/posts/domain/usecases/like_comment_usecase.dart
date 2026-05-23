@@ -1,5 +1,5 @@
-import 'package:pump/features/posts/domain/entities/comment.dart';
-import 'package:pump/features/posts/domain/repositories/comment_repository.dart';
+import 'package:pump/features/posts/domain/entity/comment.dart';
+import 'package:pump/features/posts/domain/repository/comment_repository.dart';
 
 import '../../../../core/data/dto/response/result.dart';
 import '../../../../core/errors/app_error.dart';

@@ -6,7 +6,7 @@ import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 
 import '../../constants/app/app_dimens.dart';
-import '../../domain/entities/user.dart';
+import '../../domain/entity/user.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 

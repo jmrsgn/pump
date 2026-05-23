@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:pump/core/constants/error/validation_error_constants.dart';
-import 'package:pump/core/presentation/providers/ui_state.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/features/posts/domain/usecases/create_post_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/update_post_usecase.dart';
 
+import '../../../../core/presentation/state/ui_state.dart';
 import '../../../../core/utilities/logger_utility.dart';
 
 class CreatePostViewModel extends BaseViewModel<UiState> {

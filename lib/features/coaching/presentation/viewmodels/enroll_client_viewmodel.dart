@@ -1,0 +1,95 @@
+import 'package:pump/core/presentation/state/ui_state.dart';
+import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
+import 'package:pump/features/coaching/domain/usecases/create_client_user_usecase.dart';
+
+import '../../../../core/constants/error/validation_error_constants.dart';
+import '../../../../core/utilities/logger_utility.dart';
+import '../../enums/activity_level.dart';
+import '../../enums/fitness_goal.dart';
+import '../../enums/gender.dart';
+
+class EnrollClientViewModel extends BaseViewModel<UiState> {
+  final CreateClientUserUseCase _createClientUserUseCase;
+
+  EnrollClientViewModel(this._createClientUserUseCase)
+    : super(UiState.initial());
+
+  @override
+  UiState copyWithState({bool? isLoading, String? errorMessage}) {
+    return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
+  }
+
+  // createClientUser ----------------------------------------------------------
+  Future<void> createClientUser({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String phone,
+    required profileImageUrl,
+    required Gender? gender,
+    required DateTime? birthDate,
+    required double heightCm,
+    required double currentWeight,
+    required double goalWeight,
+    required ActivityLevel activityLevel,
+    required FitnessGoal fitnessGoal,
+  }) async {
+    LoggerUtility.d(
+      runtimeType.toString(),
+      "Execute method: [createClientUser]",
+    );
+
+    // Prevent double taps
+    if (state.isLoading) return;
+
+    setLoading(true);
+
+    // Validate text fields
+    if ([firstName, lastName].any((e) => e.trim().isEmpty)) {
+      emitError(ValidationErrorConstants.allFieldsAreRequired);
+      return;
+    }
+
+    // Validate nullable required selections
+    if ([gender, birthDate, activityLevel, fitnessGoal].any((e) => e == null)) {
+      emitError(ValidationErrorConstants.allFieldsAreRequired);
+      return;
+    }
+
+    // Validate numeric fields
+    if ([heightCm, currentWeight, goalWeight].any((e) => e <= 0)) {
+      emitError(ValidationErrorConstants.allFieldsAreRequired);
+      return;
+    }
+
+    try {
+      final result = await _createClientUserUseCase.execute(
+        firstName,
+        lastName,
+        profileImageUrl,
+        gender,
+        birthDate,
+        heightCm,
+        currentWeight,
+        goalWeight,
+        activityLevel,
+        fitnessGoal,
+      );
+
+      if (result.isSuccess) {
+        state = state.copyWith(isLoading: false, errorMessage: null);
+      } else {
+        LoggerUtility.d(
+          runtimeType.toString(),
+          "createClientUser",
+          result.error!.message,
+        );
+
+        emitError(result.error!.message);
+      }
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "createClientUser", e, stack);
+      emitUnexpectedError();
+    }
+  }
+}

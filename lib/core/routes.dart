@@ -14,10 +14,10 @@ import 'package:pump/features/posts/presentation/screens/post_info_screen.dart';
 
 import '../features/coaching/presentation/screens/enroll_client_screen.dart';
 import '../features/info/presentation/screens/about.dart';
-import '../features/posts/domain/entities/post.dart';
+import '../features/posts/domain/entity/post.dart';
 import '../features/posts/presentation/screens/main_feed_screen.dart';
 import '../features/profile/presentation/screens/user_profile.dart';
-import 'domain/entities/user.dart';
+import 'domain/entity/user.dart';
 
 class AppRoutes {
   AppRoutes._();

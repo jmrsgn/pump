@@ -9,9 +9,6 @@ import 'package:pump/core/routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/time_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
-import 'package:pump/features/posts/domain/entities/post.dart';
-import 'package:pump/features/posts/presentation/providers/post_info_state.dart';
-import 'package:pump/features/posts/presentation/providers/post_providers.dart';
 import 'package:pump/features/posts/presentation/viewmodels/post_info_viewmodel.dart';
 import 'package:pump/features/posts/presentation/widgets/comment_widget.dart';
 
@@ -19,7 +16,10 @@ import '../../../../core/constants/api/api_constants.dart';
 import '../../../../core/constants/app/app_strings.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/app_text_input.dart';
-import '../../domain/entities/comment.dart';
+import '../../domain/entity/comment.dart';
+import '../../domain/entity/post.dart';
+import '../provider/post_providers.dart';
+import '../state/post_info_state.dart';
 
 class PostInfoScreen extends ConsumerStatefulWidget {
   final Post post;
@@ -155,7 +155,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
                             _focusNode.requestFocus();
 
                             _commentController.text =
-                                "@${selectedComment.author} ";
+                                "@${selectedComment.author}";
 
                             _commentController.selection =
                                 TextSelection.fromPosition(

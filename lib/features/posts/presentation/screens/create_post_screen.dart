@@ -4,14 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pump/core/constants/app/ui_constants.dart';
-import 'package:pump/core/domain/entities/user.dart';
-import 'package:pump/features/posts/presentation/providers/post_providers.dart';
+import 'package:pump/core/domain/entity/user.dart';
 import 'package:pump/features/posts/presentation/viewmodels/create_post_viewmodel.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';
-import '../../../../core/presentation/providers/ui_state.dart';
-import '../../../../core/presentation/providers/user_providers.dart';
+import '../../../../core/presentation/provider/user_providers.dart';
+import '../../../../core/presentation/state/ui_state.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/custom_scaffold.dart';
@@ -19,7 +18,8 @@ import '../../../../core/routes.dart';
 import '../../../../core/utils/image_picker_utils.dart';
 import '../../../../core/utils/navigation_utils.dart';
 import '../../../../core/utils/ui_utils.dart';
-import '../../domain/entities/post.dart';
+import '../../domain/entity/post.dart';
+import '../provider/post_providers.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
   final Post? post;

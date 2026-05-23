@@ -3,7 +3,7 @@ import 'package:pump/core/utils/ui_utils.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';
-import '../../../../core/domain/entities/user.dart';
+import '../../../../core/domain/entity/user.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/custom_scaffold.dart';

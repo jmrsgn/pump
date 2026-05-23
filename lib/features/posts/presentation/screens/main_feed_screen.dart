@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pump/core/presentation/providers/user_providers.dart';
+import 'package:pump/core/presentation/provider/user_providers.dart';
 import 'package:pump/core/presentation/viewmodels/user_viewmodel.dart';
 import 'package:pump/core/routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/features/auth/presentation/viewmodels/logout_viewmodel.dart';
-import 'package:pump/features/posts/presentation/providers/post_providers.dart';
 import 'package:pump/features/posts/presentation/viewmodels/main_feed_viewmodel.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
@@ -14,7 +13,8 @@ import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/app_drawer.dart';
 import '../../../../core/presentation/widgets/custom_scaffold.dart';
 import '../../../../core/utils/ui_utils.dart';
-import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../auth/presentation/provider/auth_providers.dart';
+import '../provider/post_providers.dart';
 import '../widgets/post_widget.dart';
 
 class MainFeedScreen extends ConsumerStatefulWidget {

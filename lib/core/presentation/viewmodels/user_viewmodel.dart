@@ -1,7 +1,8 @@
 import 'package:pump/core/domain/usecases/get_authenticated_user_usecase.dart';
-import 'package:pump/core/presentation/providers/user_state.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
+
+import '../state/user_state.dart';
 
 class UserViewModel extends BaseViewModel<UserState> {
   final GetAuthenticatedUserUseCase _getAuthenticatedUserUseCase;

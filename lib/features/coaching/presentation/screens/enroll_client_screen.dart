@@ -3,12 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pump/core/constants/app/app_dimens.dart';
 import 'package:pump/core/constants/app/app_strings.dart';
 import 'package:pump/core/constants/app/ui_constants.dart';
+import 'package:pump/core/constants/error/validation_error_constants.dart';
 import 'package:pump/core/presentation/theme/app_colors.dart';
 import 'package:pump/core/presentation/theme/app_text_styles.dart';
 import 'package:pump/core/presentation/widgets/custom_button.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
 import 'package:pump/core/presentation/widgets/custom_text_field.dart';
 import 'package:pump/core/utils/ui_utils.dart';
+import 'package:pump/features/coaching/enums/activity_level.dart';
+import 'package:pump/features/coaching/enums/fitness_goal.dart';
+import 'package:pump/features/coaching/enums/gender.dart';
+import 'package:pump/features/coaching/presentation/provider/client_user_providers.dart';
+import 'package:pump/features/coaching/presentation/viewmodels/enroll_client_viewmodel.dart';
 
 class EnrollClientScreen extends ConsumerStatefulWidget {
   const EnrollClientScreen({super.key});
@@ -19,22 +25,21 @@ class EnrollClientScreen extends ConsumerStatefulWidget {
 
 class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
   final _firstNameController = TextEditingController();
-
   final _lastNameController = TextEditingController();
-
   final _emailController = TextEditingController();
-
   final _phoneController = TextEditingController();
-
   final _heightController = TextEditingController();
-
   final _weightController = TextEditingController();
-
   final _goalWeightController = TextEditingController();
 
-  String selectedGoal = 'Fat Loss';
+  String selectedGoal = AppStrings.fatLoss;
+  String selectedActivityLevel = AppStrings.moderatelyActive;
 
-  String selectedActivityLevel = 'Moderately Active';
+  Gender selectedGender = Gender.male;
+  DateTime? selectedBirthDate;
+
+  EnrollClientViewModel get _enrollClientViewModel =>
+      ref.read(enrollClientViewModelProvider.notifier);
 
   @override
   void dispose() {
@@ -45,14 +50,48 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     _heightController.dispose();
     _weightController.dispose();
     _goalWeightController.dispose();
-
     super.dispose();
   }
 
   void _onEnrollPressed() {
-    UiUtils.showSnackBarSuccess(
-      context,
-      message: 'Client enrolled successfully',
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final height = double.tryParse(_heightController.text.trim());
+    final weight = double.tryParse(_weightController.text.trim());
+    final goalWeight = double.tryParse(_goalWeightController.text.trim());
+
+    if ([firstName, lastName, email, phone].any((e) => e.isEmpty)) {
+      UiUtils.showSnackBarError(
+        context,
+        message: ValidationErrorConstants.allFieldsAreRequired,
+      );
+      return;
+    }
+
+    if ([height, weight, goalWeight, selectedBirthDate].any((e) => e == null)) {
+      UiUtils.showSnackBarError(
+        context,
+        message: ValidationErrorConstants.allFieldsAreRequired,
+      );
+      return;
+    }
+
+    _enrollClientViewModel.createClientUser(
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      phone: phone,
+      // TODO: add actual photo
+      profileImageUrl: "",
+      gender: selectedGender,
+      birthDate: selectedBirthDate!,
+      heightCm: height!,
+      currentWeight: weight!,
+      goalWeight: goalWeight!,
+      activityLevel: ActivityLevel.fromValue(selectedActivityLevel),
+      fitnessGoal: FitnessGoal.fromValue(selectedGoal),
     );
   }
 
@@ -89,12 +128,15 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
                     UiUtils.addVerticalSpaceXL(),
 
-                    Text('Enroll Client', style: AppTextStyles.heading1),
+                    Text(
+                      AppStrings.enrollClient,
+                      style: AppTextStyles.heading1,
+                    ),
 
                     UiUtils.addVerticalSpaceS(),
 
                     Text(
-                      'Create a new coaching client profile and start managing their fitness journey.',
+                      AppStrings.enrollClientHelperText,
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -102,7 +144,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
                     UiUtils.addVerticalSpaceXXL(),
 
-                    _buildSectionLabel('Personal Information'),
+                    _buildSectionLabel(AppStrings.personalInformation),
 
                     UiUtils.addVerticalSpaceL(),
 
@@ -116,9 +158,17 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
                     _buildPhoneField(),
 
+                    UiUtils.addVerticalSpaceM(),
+
+                    _buildBirthDateField(),
+
+                    UiUtils.addVerticalSpaceM(),
+
+                    _buildGenderSelection(),
+
                     UiUtils.addVerticalSpaceXXL(),
 
-                    _buildSectionLabel('Body Metrics'),
+                    _buildSectionLabel(AppStrings.bodyMetrics),
 
                     UiUtils.addVerticalSpaceL(),
 
@@ -126,7 +176,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
                     UiUtils.addVerticalSpaceXXL(),
 
-                    _buildSectionLabel('Fitness Goal'),
+                    _buildSectionLabel(AppStrings.fitnessGoal),
 
                     UiUtils.addVerticalSpaceL(),
 
@@ -134,7 +184,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
                     UiUtils.addVerticalSpaceXXL(),
 
-                    _buildSectionLabel('Activity Level'),
+                    _buildSectionLabel(AppStrings.activityLevel),
 
                     UiUtils.addVerticalSpaceL(),
 
@@ -146,7 +196,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
                       width: double.infinity,
                       child: CustomButton(
                         onPressed: _onEnrollPressed,
-                        label: 'Enroll Client',
+                        label: AppStrings.enrollClient,
                       ),
                     ),
 
@@ -203,6 +253,94 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     );
   }
 
+  Widget _buildBirthDateField() {
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppDimens.dimen16),
+      onTap: () async {
+        final pickedDate = await showDatePicker(
+          context: context,
+          initialDate: DateTime(DateTime.now().year - 18),
+          firstDate: DateTime(1950),
+          lastDate: DateTime.now(),
+        );
+
+        if (pickedDate != null) {
+          setState(() {
+            selectedBirthDate = pickedDate;
+          });
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppDimens.dimen16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppDimens.dimen16),
+        ),
+        child: Text(
+          selectedBirthDate == null
+              ? 'Select Birth Date'
+              : selectedBirthDate!.toString().split(' ').first,
+          style: AppTextStyles.body,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGenderSelection() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildGenderChip(label: AppStrings.male, gender: Gender.male),
+        ),
+
+        UiUtils.addHorizontalSpaceS(),
+
+        Expanded(
+          child: _buildGenderChip(
+            label: AppStrings.female,
+            gender: Gender.female,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGenderChip({required String label, required Gender gender}) {
+    final isSelected = selectedGender == gender;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppDimens.dimen16),
+      onTap: () {
+        setState(() {
+          selectedGender = gender;
+        });
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: UIConstants.milliseconds180),
+        padding: const EdgeInsets.all(AppDimens.dimen16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.08)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppDimens.dimen16),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: AppTextStyles.body.copyWith(
+              fontWeight: FontWeight.w600,
+              color: isSelected ? AppColors.primary : AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildBodyMetrics() {
     return Column(
       children: [
@@ -244,10 +382,10 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       spacing: AppDimens.dimen12,
       runSpacing: AppDimens.dimen12,
       children: [
-        _buildSelectionChip('Fat Loss'),
-        _buildSelectionChip('Muscle Gain'),
-        _buildSelectionChip('Maintenance'),
-        _buildSelectionChip('Recomposition'),
+        _buildSelectionChip(AppStrings.fatLoss),
+        _buildSelectionChip(AppStrings.muscleMass),
+        _buildSelectionChip(AppStrings.maintenance),
+        _buildSelectionChip(AppStrings.recomposition),
       ],
     );
   }
@@ -255,19 +393,19 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
   Widget _buildActivityLevels() {
     return Column(
       children: [
-        _buildActivityTile(title: 'Sedentary'),
+        _buildActivityTile(title: AppStrings.sedentary),
 
         UiUtils.addVerticalSpaceS(),
 
-        _buildActivityTile(title: 'Lightly Active'),
+        _buildActivityTile(title: AppStrings.lightlyActive),
 
         UiUtils.addVerticalSpaceS(),
 
-        _buildActivityTile(title: 'Moderately Active'),
+        _buildActivityTile(title: AppStrings.moderatelyActive),
 
         UiUtils.addVerticalSpaceS(),
 
-        _buildActivityTile(title: 'Very Active'),
+        _buildActivityTile(title: AppStrings.veryActive),
       ],
     );
   }
@@ -284,7 +422,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       },
       child: AnimatedContainer(
         duration: Duration(milliseconds: UIConstants.milliseconds180),
-        padding: EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           horizontal: AppDimens.dimen16,
           vertical: AppDimens.dimen10,
         ),
@@ -320,7 +458,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       },
       child: AnimatedContainer(
         duration: Duration(milliseconds: UIConstants.milliseconds180),
-        padding: EdgeInsets.all(AppDimens.dimen16),
+        padding: const EdgeInsets.all(AppDimens.dimen16),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary.withValues(alpha: 0.08)

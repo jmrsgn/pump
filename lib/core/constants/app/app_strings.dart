@@ -161,6 +161,24 @@ class AppStrings {
   static const searchClients = "Search Clients";
   static const clients = "Clients";
 
+  // Enroll Client Screen
+  static const enrollClient = "Enroll Client";
+  static const bodyMetrics = "Body Metrics";
+  static const fitnessGoal = "Fitness Goal";
+  static const activityLevel = "Activity Level";
+  static const fatLoss = "Fat Loss";
+  static const muscleGain = "Muscle Gain";
+  static const maintenance = "Maintenance";
+  static const recomposition = "Recomposition";
+  static const male = "Male";
+  static const female = "Female";
+  static const sedentary = "Sedentary";
+  static const lightlyActive = "Lightly Active";
+  static const moderatelyActive = "Moderately Active";
+  static const veryActive = "Very Active";
+  static const enrollClientHelperText =
+      "Create a new coaching client profile and start managing their fitness journey.";
+
   // Client Info Screen
   static const clientInfo = "Client Info";
   static const physicalStats = "Physical Stats";

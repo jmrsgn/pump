@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:pump/features/coaching/domain/entities/training_week.dart';
 
 import '../../../../../core/constants/app/app_dimens.dart';
 import '../../../../../core/constants/app/app_strings.dart';
 import '../../../../../core/presentation/theme/app_colors.dart';
 import '../../../../../core/presentation/theme/app_text_styles.dart';
-import '../../../domain/entities/log_exercise.dart';
-import '../../../domain/entities/training_day.dart';
+import '../../../domain/entity/log_exercise.dart';
+import '../../../domain/entity/training_day.dart';
+import '../../../domain/entity/training_week.dart';
 
 class TrainingBlockContent extends StatefulWidget {
   final TrainingWeek week;

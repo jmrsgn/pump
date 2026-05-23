@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
-import '../../domain/entities/message.dart';
+import '../../domain/entity/message.dart';
 
 class _LocalColors {
   static const primary = Color(0xFFEC7216);

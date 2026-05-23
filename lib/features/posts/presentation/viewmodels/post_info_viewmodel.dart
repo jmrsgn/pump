@@ -3,7 +3,6 @@ import 'package:pump/core/constants/error/validation_error_constants.dart';
 import 'package:pump/core/data/dto/response/paged_response.dart';
 import 'package:pump/core/domain/usecases/get_authenticated_user_usecase.dart';
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
-import 'package:pump/features/posts/domain/entities/post.dart';
 import 'package:pump/features/posts/domain/helpers/post_comment_helper.dart';
 import 'package:pump/features/posts/domain/usecases/create_comment_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/create_reply_usecase.dart';
@@ -12,14 +11,15 @@ import 'package:pump/features/posts/domain/usecases/get_comments_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/get_replies_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_comment_usecase.dart';
 import 'package:pump/features/posts/domain/usecases/like_post_usecase.dart';
-import 'package:pump/features/posts/presentation/providers/post_info_state.dart';
 
 import '../../../../core/constants/error/auth_error_constants.dart';
 import '../../../../core/data/dto/response/result.dart';
 import '../../../../core/errors/app_error.dart';
 import '../../../../core/utilities/logger_utility.dart';
-import '../../domain/entities/comment.dart';
-import '../providers/post_providers.dart';
+import '../../domain/entity/comment.dart';
+import '../../domain/entity/post.dart';
+import '../provider/post_providers.dart';
+import '../state/post_info_state.dart';
 
 class PostInfoViewModel extends BaseViewModel<PostInfoState> {
   final Ref ref;

@@ -1,8 +1,8 @@
-import 'package:pump/features/posts/domain/repositories/post_repository.dart';
+import 'package:pump/features/posts/domain/repository/post_repository.dart';
 
 import '../../../../core/data/dto/response/result.dart';
 import '../../../../core/errors/app_error.dart';
-import '../entities/post.dart';
+import '../entity/post.dart';
 
 class LikePostUseCase {
   final PostRepository _postRepository;

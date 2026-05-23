@@ -1,4 +1,4 @@
-import 'package:pump/core/domain/entities/user.dart';
+import '../../../domain/entity/user.dart';
 
 class UserResponse {
   final String? id;

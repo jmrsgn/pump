@@ -4,13 +4,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pump/core/constants/api/api_constants.dart';
 import 'package:pump/core/constants/app/ui_constants.dart';
 import 'package:pump/core/utils/ui_utils.dart';
-import 'package:pump/features/posts/domain/entities/post.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/utils/time_utils.dart';
+import '../../domain/entity/post.dart';
 
 class PostWidget extends ConsumerStatefulWidget {
   final Post post;

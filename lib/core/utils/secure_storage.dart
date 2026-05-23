@@ -1,13 +1,17 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:pump/core/domain/entities/user.dart';
+
+import '../domain/entity/user.dart';
 
 class SecureStorage {
   // Singleton instance
   static final SecureStorage _instance = SecureStorage._internal();
+
   factory SecureStorage() => _instance;
+
   SecureStorage._internal();
+
   static const _tokenKey = 'jwt_token';
   static const _currentLoggedInUser = 'current_logged_in_user';
 

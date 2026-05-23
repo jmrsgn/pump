@@ -8,7 +8,7 @@ import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/utils/ui_utils.dart';
-import '../../domain/entities/comment.dart';
+import '../../domain/entity/comment.dart';
 
 class CommentWidget extends ConsumerStatefulWidget {
   final Comment comment;
@@ -72,7 +72,7 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
                       widget.comment.author[0],
                       style: AppTextStyles.body.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary
+                        color: AppColors.primary,
                       ),
                     ),
                   )

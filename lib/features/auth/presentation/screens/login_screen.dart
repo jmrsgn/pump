@@ -10,12 +10,12 @@ import 'package:pump/features/auth/presentation/viewmodels/login_viewmodel.dart'
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';
-import '../../../../core/presentation/providers/ui_state.dart';
+import '../../../../core/presentation/state/ui_state.dart';
 import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/custom_scaffold.dart';
 import '../../../../core/presentation/widgets/custom_text_field.dart';
-import '../providers/auth_providers.dart';
+import '../provider/auth_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
