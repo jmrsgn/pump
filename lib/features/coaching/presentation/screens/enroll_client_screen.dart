@@ -14,6 +14,7 @@ import 'package:pump/features/coaching/enums/activity_level.dart';
 import 'package:pump/features/coaching/enums/fitness_goal.dart';
 import 'package:pump/features/coaching/enums/gender.dart';
 import 'package:pump/features/coaching/presentation/provider/client_user_providers.dart';
+import 'package:pump/features/coaching/presentation/state/enroll_client_state.dart';
 import 'package:pump/features/coaching/presentation/viewmodels/enroll_client_viewmodel.dart';
 
 class EnrollClientScreen extends ConsumerStatefulWidget {
@@ -58,6 +59,11 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
   }
 
   void _onEnrollPressed() {
+    if (selectedUserId == null) {
+      UiUtils.showSnackBarError(context, message: "Please select a user");
+      return;
+    }
+
     final height = double.tryParse(_heightController.text.trim());
     final weight = double.tryParse(_weightController.text.trim());
     final goalWeight = double.tryParse(_goalWeightController.text.trim());
@@ -71,7 +77,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     }
 
     _enrollClientViewModel.createClientUser(
-      userId: "",
+      userId: selectedUserId!,
       gender: selectedGender,
       birthDate: selectedBirthDate!,
       heightCm: height!,
@@ -84,6 +90,24 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<EnrollClientState>(enrollClientViewModelProvider, (
+      previous,
+      next,
+    ) {
+      if (_searchOverlay != null) {
+        _searchOverlay!.markNeedsBuild();
+      }
+
+      final wasLoading = previous?.isLoading ?? false;
+      final isFinished = wasLoading && !next.isLoading;
+
+      if (!isFinished || !mounted) return;
+
+      if (next.errorMessage != null) {
+        UiUtils.showSnackBarError(context, message: next.errorMessage!);
+      }
+    });
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: CustomScaffold(
@@ -139,8 +163,6 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
                       link: _searchLayerLink,
                       child: _buildUserSearch(),
                     ),
-
-                    _buildSearchResults(),
 
                     UiUtils.addVerticalSpaceM(),
 
@@ -204,10 +226,14 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       return const SizedBox.shrink();
     }
 
-    final users = [
-      (id: '1', name: 'John Doe', imageUrl: ''),
-      (id: '2', name: 'Jane Smith', imageUrl: ''),
-    ];
+    final users = ref.watch(enrollClientViewModelProvider).users;
+
+    if (users.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(AppDimens.dimen16),
+        child: const Text('No users found'),
+      );
+    }
 
     return Material(
       elevation: 8,
@@ -225,10 +251,11 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
           separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (context, index) {
             final user = users[index];
+            final userName = "${user.firstName} ${user.lastName}";
 
             return ListTile(
               leading: const CircleAvatar(child: Icon(Icons.person)),
-              title: Text(user.name),
+              title: Text(userName),
               onTap: () {
                 _removeSearchOverlay();
 
@@ -236,8 +263,8 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
                 setState(() {
                   selectedUserId = user.id;
-                  selectedUserName = user.name;
-                  selectedUserProfileImageUrl = user.imageUrl;
+                  selectedUserName = userName;
+                  selectedUserProfileImageUrl = user.profileImageUrl;
 
                   _searchController.clear();
                 });
@@ -259,7 +286,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
           _removeSearchOverlay();
           return;
         }
-
+        _enrollClientViewModel.searchUsers(value.trim());
         _showSearchOverlay();
       },
     );
