@@ -36,7 +36,6 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
         );
       }
 
-      // TODO: check
       final createClientUserResult = await _clientUserService.createClientUser(
         userResult.data!.token,
         request,
@@ -47,7 +46,8 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
         return Result.failure(
           AppError(
             message:
-                createClientUserResult.error?.message ?? "Like post failed",
+                createClientUserResult.error?.message ??
+                "Create client user failed",
           ),
         );
       }

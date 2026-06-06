@@ -11,6 +11,7 @@ class CustomTextField extends StatefulWidget {
   final IconData? prefixIcon;
   final bool isMultiline;
   final InputDecoration? decoration;
+  final ValueChanged<String>? onChanged;
 
   const CustomTextField({
     super.key,
@@ -21,6 +22,7 @@ class CustomTextField extends StatefulWidget {
     this.prefixIcon,
     this.isMultiline = false,
     this.decoration,
+    this.onChanged,
   });
 
   @override

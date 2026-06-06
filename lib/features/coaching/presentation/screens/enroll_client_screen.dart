@@ -24,10 +24,7 @@ class EnrollClientScreen extends ConsumerStatefulWidget {
 }
 
 class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
+  final _searchController = TextEditingController();
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
   final _goalWeightController = TextEditingController();
@@ -38,15 +35,22 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
   Gender selectedGender = Gender.male;
   DateTime? selectedBirthDate;
 
+  String? selectedUserId;
+  String? selectedUserName;
+  String? selectedUserProfileImageUrl;
+
+  final LayerLink _searchLayerLink = LayerLink();
+
+  OverlayEntry? _searchOverlay;
+
   EnrollClientViewModel get _enrollClientViewModel =>
       ref.read(enrollClientViewModelProvider.notifier);
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
+    _removeSearchOverlay();
+
+    _searchController.dispose();
     _heightController.dispose();
     _weightController.dispose();
     _goalWeightController.dispose();
@@ -54,21 +58,9 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
   }
 
   void _onEnrollPressed() {
-    final firstName = _firstNameController.text.trim();
-    final lastName = _lastNameController.text.trim();
-    final email = _emailController.text.trim();
-    final phone = _phoneController.text.trim();
     final height = double.tryParse(_heightController.text.trim());
     final weight = double.tryParse(_weightController.text.trim());
     final goalWeight = double.tryParse(_goalWeightController.text.trim());
-
-    if ([firstName, lastName, email, phone].any((e) => e.isEmpty)) {
-      UiUtils.showSnackBarError(
-        context,
-        message: ValidationErrorConstants.allFieldsAreRequired,
-      );
-      return;
-    }
 
     if ([height, weight, goalWeight, selectedBirthDate].any((e) => e == null)) {
       UiUtils.showSnackBarError(
@@ -79,12 +71,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     }
 
     _enrollClientViewModel.createClientUser(
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      phone: phone,
-      // TODO: add actual photo
-      profileImageUrl: "",
+      userId: "",
       gender: selectedGender,
       birthDate: selectedBirthDate!,
       heightCm: height!,
@@ -148,17 +135,16 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
                     UiUtils.addVerticalSpaceL(),
 
-                    _buildNameFields(),
+                    CompositedTransformTarget(
+                      link: _searchLayerLink,
+                      child: _buildUserSearch(),
+                    ),
+
+                    _buildSearchResults(),
 
                     UiUtils.addVerticalSpaceM(),
 
-                    _buildEmailField(),
-
-                    UiUtils.addVerticalSpaceM(),
-
-                    _buildPhoneField(),
-
-                    UiUtils.addVerticalSpaceM(),
+                    if (selectedUserId != null) _buildSelectedUserCard(),
 
                     _buildBirthDateField(),
 
@@ -213,44 +199,164 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     );
   }
 
-  Widget _buildSectionLabel(String title) {
-    return Text(title, style: AppTextStyles.heading3);
+  Widget _buildSearchResults() {
+    if (_searchController.text.trim().isEmpty || selectedUserId != null) {
+      return const SizedBox.shrink();
+    }
+
+    final users = [
+      (id: '1', name: 'John Doe', imageUrl: ''),
+      (id: '2', name: 'Jane Smith', imageUrl: ''),
+    ];
+
+    return Material(
+      elevation: 8,
+      borderRadius: BorderRadius.circular(AppDimens.dimen16),
+      child: Container(
+        constraints: const BoxConstraints(maxHeight: 200),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppDimens.dimen16),
+        ),
+        child: ListView.separated(
+          padding: EdgeInsets.zero,
+          shrinkWrap: true,
+          itemCount: users.length,
+          separatorBuilder: (_, _) => const Divider(height: 1),
+          itemBuilder: (context, index) {
+            final user = users[index];
+
+            return ListTile(
+              leading: const CircleAvatar(child: Icon(Icons.person)),
+              title: Text(user.name),
+              onTap: () {
+                _removeSearchOverlay();
+
+                FocusScope.of(context).unfocus();
+
+                setState(() {
+                  selectedUserId = user.id;
+                  selectedUserName = user.name;
+                  selectedUserProfileImageUrl = user.imageUrl;
+
+                  _searchController.clear();
+                });
+              },
+            );
+          },
+        ),
+      ),
+    );
   }
 
-  Widget _buildNameFields() {
-    return Row(
+  Widget _buildUserSearch() {
+    return CustomTextField(
+      hint: 'Search User',
+      controller: _searchController,
+      prefixIcon: Icons.search,
+      onChanged: (value) {
+        if (value.trim().isEmpty) {
+          _removeSearchOverlay();
+          return;
+        }
+
+        _showSearchOverlay();
+      },
+    );
+  }
+
+  void _showSearchOverlay() {
+    _removeSearchOverlay();
+
+    _searchOverlay = OverlayEntry(
+      builder: (context) {
+        return Positioned(
+          width: MediaQuery.of(context).size.width - (AppDimens.dimen24 * 2),
+          child: CompositedTransformFollower(
+            link: _searchLayerLink,
+            showWhenUnlinked: false,
+            offset: const Offset(0, 64),
+            child: Material(
+              elevation: 12,
+              borderRadius: BorderRadius.circular(AppDimens.dimen16),
+              child: _buildSearchResults(),
+            ),
+          ),
+        );
+      },
+    );
+
+    Overlay.of(context).insert(_searchOverlay!);
+  }
+
+  void _removeSearchOverlay() {
+    _searchOverlay?.remove();
+    _searchOverlay = null;
+  }
+
+  Widget _buildSelectedUserCard() {
+    return Column(
       children: [
-        Expanded(
-          child: CustomTextField(
-            hint: AppStrings.firstName,
-            controller: _firstNameController,
+        Container(
+          padding: const EdgeInsets.all(AppDimens.dimen16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppDimens.dimen16),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: AppDimens.dimen24,
+                backgroundImage: selectedUserProfileImageUrl != null
+                    ? NetworkImage(selectedUserProfileImageUrl!)
+                    : null,
+                child: selectedUserProfileImageUrl == null
+                    ? const Icon(Icons.person)
+                    : null,
+              ),
+
+              UiUtils.addHorizontalSpaceM(),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      selectedUserName ?? '',
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+
+                    Text('Selected User', style: AppTextStyles.bodySmall),
+                  ],
+                ),
+              ),
+
+              IconButton(
+                icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                onPressed: _clearSelectedUser,
+              ),
+            ],
           ),
         ),
-
-        UiUtils.addHorizontalSpaceS(),
-
-        Expanded(
-          child: CustomTextField(
-            hint: AppStrings.lastName,
-            controller: _lastNameController,
-          ),
-        ),
+        UiUtils.addVerticalSpaceM(),
       ],
     );
   }
 
-  Widget _buildEmailField() {
-    return CustomTextField(
-      hint: AppStrings.email,
-      controller: _emailController,
-    );
+  void _clearSelectedUser() {
+    setState(() {
+      selectedUserId = null;
+      selectedUserName = null;
+      selectedUserProfileImageUrl = null;
+
+      _searchController.clear();
+    });
   }
 
-  Widget _buildPhoneField() {
-    return CustomTextField(
-      hint: AppStrings.phone,
-      controller: _phoneController,
-    );
+  Widget _buildSectionLabel(String title) {
+    return Text(title, style: AppTextStyles.heading3);
   }
 
   Widget _buildBirthDateField() {

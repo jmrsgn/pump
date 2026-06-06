@@ -14,28 +14,24 @@ class CreateClientUserUseCase {
   CreateClientUserUseCase(this._clientUserRepository);
 
   Future<Result<ClientUser, AppError>> execute(
-    String firstName,
-    String lastName,
-    String? profileImageUrl,
-    Gender? gender,
+    String userId,
+    Gender gender,
     DateTime? birthDate,
-    double? heightCm,
-    double? currentWeight,
-    double? goalWeight,
-    ActivityLevel? activityLevel,
-    FitnessGoal? fitnessGoal,
+    double heightCm,
+    double currentWeight,
+    double goalWeight,
+    ActivityLevel activityLevel,
+    FitnessGoal fitnessGoal,
   ) async {
     final request = CreateClientUserRequest(
-      firstName: firstName,
-      lastName: lastName,
-      profileImageUrl: profileImageUrl,
-      gender: gender,
+      userId: userId,
+      gender: gender.value,
       birthDate: birthDate,
       heightCm: heightCm,
       currentWeight: currentWeight,
       goalWeight: goalWeight,
-      activityLevel: activityLevel,
-      fitnessGoal: fitnessGoal,
+      activityLevel: activityLevel.value,
+      fitnessGoal: fitnessGoal.value,
     );
     return await _clientUserRepository.createClientUser(request);
   }
