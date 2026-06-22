@@ -11,6 +11,9 @@ import 'package:pump/core/presentation/widgets/custom_text_field.dart';
 import 'package:pump/core/routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
+import 'package:pump/features/coaching/domain/entity/client_user.dart';
+import 'package:pump/features/coaching/presentation/provider/client_user_providers.dart';
+import 'package:pump/features/coaching/presentation/viewmodels/clients_viewmodel.dart';
 
 import '../../../../core/constants/app/ui_constants.dart';
 
@@ -24,30 +27,28 @@ class ClientsScreen extends ConsumerStatefulWidget {
 class _ClientsScreenState extends ConsumerState<ClientsScreen> {
   final _searchController = TextEditingController();
 
-  final List<Map<String, dynamic>> clients = const [
-    {
-      'name': 'John Martin I. Marasigan',
-      'status': 'Active',
-      'image': 'assets/images/jm.jpg',
-      'goal': 'Fat Loss',
-      'weight': '63 kg',
-      'lastCheckIn': '2h ago',
-    },
-    {
-      'name': 'Romeo Jaranilla',
-      'status': 'Inactive',
-      'image': '',
-      'goal': 'Muscle Gain',
-      'weight': '71 kg',
-      'lastCheckIn': '3 days ago',
-    },
-  ];
+  ClientsViewModel get _clientsViewModel =>
+      ref.read(clientsViewModelProvider.notifier);
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      // TODO: FOR NOW, always page is 0, implement scrolling
+      _clientsViewModel.getClientUsers(0);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final clientsState = ref.watch(clientsViewModelProvider);
+    final clients = clientsState.clients;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: CustomScaffold(
+        isLoading: clientsState.isLoading,
         backgroundColor: AppColors.background,
         appBarTitle: AppStrings.clients,
         body: Padding(
@@ -60,7 +61,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
 
               UiUtils.addVerticalSpaceL(),
 
-              _buildOverviewSection(),
+              _buildOverviewSection(clients),
 
               UiUtils.addVerticalSpaceL(),
 
@@ -72,15 +73,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                   itemBuilder: (context, index) {
                     final client = clients[index];
 
-                    return _buildClientCard(
-                      context,
-                      name: client['name'] as String? ?? '',
-                      status: client['status'] as String? ?? '',
-                      profileImageUrl: client['image'] as String? ?? '',
-                      goal: client['goal'] as String? ?? '',
-                      weight: client['weight'] as String? ?? '',
-                      lastCheckIn: client['lastCheckIn'] as String? ?? '',
-                    );
+                    return _buildClientCard(context, client: client);
                   },
                 ),
               ),
@@ -111,17 +104,20 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         controller: _searchController,
         hint: AppStrings.searchClients,
         prefixIcon: Icons.search_rounded,
+        onChanged: (value) {
+          ref.read(clientsViewModelProvider.notifier).searchClients(value);
+        },
       ),
     );
   }
 
-  Widget _buildOverviewSection() {
+  Widget _buildOverviewSection(List<ClientUser> clients) {
     return Row(
       children: [
         Expanded(
           child: _buildOverviewCard(
             title: 'Total Clients',
-            value: '${clients.length}',
+            value: clients.length.toString(),
             icon: FontAwesomeIcons.users,
           ),
         ),
@@ -131,10 +127,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         Expanded(
           child: _buildOverviewCard(
             title: 'Active',
-            value: clients
-                .where((client) => client['status'] == 'Active')
-                .length
-                .toString(),
+            value: clients.length.toString(),
             icon: FontAwesomeIcons.fire,
           ),
         ),
@@ -189,15 +182,15 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
     );
   }
 
-  Widget _buildClientCard(
-    BuildContext context, {
-    required String name,
-    required String status,
-    required String goal,
-    required String weight,
-    required String lastCheckIn,
-    String profileImageUrl = '',
-  }) {
+  Widget _buildClientCard(BuildContext context, {required ClientUser client}) {
+    final name = '${client.firstName} ${client.lastName}';
+    final profileImageUrl = client.profileImageUrl;
+    final goal = client.fitnessGoal.value;
+    final weight = '${client.currentWeight.toStringAsFixed(0)} kg';
+
+    const status = 'Active';
+    const lastCheckIn = '--';
+
     final bool isActive = status == 'Active';
 
     return GestureDetector(
@@ -305,7 +298,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         radius: AppDimens.dimen36,
         backgroundColor: AppColors.primary.withValues(alpha: 0.12),
         child: Text(
-          name[0],
+          name.isEmpty ? "?" : name[0],
           style: AppTextStyles.heading2.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w700,
@@ -314,8 +307,9 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
       );
     }
     return CircleAvatar(
-      radius: AppDimens.dimen36,
-      backgroundImage: AssetImage(profileImageUrl),
+      backgroundImage: profileImageUrl.isEmpty
+          ? null
+          : NetworkImage(profileImageUrl),
     );
   }
 

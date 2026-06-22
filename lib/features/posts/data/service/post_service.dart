@@ -10,8 +10,8 @@ import 'package:pump/core/data/dto/response/result.dart';
 
 import '../../../../core/utilities/logger_utility.dart';
 import '../dto/request/create_post_request_dto.dart';
-import '../dto/response/post_response_dto.dart';
 import '../dto/request/update_post_request_dto.dart';
+import '../dto/response/post_response_dto.dart';
 
 class PostService {
   // getPosts ------------------------------------------------------------------
@@ -53,8 +53,8 @@ class PostService {
       return Result.failure(
         ApiErrorResponse(
           status: HttpStatus.internalServerError,
-          message: "An unexpected error occurred",
-          error: "Internal server error",
+          error: SystemErrorConstants.anUnexpectedErrorOccurred,
+          message: SystemErrorConstants.internalServerError,
         ),
       );
     }

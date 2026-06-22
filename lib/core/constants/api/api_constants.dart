@@ -52,6 +52,6 @@ class ApiConstants {
       "$postUrl/$postId/comments/$commentId/like";
 
   // Coaching service endpoints
-  static const String createClientUserUrl =
-      "$coachingServiceBaseUrl/users/create";
+  static const String clientUsersUrl = "$coachingServiceBaseUrl/users";
+  static const String createClientUserUrl = "$clientUsersUrl/create";
 }
