@@ -1,3 +1,4 @@
+import 'package:pump/core/domain/entity/user_summary.dart';
 import 'package:pump/features/coaching/domain/entity/client_user.dart';
 
 import '../../../../core/data/dto/response/paged_response.dart';
@@ -11,4 +12,6 @@ abstract class ClientUserRepository {
   );
 
   Future<Result<PagedResponse<ClientUser>, AppError>> getClientUsers(int page);
+
+  Future<Result<List<UserSummary>, AppError>> searchUsers(String query);
 }

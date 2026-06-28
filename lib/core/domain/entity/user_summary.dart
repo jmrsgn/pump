@@ -1,3 +1,4 @@
+/// Re-used class for all service returning the summary information of a user
 class UserSummary {
   final String id;
   final String firstName;

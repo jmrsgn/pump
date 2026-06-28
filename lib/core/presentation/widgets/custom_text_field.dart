@@ -68,7 +68,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 icon: const Icon(Icons.clear, size: 20),
                 onPressed: () {
                   widget.controller.clear();
-                  _handleChange(); // update immediately after clearing
+                  widget.onChanged?.call('');
+                  _handleChange();
                 },
               )
             : null,
@@ -84,7 +85,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
               icon: const Icon(Icons.clear, size: 20),
               onPressed: () {
                 widget.controller.clear();
-                _handleChange(); // update immediately after clearing
+                widget.onChanged?.call('');
+                _handleChange();
               },
             )
           : null,
@@ -119,6 +121,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         if (widget.hint.contains(AppStrings.phone))
           FilteringTextInputFormatter.digitsOnly,
       ],
+      onChanged: widget.onChanged,
     );
   }
 }

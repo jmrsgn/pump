@@ -7,6 +7,7 @@ import 'package:pump/features/coaching/domain/usecases/get_client_users_usecase.
 import 'package:pump/features/coaching/presentation/state/enroll_client_state.dart';
 import 'package:pump/features/coaching/presentation/viewmodels/clients_viewmodel.dart';
 
+import '../../../../core/domain/usecases/search_users_usecase.dart';
 import '../state/clients_state.dart';
 import '../viewmodels/enroll_client_viewmodel.dart';
 
@@ -30,6 +31,10 @@ final createClientUserUseCaseProvider = Provider<CreateClientUserUseCase>(
 
 final getClientUsersUseCaseProvider = Provider<GetClientUsersUseCase>(
   (ref) => GetClientUsersUseCase(ref.watch(clientUserRepositoryProvider)),
+);
+
+final searchUsersUseCaseProvider = Provider<SearchUsersUseCase>(
+  (ref) => SearchUsersUseCase(ref.watch(clientUserRepositoryProvider)),
 );
 
 // ViewModels

@@ -4,6 +4,7 @@ class UIConstants {
   // Milliseconds
   static final int milliseconds180 = 180;
   static final int milliseconds350 = 350;
+  static final int milliseconds500 = 500;
 
   // Seconds
   static final int seconds3 = 3;

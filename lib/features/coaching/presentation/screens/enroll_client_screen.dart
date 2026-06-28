@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pump/core/constants/app/app_dimens.dart';
@@ -30,19 +32,20 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
   final _weightController = TextEditingController();
   final _goalWeightController = TextEditingController();
 
+  final LayerLink _searchLayerLink = LayerLink();
+
   String selectedGoal = AppStrings.fatLoss;
   String selectedActivityLevel = AppStrings.moderatelyActive;
-
   Gender selectedGender = Gender.male;
-  DateTime? selectedBirthDate;
 
+  DateTime? selectedBirthDate;
   String? selectedUserId;
   String? selectedUserName;
   String? selectedUserProfileImageUrl;
 
-  final LayerLink _searchLayerLink = LayerLink();
-
   OverlayEntry? _searchOverlay;
+
+  Timer? _searchDebounce;
 
   EnrollClientViewModel get _enrollClientViewModel =>
       ref.read(enrollClientViewModelProvider.notifier);
@@ -55,6 +58,8 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     _heightController.dispose();
     _weightController.dispose();
     _goalWeightController.dispose();
+
+    _searchDebounce?.cancel();
     super.dispose();
   }
 
@@ -94,6 +99,13 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       previous,
       next,
     ) {
+      if (!mounted) return;
+
+      if (_searchController.text.trim().isEmpty || selectedUserId != null) {
+        _removeSearchOverlay();
+        return;
+      }
+
       if (_searchOverlay != null) {
         _searchOverlay!.markNeedsBuild();
       }
@@ -101,7 +113,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       final wasLoading = previous?.isLoading ?? false;
       final isFinished = wasLoading && !next.isLoading;
 
-      if (!isFinished || !mounted) return;
+      if (!isFinished) return;
 
       if (next.errorMessage != null) {
         UiUtils.showSnackBarError(context, message: next.errorMessage!);
@@ -223,6 +235,10 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
   Widget _buildSearchResults() {
     if (_searchController.text.trim().isEmpty || selectedUserId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _removeSearchOverlay();
+      });
+
       return const SizedBox.shrink();
     }
 
@@ -282,12 +298,36 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       controller: _searchController,
       prefixIcon: Icons.search,
       onChanged: (value) {
-        if (value.trim().isEmpty) {
+        _searchDebounce?.cancel();
+
+        final query = value.trim();
+
+        if (query.isEmpty) {
+          _searchDebounce?.cancel();
           _removeSearchOverlay();
+          _enrollClientViewModel.clearSearchUsers();
           return;
         }
-        _enrollClientViewModel.searchUsers(value.trim());
-        _showSearchOverlay();
+
+        _searchDebounce = Timer(
+          Duration(milliseconds: UIConstants.milliseconds500),
+          () {
+            final latestQuery = _searchController.text.trim();
+
+            if (latestQuery.isEmpty) {
+              _removeSearchOverlay();
+              return;
+            }
+
+            _enrollClientViewModel.searchUsers(latestQuery);
+
+            if (_searchController.text.trim().isEmpty) {
+              return;
+            }
+
+            _showSearchOverlay();
+          },
+        );
       },
     );
   }
@@ -373,6 +413,9 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
   }
 
   void _clearSelectedUser() {
+    _removeSearchOverlay();
+    _enrollClientViewModel.clearSearchUsers();
+
     setState(() {
       selectedUserId = null;
       selectedUserName = null;

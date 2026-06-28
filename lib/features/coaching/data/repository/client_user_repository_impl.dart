@@ -8,6 +8,7 @@ import '../../../../core/constants/error/auth_error_constants.dart';
 import '../../../../core/constants/error/system_error_constants.dart';
 import '../../../../core/data/dto/response/paged_response.dart';
 import '../../../../core/data/repository/user_repository_impl.dart';
+import '../../../../core/domain/entity/user_summary.dart';
 import '../../../../core/utilities/logger_utility.dart';
 import '../dto/request/create_client_user_request_dto.dart';
 
@@ -105,6 +106,49 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
       return Result.success(paged);
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "getClientUsers", e, stack);
+      return Result.failure(
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
+      );
+    }
+  }
+
+  // searchUsers ---------------------------------------------------------------
+  @override
+  Future<Result<List<UserSummary>, AppError>> searchUsers(String query) async {
+    LoggerUtility.d(
+      runtimeType.toString(),
+      "Execute method: [searchUsers] query: [$query]",
+    );
+
+    try {
+      final userResult = await _userRepositoryImpl.getAuthenticatedUser();
+      if (!userResult.isSuccess || userResult.data == null) {
+        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
+        return Result.failure(
+          AppError(message: AuthErrorConstants.userIsNotAuthenticated),
+        );
+      }
+
+      final searchUsersResult = await _clientUserService.searchUsers(
+        userResult.data!.token,
+        query,
+      );
+
+      if (!searchUsersResult.isSuccess) {
+        return Result.failure(
+          AppError(
+            message: searchUsersResult.error?.message ?? "Search users failed",
+          ),
+        );
+      }
+
+      final users = searchUsersResult.data!
+          .map((e) => e.toUserSummary())
+          .toList();
+
+      return Result.success(users);
+    } catch (e, stack) {
+      LoggerUtility.e(runtimeType.toString(), "getAuthenticatedUser", e, stack);
       return Result.failure(
         AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );

@@ -1,5 +1,6 @@
 import 'package:pump/core/domain/entity/user_summary.dart';
 
+/// Re-used class for all service returning the summary information of a user
 class UserSummaryResponse {
   final String? id;
   final String? firstName;

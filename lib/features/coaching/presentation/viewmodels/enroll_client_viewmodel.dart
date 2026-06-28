@@ -21,6 +21,17 @@ class EnrollClientViewModel extends BaseViewModel<EnrollClientState> {
     return state.copyWith(isLoading: isLoading, errorMessage: errorMessage);
   }
 
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+  void clearSearchUsers() {
+    LoggerUtility.d(
+      runtimeType.toString(),
+      "Execute method: [clearSearchUsers]",
+    );
+    state = state.copyWith(users: [], errorMessage: null);
+  }
+
   // createClientUser ----------------------------------------------------------
   Future<void> createClientUser({
     required String userId,
@@ -89,11 +100,6 @@ class EnrollClientViewModel extends BaseViewModel<EnrollClientState> {
       runtimeType.toString(),
       "Execute method: [searchUsers] query: [$query]",
     );
-
-    // Prevent double taps
-    if (state.isLoading) return;
-
-    setLoading(true);
 
     if (query.trim().isEmpty) {
       state = state.copyWith(users: [], errorMessage: null);

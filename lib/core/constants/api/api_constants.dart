@@ -29,8 +29,6 @@ class ApiConstants {
 
   // ---------------------------------------------------------------------------
 
-  static const String searchUsersUrl = '$socialServiceBaseUrl/user/search';
-
   // Auth service endpoints
   static const String loginUrl = "$authServiceBaseUrl/auth/login";
   static const String registerUrl = "$authServiceBaseUrl/auth/register";
@@ -54,4 +52,5 @@ class ApiConstants {
   // Coaching service endpoints
   static const String clientUsersUrl = "$coachingServiceBaseUrl/users";
   static const String createClientUserUrl = "$clientUsersUrl/create";
+  static const String searchUsersUrl = '$coachingServiceBaseUrl/users/search';
 }
