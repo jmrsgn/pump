@@ -78,7 +78,11 @@ class EnrollClientViewModel extends BaseViewModel<EnrollClientState> {
       );
 
       if (result.isSuccess) {
-        state = state.copyWith(isLoading: false, errorMessage: null);
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: null,
+          isEnrollSuccess: true,
+        );
       } else {
         LoggerUtility.d(
           runtimeType.toString(),

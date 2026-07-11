@@ -1,6 +1,5 @@
 import 'package:pump/core/errors/app_error.dart';
 import 'package:pump/features/coaching/data/dto/request/create_client_user_request_dto.dart';
-import 'package:pump/features/coaching/domain/entity/client_user.dart';
 import 'package:pump/features/coaching/domain/repository/client_user_repository.dart';
 
 import '../../../../core/data/dto/response/result.dart';
@@ -13,7 +12,7 @@ class CreateClientUserUseCase {
 
   CreateClientUserUseCase(this._clientUserRepository);
 
-  Future<Result<ClientUser, AppError>> execute(
+  Future<Result<void, AppError>> execute(
     String userId,
     Gender gender,
     DateTime? birthDate,

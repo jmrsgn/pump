@@ -7,7 +7,7 @@ import '../../../../core/errors/app_error.dart';
 import '../../data/dto/request/create_client_user_request_dto.dart';
 
 abstract class ClientUserRepository {
-  Future<Result<ClientUser, AppError>> createClientUser(
+  Future<Result<void, AppError>> createClientUser(
     CreateClientUserRequest request,
   );
 

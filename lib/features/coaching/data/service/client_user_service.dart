@@ -15,7 +15,7 @@ import '../dto/response/client_user_response_dto.dart';
 
 class ClientUserService {
   // createClientUser ----------------------------------------------------------
-  Future<Result<ClientUserResponse, ApiErrorResponse>> createClientUser(
+  Future<Result<void, ApiErrorResponse>> createClientUser(
     String token,
     CreateClientUserRequest request,
   ) async {
@@ -33,7 +33,7 @@ class ClientUserService {
 
       if (response.statusCode == HttpStatus.ok ||
           response.statusCode == HttpStatus.created) {
-        return Result.success(ClientUserResponse.fromJson(json['data']));
+        return Result.success(null);
       }
 
       final errorJson = json['error'] ?? {};

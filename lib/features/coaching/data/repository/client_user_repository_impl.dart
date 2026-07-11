@@ -20,7 +20,7 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
 
   // createClientUser ----------------------------------------------------------
   @override
-  Future<Result<ClientUser, AppError>> createClientUser(
+  Future<Result<void, AppError>> createClientUser(
     CreateClientUserRequest request,
   ) async {
     LoggerUtility.d(
@@ -43,8 +43,7 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
         request,
       );
 
-      if (!createClientUserResult.isSuccess ||
-          createClientUserResult.data == null) {
+      if (!createClientUserResult.isSuccess) {
         return Result.failure(
           AppError(
             message:
@@ -54,8 +53,7 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
         );
       }
 
-      final response = createClientUserResult.data!;
-      return Result.success(response.toClientUser());
+      return Result.success(null);
     } catch (e, stack) {
       LoggerUtility.e(runtimeType.toString(), "createClientUser", e, stack);
       return Result.failure(

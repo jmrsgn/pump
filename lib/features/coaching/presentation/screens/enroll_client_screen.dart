@@ -11,6 +11,7 @@ import 'package:pump/core/presentation/theme/app_text_styles.dart';
 import 'package:pump/core/presentation/widgets/custom_button.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
 import 'package:pump/core/presentation/widgets/custom_text_field.dart';
+import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/coaching/enums/activity_level.dart';
 import 'package:pump/features/coaching/enums/fitness_goal.dart';
@@ -18,6 +19,8 @@ import 'package:pump/features/coaching/enums/gender.dart';
 import 'package:pump/features/coaching/presentation/provider/client_user_providers.dart';
 import 'package:pump/features/coaching/presentation/state/enroll_client_state.dart';
 import 'package:pump/features/coaching/presentation/viewmodels/enroll_client_viewmodel.dart';
+
+import '../../../../core/routes.dart';
 
 class EnrollClientScreen extends ConsumerStatefulWidget {
   const EnrollClientScreen({super.key});
@@ -117,6 +120,10 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
       if (next.errorMessage != null) {
         UiUtils.showSnackBarError(context, message: next.errorMessage!);
+      }
+
+      if (next.isEnrollSuccess) {
+        NavigationUtils.navigateTo(context, AppRoutes.coaching);
       }
     });
 
@@ -559,7 +566,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       runSpacing: AppDimens.dimen12,
       children: [
         _buildSelectionChip(AppStrings.fatLoss),
-        _buildSelectionChip(AppStrings.muscleMass),
+        _buildSelectionChip(AppStrings.muscleGain),
         _buildSelectionChip(AppStrings.maintenance),
         _buildSelectionChip(AppStrings.recomposition),
       ],

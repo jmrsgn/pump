@@ -4,11 +4,13 @@ import '../../../../core/presentation/state/ui_state.dart';
 
 class EnrollClientState extends UiState {
   final List<UserSummary> users;
+  final bool isEnrollSuccess;
 
   const EnrollClientState({
     required super.isLoading,
     super.errorMessage,
     required this.users,
+    required this.isEnrollSuccess,
   });
 
   @override
@@ -16,11 +18,13 @@ class EnrollClientState extends UiState {
     bool? isLoading,
     String? errorMessage,
     List<UserSummary>? users,
+    bool? isEnrollSuccess,
   }) {
     return EnrollClientState(
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage ?? this.errorMessage,
       users: users ?? this.users,
+      isEnrollSuccess: isEnrollSuccess ?? this.isEnrollSuccess;
     );
   }
 
@@ -29,6 +33,7 @@ class EnrollClientState extends UiState {
       isLoading: false,
       errorMessage: null,
       users: [],
+      isEnrollSuccess: false
     );
   }
 }
