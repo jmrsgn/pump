@@ -24,7 +24,7 @@ class EnrollClientState extends UiState {
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage ?? this.errorMessage,
       users: users ?? this.users,
-      isEnrollSuccess: isEnrollSuccess ?? this.isEnrollSuccess;
+      isEnrollSuccess: isEnrollSuccess ?? this.isEnrollSuccess,
     );
   }
 

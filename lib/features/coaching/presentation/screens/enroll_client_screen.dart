@@ -20,8 +20,6 @@ import 'package:pump/features/coaching/presentation/provider/client_user_provide
 import 'package:pump/features/coaching/presentation/state/enroll_client_state.dart';
 import 'package:pump/features/coaching/presentation/viewmodels/enroll_client_viewmodel.dart';
 
-import '../../../../core/routes.dart';
-
 class EnrollClientScreen extends ConsumerStatefulWidget {
   const EnrollClientScreen({super.key});
 
@@ -98,38 +96,39 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final enrollClientState = ref.watch(enrollClientViewModelProvider);
+
     ref.listen<EnrollClientState>(enrollClientViewModelProvider, (
       previous,
       next,
     ) {
-      if (!mounted) return;
+      final wasLoading = previous?.isLoading ?? false;
+      final isFinished = wasLoading && !next.isLoading;
+
+      if (!isFinished || !mounted) return;
 
       if (_searchController.text.trim().isEmpty || selectedUserId != null) {
         _removeSearchOverlay();
-        return;
       }
 
       if (_searchOverlay != null) {
         _searchOverlay!.markNeedsBuild();
       }
 
-      final wasLoading = previous?.isLoading ?? false;
-      final isFinished = wasLoading && !next.isLoading;
-
-      if (!isFinished) return;
-
       if (next.errorMessage != null) {
         UiUtils.showSnackBarError(context, message: next.errorMessage!);
       }
 
       if (next.isEnrollSuccess) {
-        NavigationUtils.navigateTo(context, AppRoutes.coaching);
+        // Navigates back to Coaching Screen
+        NavigationUtils.pop(context);
       }
     });
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: CustomScaffold(
+        isLoading: enrollClientState.isLoading,
         body: Column(
           children: [
             Expanded(

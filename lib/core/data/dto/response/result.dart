@@ -4,9 +4,11 @@ class Result<T, E> {
   final T? data;
   final E? error;
 
-  bool get isSuccess => data != null && error == null;
+  bool get isSuccess => error == null;
+
   bool get isFailure => error != null;
 
   const Result.success(this.data) : error = null;
+
   const Result.failure(this.error) : data = null;
 }
