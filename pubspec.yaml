@@ -50,7 +50,7 @@ dependencies:
   # The following adds the recommended dependencies that is close to Apache Commons library in Java
 #  quiver: ^4.0.0
   collection: ^1.19.0
-  intl: ^0.18.1
+  intl: ^0.20.2
   timeago: ^3.4.0
   path_provider: ^2.0.15
   archive: ^3.3.5

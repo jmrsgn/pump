@@ -22,4 +22,5 @@ class UIConstants {
   // Other
   static final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
   static final int minimumPasswordLength = 6;
+  static final birthDateFormat = "MMM dd, yyyy";
 }

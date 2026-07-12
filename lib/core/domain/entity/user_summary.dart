@@ -28,6 +28,7 @@ class UserSummary {
     'profileImageUrl': profileImageUrl,
   };
 
+
   @override
   String toString() => 'User(id: $id, name: $firstName $lastName)';
 }

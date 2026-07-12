@@ -87,6 +87,9 @@ class AppDimens {
 
   // Alpha Values
   static const double alpha0_3 = 0.3;
+  static const double alpha0_8 = 0.8;
+  static const double alpha0_12 = 0.12;
+  static const double alpha0_25 = 0.25;
 
   // Radius
   static const double radius4 = 4.0;
@@ -97,5 +100,8 @@ class AppDimens {
   static const double radius36 = 36.0;
   static const double radius48 = 48.0;
 
+  // Elevation
   static const double elevation3 = 3.0;
+  static const double elevation8 = 8.0;
+  static const double elevation12 = 12.0;
 }

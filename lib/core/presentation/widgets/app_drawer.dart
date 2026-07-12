@@ -113,21 +113,7 @@ class AppDrawer extends StatelessWidget {
       ),
       child: Row(
         children: [
-          currentUser.profileImageUrl.isEmpty
-              ? CircleAvatar(
-                  backgroundColor: AppColors.primary.withValues(alpha: 0.12),
-                  radius: AppDimens.dimen48,
-                  child: Text(
-                    currentUser.firstName[0],
-                    style: AppTextStyles.heading1.copyWith(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                )
-              : CircleAvatar(
-                  backgroundImage: AssetImage(currentUser.profileImageUrl),
-                  radius: AppDimens.dimen48,
-                ),
+          UiUtils.buildDAvatarHeader(user: currentUser.toUserSummary()),
 
           UiUtils.addHorizontalSpaceL(),
 

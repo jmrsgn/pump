@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pump/core/constants/app/app_dimens.dart';
 import 'package:pump/core/constants/app/app_strings.dart';
 import 'package:pump/core/constants/app/ui_constants.dart';
 import 'package:pump/core/constants/error/validation_error_constants.dart';
+import 'package:pump/core/domain/entity/user_summary.dart';
 import 'package:pump/core/presentation/theme/app_colors.dart';
 import 'package:pump/core/presentation/theme/app_text_styles.dart';
 import 'package:pump/core/presentation/widgets/custom_button.dart';
@@ -29,6 +31,7 @@ class EnrollClientScreen extends ConsumerStatefulWidget {
 
 class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
   final _searchController = TextEditingController();
+  final _ageController = TextEditingController();
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
   final _goalWeightController = TextEditingController();
@@ -39,10 +42,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
   String selectedActivityLevel = AppStrings.moderatelyActive;
   Gender selectedGender = Gender.male;
 
-  DateTime? selectedBirthDate;
-  String? selectedUserId;
-  String? selectedUserName;
-  String? selectedUserProfileImageUrl;
+  UserSummary? selectedUser;
 
   OverlayEntry? _searchOverlay;
 
@@ -56,6 +56,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     _removeSearchOverlay();
 
     _searchController.dispose();
+    _ageController.dispose();
     _heightController.dispose();
     _weightController.dispose();
     _goalWeightController.dispose();
@@ -65,16 +66,17 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
   }
 
   void _onEnrollPressed() {
-    if (selectedUserId == null) {
+    if (selectedUser == null) {
       UiUtils.showSnackBarError(context, message: "Please select a user");
       return;
     }
 
+    final age = double.tryParse(_ageController.text.trim());
     final height = double.tryParse(_heightController.text.trim());
     final weight = double.tryParse(_weightController.text.trim());
     final goalWeight = double.tryParse(_goalWeightController.text.trim());
 
-    if ([height, weight, goalWeight, selectedBirthDate].any((e) => e == null)) {
+    if ([height, weight, goalWeight, age].any((e) => e == null)) {
       UiUtils.showSnackBarError(
         context,
         message: ValidationErrorConstants.allFieldsAreRequired,
@@ -83,9 +85,9 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     }
 
     _enrollClientViewModel.createClientUser(
-      userId: selectedUserId!,
+      userId: selectedUser!.id,
       gender: selectedGender,
-      birthDate: selectedBirthDate!,
+      age: age!,
       heightCm: height!,
       currentWeight: weight!,
       goalWeight: goalWeight!,
@@ -107,7 +109,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
       if (!isFinished || !mounted) return;
 
-      if (_searchController.text.trim().isEmpty || selectedUserId != null) {
+      if (_searchController.text.trim().isEmpty || selectedUser != null) {
         _removeSearchOverlay();
       }
 
@@ -144,7 +146,9 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(AppDimens.dimen18),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.08),
+                          color: AppColors.primary.withValues(
+                            alpha: AppDimens.alpha0_8,
+                          ),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -171,7 +175,11 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
                       ),
                     ),
 
-                    UiUtils.addVerticalSpaceXXL(),
+                    UiUtils.addVerticalSpaceL(),
+
+                    _buildRequiredFieldsNotice(),
+
+                    UiUtils.addVerticalSpaceL(),
 
                     _buildSectionLabel(AppStrings.personalInformation),
 
@@ -184,11 +192,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
                     UiUtils.addVerticalSpaceM(),
 
-                    if (selectedUserId != null) _buildSelectedUserCard(),
-
-                    _buildBirthDateField(),
-
-                    UiUtils.addVerticalSpaceM(),
+                    if (selectedUser != null) _buildSelectedUserCard(),
 
                     _buildGenderSelection(),
 
@@ -239,8 +243,43 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     );
   }
 
+  Widget _buildRequiredFieldsNotice() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppDimens.dimen14),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: AppDimens.alpha0_8),
+        borderRadius: BorderRadius.circular(AppDimens.dimen12),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: AppDimens.alpha0_25),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.info_outline,
+            color: AppColors.primary,
+            size: AppDimens.dimen18,
+          ),
+
+          UiUtils.addHorizontalSpaceS(),
+
+          Expanded(
+            child: Text(
+              'All fields are required unless stated otherwise.',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSearchResults() {
-    if (_searchController.text.trim().isEmpty || selectedUserId != null) {
+    if (_searchController.text.trim().isEmpty || selectedUser != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _removeSearchOverlay();
       });
@@ -252,13 +291,14 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
     if (users.isEmpty) {
       return Container(
+        color: AppColors.surface,
         padding: const EdgeInsets.all(AppDimens.dimen16),
         child: const Text('No users found'),
       );
     }
 
     return Material(
-      elevation: 8,
+      elevation: AppDimens.elevation8,
       borderRadius: BorderRadius.circular(AppDimens.dimen16),
       child: Container(
         constraints: const BoxConstraints(maxHeight: 200),
@@ -276,7 +316,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
             final userName = "${user.firstName} ${user.lastName}";
 
             return ListTile(
-              leading: const CircleAvatar(child: Icon(Icons.person)),
+              leading: UiUtils.buildAvatarSmall(user: user),
               title: Text(userName),
               onTap: () {
                 _removeSearchOverlay();
@@ -284,10 +324,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
                 FocusScope.of(context).unfocus();
 
                 setState(() {
-                  selectedUserId = user.id;
-                  selectedUserName = userName;
-                  selectedUserProfileImageUrl = user.profileImageUrl;
-
+                  selectedUser = user;
                   _searchController.clear();
                 });
               },
@@ -350,7 +387,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
             showWhenUnlinked: false,
             offset: const Offset(0, 64),
             child: Material(
-              elevation: 12,
+              elevation: AppDimens.elevation12,
               borderRadius: BorderRadius.circular(AppDimens.dimen16),
               child: _buildSearchResults(),
             ),
@@ -378,15 +415,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
           ),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: AppDimens.dimen24,
-                backgroundImage: selectedUserProfileImageUrl != null
-                    ? NetworkImage(selectedUserProfileImageUrl!)
-                    : null,
-                child: selectedUserProfileImageUrl == null
-                    ? const Icon(Icons.person)
-                    : null,
-              ),
+              UiUtils.buildAvatarMedium(user: selectedUser!),
 
               UiUtils.addHorizontalSpaceM(),
 
@@ -395,7 +424,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      selectedUserName ?? '',
+                      "${selectedUser?.firstName} ${selectedUser?.lastName}",
                       style: AppTextStyles.body.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -423,10 +452,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     _enrollClientViewModel.clearSearchUsers();
 
     setState(() {
-      selectedUserId = null;
-      selectedUserName = null;
-      selectedUserProfileImageUrl = null;
-
+      selectedUser = null;
       _searchController.clear();
     });
   }
@@ -435,45 +461,15 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     return Text(title, style: AppTextStyles.heading3);
   }
 
-  Widget _buildBirthDateField() {
-    return InkWell(
-      borderRadius: BorderRadius.circular(AppDimens.dimen16),
-      onTap: () async {
-        final pickedDate = await showDatePicker(
-          context: context,
-          initialDate: DateTime(DateTime.now().year - 18),
-          firstDate: DateTime(1950),
-          lastDate: DateTime.now(),
-        );
-
-        if (pickedDate != null) {
-          setState(() {
-            selectedBirthDate = pickedDate;
-          });
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppDimens.dimen16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppDimens.dimen16),
-        ),
-        child: Text(
-          selectedBirthDate == null
-              ? 'Select Birth Date'
-              : selectedBirthDate!.toString().split(' ').first,
-          style: AppTextStyles.body,
-        ),
-      ),
-    );
-  }
-
   Widget _buildGenderSelection() {
     return Row(
       children: [
         Expanded(
-          child: _buildGenderChip(label: AppStrings.male, gender: Gender.male),
+          child: _buildGenderChip(
+            label: AppStrings.male,
+            gender: Gender.male,
+            icon: FontAwesomeIcons.venus,
+          ),
         ),
 
         UiUtils.addHorizontalSpaceS(),
@@ -482,13 +478,28 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
           child: _buildGenderChip(
             label: AppStrings.female,
             gender: Gender.female,
+            icon: FontAwesomeIcons.mars,
+          ),
+        ),
+
+        UiUtils.addHorizontalSpaceS(),
+
+        Expanded(
+          child: CustomTextField(
+            hint: 'Age',
+            controller: _ageController,
+            keyboardType: TextInputType.number,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildGenderChip({required String label, required Gender gender}) {
+  Widget _buildGenderChip({
+    required String label,
+    required Gender gender,
+    required IconData icon,
+  }) {
     final isSelected = selectedGender == gender;
 
     return InkWell(
@@ -511,12 +522,25 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
           ),
         ),
         child: Center(
-          child: Text(
-            label,
-            style: AppTextStyles.body.copyWith(
-              fontWeight: FontWeight.w600,
-              color: isSelected ? AppColors.primary : AppColors.textPrimary,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FaIcon(
+                icon,
+                size: AppDimens.dimen16,
+                color: isSelected ? AppColors.primary : AppColors.textPrimary,
+              ),
+
+              UiUtils.addHorizontalSpaceS(),
+
+              Text(
+                label,
+                style: AppTextStyles.body.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -533,6 +557,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
                 hint: 'Height (cm)',
                 controller: _heightController,
                 keyboardType: TextInputType.number,
+                prefixIcon: Icons.height,
               ),
             ),
 
@@ -543,6 +568,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
                 hint: 'Weight (kg)',
                 controller: _weightController,
                 keyboardType: TextInputType.number,
+                prefixIcon: FontAwesomeIcons.weightScale,
               ),
             ),
           ],
@@ -554,6 +580,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
           hint: 'Goal Weight (kg)',
           controller: _goalWeightController,
           keyboardType: TextInputType.number,
+          prefixIcon: Icons.track_changes,
         ),
       ],
     );
@@ -610,7 +637,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.12)
+              ? AppColors.primary.withValues(alpha: AppDimens.alpha0_12)
               : AppColors.surface,
           borderRadius: BorderRadius.circular(AppDimens.dimen50),
           border: Border.all(
@@ -643,7 +670,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
         padding: const EdgeInsets.all(AppDimens.dimen16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.08)
+              ? AppColors.primary.withValues(alpha: AppDimens.alpha0_8)
               : AppColors.surface,
           borderRadius: BorderRadius.circular(AppDimens.dimen16),
           border: Border.all(

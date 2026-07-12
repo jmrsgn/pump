@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app/app_dimens.dart';
 import '../constants/app/app_strings.dart';
+import '../domain/entity/user_summary.dart';
 import '../presentation/theme/app_colors.dart';
 import '../presentation/theme/app_text_styles.dart';
 
@@ -131,4 +132,54 @@ class UiUtils {
     message: message,
     backgroundColor: AppColors.snackBarInfo,
   );
+
+  /// Create avatar using the App's default theme
+  static CircleAvatar _buildAvatar({
+    required UserSummary user,
+    required radius,
+    required fontSize,
+  }) {
+    return user.profileImageUrl.isEmpty
+        ? CircleAvatar(
+            backgroundColor: AppColors.primary.withValues(
+              alpha: AppDimens.alpha0_12,
+            ),
+            radius: radius,
+            child: Text(
+              user.firstName[0],
+              style: AppTextStyles.heading1.copyWith(
+                color: AppColors.primary,
+                fontSize: fontSize,
+              ),
+            ),
+          )
+        : CircleAvatar(
+            backgroundImage: AssetImage(user.profileImageUrl),
+            radius: radius,
+          );
+  }
+
+  static CircleAvatar buildDAvatarHeader({required UserSummary user}) {
+    return _buildAvatar(
+      user: user,
+      radius: AppDimens.dimen48,
+      fontSize: AppDimens.dimen48,
+    );
+  }
+
+  static CircleAvatar buildAvatarSmall({required UserSummary user}) {
+    return _buildAvatar(
+      user: user,
+      radius: AppDimens.dimen18,
+      fontSize: AppDimens.dimen18,
+    );
+  }
+
+  static CircleAvatar buildAvatarMedium({required UserSummary user}) {
+    return _buildAvatar(
+      user: user,
+      radius: AppDimens.dimen24,
+      fontSize: AppDimens.dimen24,
+    );
+  }
 }

@@ -36,7 +36,7 @@ class EnrollClientViewModel extends BaseViewModel<EnrollClientState> {
   Future<void> createClientUser({
     required String userId,
     required Gender gender,
-    required DateTime? birthDate,
+    required double age,
     required double heightCm,
     required double currentWeight,
     required double goalWeight,
@@ -54,7 +54,7 @@ class EnrollClientViewModel extends BaseViewModel<EnrollClientState> {
     setLoading(true);
 
     // Validate nullable required selections
-    if ([gender, birthDate, activityLevel, fitnessGoal].any((e) => e == null)) {
+    if ([gender, activityLevel, fitnessGoal].any((e) => e == null)) {
       emitError(ValidationErrorConstants.allFieldsAreRequired);
       return;
     }
@@ -69,7 +69,7 @@ class EnrollClientViewModel extends BaseViewModel<EnrollClientState> {
       final result = await _createClientUserUseCase.execute(
         userId,
         gender,
-        birthDate,
+        age,
         heightCm,
         currentWeight,
         goalWeight,
