@@ -13,6 +13,7 @@ import 'package:pump/core/presentation/theme/app_text_styles.dart';
 import 'package:pump/core/presentation/widgets/custom_button.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
 import 'package:pump/core/presentation/widgets/custom_text_field.dart';
+import 'package:pump/core/utilities/logger_utility.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/coaching/enums/activity_level.dart';
@@ -30,6 +31,8 @@ class EnrollClientScreen extends ConsumerStatefulWidget {
 }
 
 class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
+  static const debugTag = "EnrollClientScreen";
+
   final _searchController = TextEditingController();
   final _ageController = TextEditingController();
   final _heightController = TextEditingController();
@@ -71,7 +74,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       return;
     }
 
-    final age = double.tryParse(_ageController.text.trim());
+    final age = int.tryParse(_ageController.text.trim());
     final height = double.tryParse(_heightController.text.trim());
     final weight = double.tryParse(_weightController.text.trim());
     final goalWeight = double.tryParse(_goalWeightController.text.trim());
@@ -114,7 +117,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       }
 
       if (_searchOverlay != null) {
-        _searchOverlay!.markNeedsBuild();
+        _searchOverlay?.markNeedsBuild();
       }
 
       if (next.errorMessage != null) {
@@ -123,7 +126,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
       if (next.isEnrollSuccess) {
         // Navigates back to Coaching Screen
-        NavigationUtils.pop(context);
+        NavigationUtils.pop(context, true);
       }
     });
 
@@ -147,7 +150,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
                         padding: const EdgeInsets.all(AppDimens.dimen18),
                         decoration: BoxDecoration(
                           color: AppColors.primary.withValues(
-                            alpha: AppDimens.alpha0_8,
+                            alpha: AppDimens.alpha0_08,
                           ),
                           shape: BoxShape.circle,
                         ),
@@ -248,7 +251,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(AppDimens.dimen14),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: AppDimens.alpha0_8),
+        color: AppColors.primary.withValues(alpha: AppDimens.alpha0_08),
         borderRadius: BorderRadius.circular(AppDimens.dimen12),
         border: Border.all(
           color: AppColors.primary.withValues(alpha: AppDimens.alpha0_25),
@@ -290,10 +293,17 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     final users = ref.watch(enrollClientViewModelProvider).users;
 
     if (users.isEmpty) {
-      return Container(
-        color: AppColors.surface,
-        padding: const EdgeInsets.all(AppDimens.dimen16),
-        child: const Text('No users found'),
+      return Material(
+        elevation: AppDimens.elevation8,
+        borderRadius: BorderRadius.circular(AppDimens.dimen16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppDimens.dimen16),
+          ),
+          padding: const EdgeInsets.all(AppDimens.dimen16),
+          child: const Center(child: Text("No users found")),
+        ),
       );
     }
 
@@ -316,7 +326,10 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
             final userName = "${user.firstName} ${user.lastName}";
 
             return ListTile(
-              leading: UiUtils.buildAvatarSmall(user: user),
+              leading: UiUtils.buildAvatarSmall(
+                userName: userName,
+                profileImageUrl: user.profileImageUrl,
+              ),
               title: Text(userName),
               onTap: () {
                 _removeSearchOverlay();
@@ -346,6 +359,10 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
         final query = value.trim();
 
         if (query.isEmpty) {
+          LoggerUtility.d(
+            debugTag,
+            "Search query is empty, will not proceed to _showSearchOverlay",
+          );
           _searchDebounce?.cancel();
           _removeSearchOverlay();
           _enrollClientViewModel.clearSearchUsers();
@@ -353,18 +370,23 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
         }
 
         _searchDebounce = Timer(
-          Duration(milliseconds: UIConstants.milliseconds500),
-          () {
+          Duration(milliseconds: UIConstants.milliseconds300),
+          () async {
             final latestQuery = _searchController.text.trim();
+            LoggerUtility.d(debugTag, "latestQuery: [$latestQuery}]");
 
             if (latestQuery.isEmpty) {
               _removeSearchOverlay();
               return;
             }
 
-            _enrollClientViewModel.searchUsers(latestQuery);
+            await _enrollClientViewModel.searchUsers(query: latestQuery);
 
-            if (_searchController.text.trim().isEmpty) {
+            if (!mounted || _searchController.text.trim().isEmpty) {
+              LoggerUtility.d(
+                debugTag,
+                "Search query is empty, will not proceed to _showSearchOverlay",
+              );
               return;
             }
 
@@ -415,7 +437,11 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
           ),
           child: Row(
             children: [
-              UiUtils.buildAvatarMedium(user: selectedUser!),
+              UiUtils.buildAvatarMedium(
+                userName:
+                    "${selectedUser!.firstName} ${selectedUser!.lastName}",
+                profileImageUrl: selectedUser!.profileImageUrl,
+              ),
 
               UiUtils.addHorizontalSpaceM(),
 
@@ -670,7 +696,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
         padding: const EdgeInsets.all(AppDimens.dimen16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: AppDimens.alpha0_8)
+              ? AppColors.primary.withValues(alpha: AppDimens.alpha0_08)
               : AppColors.surface,
           borderRadius: BorderRadius.circular(AppDimens.dimen16),
           border: Border.all(

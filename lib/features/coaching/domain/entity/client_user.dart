@@ -1,3 +1,5 @@
+import 'package:pump/features/coaching/enums/coaching_status.dart';
+
 import '../../enums/activity_level.dart';
 import '../../enums/fitness_goal.dart';
 import '../../enums/gender.dart';
@@ -23,6 +25,8 @@ class ClientUser {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  final CoachingStatus status;
+
   const ClientUser({
     required this.id,
     required this.coachId,
@@ -38,6 +42,7 @@ class ClientUser {
     required this.fitnessGoal,
     required this.createdAt,
     required this.updatedAt,
+    required this.status,
   });
 
   String get fullName => '$firstName $lastName';

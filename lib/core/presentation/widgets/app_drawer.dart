@@ -113,7 +113,10 @@ class AppDrawer extends StatelessWidget {
       ),
       child: Row(
         children: [
-          UiUtils.buildDAvatarHeader(user: currentUser.toUserSummary()),
+          UiUtils.buildDAvatarHeader(
+            userName: "${currentUser.firstName} ${currentUser.lastName}",
+            profileImageUrl: currentUser.profileImageUrl,
+          ),
 
           UiUtils.addHorizontalSpaceL(),
 

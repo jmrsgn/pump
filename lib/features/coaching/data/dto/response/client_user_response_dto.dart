@@ -1,5 +1,6 @@
 import 'package:pump/features/coaching/domain/entity/client_user.dart';
 import 'package:pump/features/coaching/enums/activity_level.dart';
+import 'package:pump/features/coaching/enums/coaching_status.dart';
 import 'package:pump/features/coaching/enums/fitness_goal.dart';
 import 'package:pump/features/coaching/enums/gender.dart';
 
@@ -24,6 +25,8 @@ class ClientUserResponse {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
+  final CoachingStatus? status;
+
   ClientUserResponse({
     this.id,
     this.coachId,
@@ -39,6 +42,7 @@ class ClientUserResponse {
     this.fitnessGoal,
     this.createdAt,
     this.updatedAt,
+    this.status,
   });
 
   factory ClientUserResponse.fromJson(Map<String, dynamic> json) {
@@ -77,6 +81,10 @@ class ClientUserResponse {
       updatedAt: json['updatedAt'] == null
           ? null
           : DateTime.parse(json['updatedAt']),
+
+      status: json['status'] == null
+          ? null
+          : CoachingStatus.fromValue(json['status']),
     );
   }
 
@@ -96,6 +104,7 @@ class ClientUserResponse {
       'fitnessGoal': fitnessGoal?.value,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      "status": status,
     };
   }
 
@@ -115,6 +124,7 @@ class ClientUserResponse {
       fitnessGoal: fitnessGoal ?? FitnessGoal.maintenance,
       createdAt: createdAt ?? DateTime.now(),
       updatedAt: updatedAt ?? DateTime.now(),
+      status: status ?? CoachingStatus.inactive,
     );
   }
 }

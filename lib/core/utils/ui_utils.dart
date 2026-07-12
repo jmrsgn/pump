@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../constants/app/app_dimens.dart';
 import '../constants/app/app_strings.dart';
-import '../domain/entity/user_summary.dart';
 import '../presentation/theme/app_colors.dart';
 import '../presentation/theme/app_text_styles.dart';
 
@@ -135,49 +134,63 @@ class UiUtils {
 
   /// Create avatar using the App's default theme
   static CircleAvatar _buildAvatar({
-    required UserSummary user,
+    required String userName,
+    required String profileImageUrl,
     required radius,
     required fontSize,
   }) {
-    return user.profileImageUrl.isEmpty
+    return profileImageUrl.isEmpty
         ? CircleAvatar(
             backgroundColor: AppColors.primary.withValues(
               alpha: AppDimens.alpha0_12,
             ),
             radius: radius,
             child: Text(
-              user.firstName[0],
-              style: AppTextStyles.heading1.copyWith(
+              userName[0],
+              style: AppTextStyles.body.copyWith(
                 color: AppColors.primary,
                 fontSize: fontSize,
+                fontWeight: FontWeight.bold,
               ),
             ),
           )
         : CircleAvatar(
-            backgroundImage: AssetImage(user.profileImageUrl),
+            backgroundImage: AssetImage(profileImageUrl),
             radius: radius,
           );
   }
 
-  static CircleAvatar buildDAvatarHeader({required UserSummary user}) {
+  static CircleAvatar buildDAvatarHeader({
+    required String userName,
+    required String profileImageUrl,
+  }) {
     return _buildAvatar(
-      user: user,
+      userName: userName,
+      profileImageUrl: profileImageUrl,
       radius: AppDimens.dimen48,
       fontSize: AppDimens.dimen48,
     );
   }
 
-  static CircleAvatar buildAvatarSmall({required UserSummary user}) {
+  static CircleAvatar buildAvatarSmall({
+    required String userName,
+    required String profileImageUrl,
+  }) {
     return _buildAvatar(
-      user: user,
+      userName: userName,
+      profileImageUrl: profileImageUrl,
       radius: AppDimens.dimen18,
       fontSize: AppDimens.dimen18,
     );
   }
 
-  static CircleAvatar buildAvatarMedium({required UserSummary user}) {
+  static CircleAvatar buildAvatarMedium({
+    required String userName,
+    required String profileImageUrl,
+  }) {
     return _buildAvatar(
-      user: user,
+      userName: userName,
+      profileImageUrl: profileImageUrl,
       radius: AppDimens.dimen24,
       fontSize: AppDimens.dimen24,
     );

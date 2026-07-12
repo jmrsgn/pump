@@ -86,6 +86,7 @@ class AppDimens {
   static const double space32 = 32.0;
 
   // Alpha Values
+  static const double alpha0_08 = 0.08;
   static const double alpha0_3 = 0.3;
   static const double alpha0_8 = 0.8;
   static const double alpha0_12 = 0.12;

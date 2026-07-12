@@ -15,7 +15,7 @@ class CreateClientUserUseCase {
   Future<Result<void, AppError>> execute(
     String userId,
     Gender gender,
-    DateTime? birthDate,
+    int age,
     double heightCm,
     double currentWeight,
     double goalWeight,
@@ -25,7 +25,7 @@ class CreateClientUserUseCase {
     final request = CreateClientUserRequest(
       userId: userId,
       gender: gender.value,
-      birthDate: birthDate,
+      age: age,
       heightCm: heightCm,
       currentWeight: currentWeight,
       goalWeight: goalWeight,

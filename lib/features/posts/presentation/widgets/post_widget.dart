@@ -61,27 +61,10 @@ class _PostWidgetState extends ConsumerState<PostWidget>
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  widget.post.authorProfileImageUrl == null ||
-                          widget.post.authorProfileImageUrl!.isEmpty
-                      ? CircleAvatar(
-                          backgroundColor: AppColors.primary.withValues(
-                            alpha: 0.12,
-                          ),
-                          radius: AppDimens.dimen16,
-                          child: Text(
-                            widget.post.author[0],
-                            style: AppTextStyles.body.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        )
-                      : CircleAvatar(
-                          backgroundImage: AssetImage(
-                            widget.post.authorProfileImageUrl!,
-                          ),
-                          radius: AppDimens.dimen16,
-                        ),
+                  UiUtils.buildAvatarSmall(
+                    userName: widget.post.author,
+                    profileImageUrl: widget.post.authorProfileImageUrl!,
+                  ),
 
                   UiUtils.addHorizontalSpaceM(),
 

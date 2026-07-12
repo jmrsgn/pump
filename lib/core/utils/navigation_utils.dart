@@ -13,22 +13,35 @@ class NavigationUtils {
   }
 
   // Push a new route (keeps previous)
-  static void navigateTo(
+  static Future<T?> navigateTo<T extends Object?>(
     BuildContext context,
     String routeName, {
     Object? arguments,
   }) {
-    Navigator.pushNamed(context, routeName, arguments: arguments);
+    return Navigator.pushNamed<T>(context, routeName, arguments: arguments);
   }
 
   // Replace current route (no going back)
-  static void replaceWith(BuildContext context, String routeName) {
-    Navigator.pushReplacementNamed(context, routeName);
+  static Future<T?> replaceWith<T extends Object?>(
+    BuildContext context,
+    String routeName, {
+    Object? arguments,
+  }) {
+    return Navigator.pushReplacementNamed(context, routeName);
   }
 
   // Deletes all navigation stack and go to designated route
-  static void navigateAndRemoveAll(BuildContext context, String routeName) {
-    Navigator.pushNamedAndRemoveUntil(context, routeName, (route) => false);
+  static Future<T?> navigateAndRemoveAll<T extends Object?>(
+    BuildContext context,
+    String routeName, {
+    Object? arguments,
+  }) {
+    return Navigator.pushNamedAndRemoveUntil(
+      context,
+      routeName,
+      (route) => false,
+      arguments: arguments,
+    );
   }
 
   // Safely pops the current route and optionally returns a result

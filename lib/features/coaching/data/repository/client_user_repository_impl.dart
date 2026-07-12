@@ -13,6 +13,8 @@ import '../../../../core/utilities/logger_utility.dart';
 import '../dto/request/create_client_user_request_dto.dart';
 
 class ClientUserRepositoryImpl extends ClientUserRepository {
+  static const debugTag = "ClientUserRepositoryImpl";
+
   final ClientUserService _clientUserService;
   final UserRepositoryImpl _userRepositoryImpl;
 
@@ -23,16 +25,13 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
   Future<Result<void, AppError>> createClientUser(
     CreateClientUserRequest request,
   ) async {
-    LoggerUtility.d(
-      runtimeType.toString(),
-      "Execute method: [createClientUser]",
-    );
+    LoggerUtility.d(debugTag, "Execute method: [createClientUser]");
 
     try {
       // Get authenticated user
       final userResult = await _userRepositoryImpl.getAuthenticatedUser();
       if (!userResult.isSuccess || userResult.data == null) {
-        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
+        LoggerUtility.e(debugTag, "User is not authenticated");
         return Result.failure(
           AppError(message: AuthErrorConstants.userIsNotAuthenticated),
         );
@@ -55,7 +54,7 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
 
       return Result.success(null);
     } catch (e, stack) {
-      LoggerUtility.e(runtimeType.toString(), "createClientUser", e, stack);
+      LoggerUtility.e(debugTag, "createClientUser", e, stack);
       return Result.failure(
         AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );
@@ -67,13 +66,13 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
   Future<Result<PagedResponse<ClientUser>, AppError>> getClientUsers(
     int page,
   ) async {
-    LoggerUtility.d(runtimeType.toString(), "Execute method: [getPosts]");
+    LoggerUtility.d(debugTag, "Execute method: [getPosts]");
 
     try {
       // Get authenticated user
       final userResult = await _userRepositoryImpl.getAuthenticatedUser();
       if (!userResult.isSuccess || userResult.data == null) {
-        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
+        LoggerUtility.e(debugTag, "User is not authenticated");
         return Result.failure(
           AppError(message: AuthErrorConstants.userIsNotAuthenticated),
         );
@@ -103,7 +102,7 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
 
       return Result.success(paged);
     } catch (e, stack) {
-      LoggerUtility.e(runtimeType.toString(), "getClientUsers", e, stack);
+      LoggerUtility.e(debugTag, "getClientUsers", e, stack);
       return Result.failure(
         AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );
@@ -113,15 +112,12 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
   // searchUsers ---------------------------------------------------------------
   @override
   Future<Result<List<UserSummary>, AppError>> searchUsers(String query) async {
-    LoggerUtility.d(
-      runtimeType.toString(),
-      "Execute method: [searchUsers] query: [$query]",
-    );
+    LoggerUtility.d(debugTag, "Execute method: [searchUsers] query: [$query]");
 
     try {
       final userResult = await _userRepositoryImpl.getAuthenticatedUser();
       if (!userResult.isSuccess || userResult.data == null) {
-        LoggerUtility.e(runtimeType.toString(), "User is not authenticated");
+        LoggerUtility.e(debugTag, "User is not authenticated");
         return Result.failure(
           AppError(message: AuthErrorConstants.userIsNotAuthenticated),
         );
@@ -146,7 +142,7 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
 
       return Result.success(users);
     } catch (e, stack) {
-      LoggerUtility.e(runtimeType.toString(), "getAuthenticatedUser", e, stack);
+      LoggerUtility.e(debugTag, "getAuthenticatedUser", e, stack);
       return Result.failure(
         AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );

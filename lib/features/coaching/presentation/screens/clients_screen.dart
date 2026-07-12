@@ -12,6 +12,7 @@ import 'package:pump/core/routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/coaching/domain/entity/client_user.dart';
+import 'package:pump/features/coaching/enums/coaching_status.dart';
 import 'package:pump/features/coaching/presentation/provider/client_user_providers.dart';
 import 'package:pump/features/coaching/presentation/viewmodels/clients_viewmodel.dart';
 
@@ -85,8 +86,15 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
           child: CustomButton(
             prefixIcon: Icons.add_rounded,
             label: AppStrings.enroll,
-            onPressed: () {
-              NavigationUtils.navigateTo(context, AppRoutes.enrollClient);
+            onPressed: () async {
+              final result = await NavigationUtils.navigateTo(
+                context,
+                AppRoutes.enrollClient,
+              );
+
+              if (result == true) {
+                _clientsViewModel.getClientUsers(0);
+              }
             },
           ),
         ),
@@ -188,10 +196,9 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
     final goal = client.fitnessGoal.value;
     final weight = '${client.currentWeight.toStringAsFixed(0)} kg';
 
-    const status = 'Active';
     const lastCheckIn = '--';
 
-    final bool isActive = status == 'Active';
+    final bool isActive = client.status == CoachingStatus.active;
 
     return GestureDetector(
       onTap: () {
@@ -237,14 +244,18 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: isActive
-                              ? AppColors.success.withValues(alpha: 0.12)
-                              : AppColors.error.withValues(alpha: 0.12),
+                              ? AppColors.success.withValues(
+                                  alpha: AppDimens.alpha0_12,
+                                )
+                              : AppColors.error.withValues(
+                                  alpha: AppDimens.alpha0_12,
+                                ),
                           borderRadius: BorderRadius.circular(
                             AppDimens.dimen50,
                           ),
                         ),
                         child: Text(
-                          status,
+                          client.status.toString(),
                           style: AppTextStyles.caption.copyWith(
                             color: isActive
                                 ? AppColors.success

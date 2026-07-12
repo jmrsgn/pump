@@ -74,6 +74,11 @@ class LoggerUtility {
       stackTrace: stackTrace,
     );
   }
+
+  /// Logs item size
+  static void logItemSize<T>(String tag, String itemType, List<T> items) {
+    d(tag, '[$itemType] size: [${items.length}]');
+  }
 }
 
 class _LogFilter extends LogFilter {

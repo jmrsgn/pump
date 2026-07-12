@@ -3,13 +3,14 @@ import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/features/coaching/domain/usecases/create_client_user_usecase.dart';
 import 'package:pump/features/coaching/presentation/state/enroll_client_state.dart';
 
-import '../../../../core/constants/error/validation_error_constants.dart';
 import '../../../../core/utilities/logger_utility.dart';
 import '../../enums/activity_level.dart';
 import '../../enums/fitness_goal.dart';
 import '../../enums/gender.dart';
 
 class EnrollClientViewModel extends BaseViewModel<EnrollClientState> {
+  static const debugTag = "EnrollClientViewModel";
+
   final CreateClientUserUseCase _createClientUserUseCase;
   final SearchUsersUseCase _searchUsersUseCase;
 
@@ -25,10 +26,7 @@ class EnrollClientViewModel extends BaseViewModel<EnrollClientState> {
   // Helpers
   // ---------------------------------------------------------------------------
   void clearSearchUsers() {
-    LoggerUtility.d(
-      runtimeType.toString(),
-      "Execute method: [clearSearchUsers]",
-    );
+    LoggerUtility.d(debugTag, "Execute method: [clearSearchUsers]");
     state = state.copyWith(users: [], errorMessage: null);
   }
 
@@ -36,34 +34,19 @@ class EnrollClientViewModel extends BaseViewModel<EnrollClientState> {
   Future<void> createClientUser({
     required String userId,
     required Gender gender,
-    required double age,
+    required int age,
     required double heightCm,
     required double currentWeight,
     required double goalWeight,
     required ActivityLevel activityLevel,
     required FitnessGoal fitnessGoal,
   }) async {
-    LoggerUtility.d(
-      runtimeType.toString(),
-      "Execute method: [createClientUser]",
-    );
+    LoggerUtility.d(debugTag, "Execute method: [createClientUser]");
 
     // Prevent double taps
     if (state.isLoading) return;
 
     setLoading(true);
-
-    // Validate nullable required selections
-    if ([gender, activityLevel, fitnessGoal].any((e) => e == null)) {
-      emitError(ValidationErrorConstants.allFieldsAreRequired);
-      return;
-    }
-
-    // Validate numeric fields
-    if ([heightCm, currentWeight, goalWeight].any((e) => e <= 0)) {
-      emitError(ValidationErrorConstants.allFieldsAreRequired);
-      return;
-    }
 
     try {
       final result = await _createClientUserUseCase.execute(
@@ -84,47 +67,30 @@ class EnrollClientViewModel extends BaseViewModel<EnrollClientState> {
           isEnrollSuccess: true,
         );
       } else {
-        LoggerUtility.d(
-          runtimeType.toString(),
-          "createClientUser",
-          result.error!.message,
-        );
-
+        LoggerUtility.d(debugTag, "createClientUser", result.error!.message);
         emitError(result.error!.message);
       }
     } catch (e, stack) {
-      LoggerUtility.e(runtimeType.toString(), "createClientUser", e, stack);
+      LoggerUtility.e(debugTag, "createClientUser", e, stack);
       emitUnexpectedError();
     }
   }
 
   // searchUsers ---------------------------------------------------------------
-  Future<void> searchUsers(String query) async {
-    LoggerUtility.d(
-      runtimeType.toString(),
-      "Execute method: [searchUsers] query: [$query]",
-    );
-
-    if (query.trim().isEmpty) {
-      state = state.copyWith(users: [], errorMessage: null);
-      return;
-    }
+  Future<void> searchUsers({required String query}) async {
+    LoggerUtility.d(debugTag, "Execute method: [searchUsers] query: [$query]");
 
     try {
       final result = await _searchUsersUseCase.execute(query.trim());
       if (result.isSuccess) {
         state = state.copyWith(users: result.data!, errorMessage: null);
+        LoggerUtility.logItemSize(debugTag, "users", result.data!);
       } else {
-        LoggerUtility.d(
-          runtimeType.toString(),
-          "searchUsers",
-          result.error!.message,
-        );
-
+        LoggerUtility.d(debugTag, "searchUsers", result.error!.message);
         emitError(result.error!.message);
       }
     } catch (e, stack) {
-      LoggerUtility.e(runtimeType.toString(), "searchUsers", e, stack);
+      LoggerUtility.e(debugTag, "searchUsers", e, stack);
       emitUnexpectedError();
     }
   }

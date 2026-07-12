@@ -14,6 +14,8 @@ import '../dto/request/create_client_user_request_dto.dart';
 import '../dto/response/client_user_response_dto.dart';
 
 class ClientUserService {
+  static const debugTag = "ClientUserService";
+
   // createClientUser ----------------------------------------------------------
   Future<Result<void, ApiErrorResponse>> createClientUser(
     String token,
@@ -47,7 +49,7 @@ class ClientUserService {
         ),
       );
     } catch (e, stack) {
-      LoggerUtility.e(runtimeType.toString(), "createClientUser", e, stack);
+      LoggerUtility.e(debugTag, "createClientUser", e, stack);
       return Result.failure(
         ApiErrorResponse(
           status: HttpStatus.internalServerError,
@@ -91,7 +93,7 @@ class ClientUserService {
         ),
       );
     } catch (e, stack) {
-      LoggerUtility.e(runtimeType.toString(), "getClientUsers", e, stack);
+      LoggerUtility.e(debugTag, "getClientUsers", e, stack);
       return Result.failure(
         ApiErrorResponse(
           status: HttpStatus.internalServerError,
@@ -138,7 +140,7 @@ class ClientUserService {
         ),
       );
     } catch (e, stack) {
-      LoggerUtility.e(runtimeType.toString(), "searchUsers", e, stack);
+      LoggerUtility.e(debugTag, "searchUsers", e, stack);
       return Result.failure(
         ApiErrorResponse(
           status: HttpStatus.internalServerError,

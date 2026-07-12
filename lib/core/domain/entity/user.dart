@@ -1,5 +1,3 @@
-import 'package:pump/core/domain/entity/user_summary.dart';
-
 class User {
   final String id;
   final String firstName;
@@ -40,13 +38,6 @@ class User {
     'followersNo': followersNo,
     'followingNo': followingNo,
   };
-
-  UserSummary toUserSummary() => UserSummary(
-    id: id,
-    firstName: firstName,
-    lastName: lastName,
-    profileImageUrl: profileImageUrl,
-  );
 
   @override
   String toString() =>

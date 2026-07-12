@@ -1,7 +1,7 @@
 class CreateClientUserRequest {
   final String userId;
   final String gender;
-  final DateTime? birthDate;
+  final int age;
   final double heightCm;
   final double currentWeight;
   final double goalWeight;
@@ -11,7 +11,7 @@ class CreateClientUserRequest {
   const CreateClientUserRequest({
     required this.userId,
     required this.gender,
-    this.birthDate,
+    required this.age,
     required this.heightCm,
     required this.currentWeight,
     required this.goalWeight,
@@ -23,7 +23,7 @@ class CreateClientUserRequest {
     return {
       'userId': userId,
       'gender': gender,
-      'birthDate': birthDate?.toIso8601String(),
+      'age': age,
       'heightCm': heightCm,
       'currentWeight': currentWeight,
       'goalWeight': goalWeight,
