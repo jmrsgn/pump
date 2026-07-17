@@ -9,6 +9,9 @@ enum CoachingStatus {
   const CoachingStatus(this.value);
 
   static CoachingStatus fromValue(String value) {
-    return CoachingStatus.values.firstWhere((status) => status.value == value);
+    return CoachingStatus.values.firstWhere(
+      (status) => status.value.toLowerCase() == value.toLowerCase(),
+      orElse: () => throw ArgumentError('Unknown CoachingStatus: $value'),
+    );
   }
 }

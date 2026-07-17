@@ -353,6 +353,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       hint: 'Search User',
       controller: _searchController,
       prefixIcon: Icons.search,
+      enabled: selectedUser == null,
       onChanged: (value) {
         _searchDebounce?.cancel();
 

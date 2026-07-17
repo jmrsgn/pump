@@ -87,14 +87,8 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
             prefixIcon: Icons.add_rounded,
             label: AppStrings.enroll,
             onPressed: () async {
-              final result = await NavigationUtils.navigateTo(
-                context,
-                AppRoutes.enrollClient,
-              );
-
-              if (result == true) {
-                _clientsViewModel.getClientUsers(0);
-              }
+              _searchController.clear();
+              await NavigationUtils.navigateTo(context, AppRoutes.enrollClient);
             },
           ),
         ),
@@ -120,6 +114,10 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
   }
 
   Widget _buildOverviewSection(List<ClientUser> clients) {
+    final activeClients = clients.where(
+      (client) => client.status == CoachingStatus.active,
+    );
+
     return Row(
       children: [
         Expanded(
@@ -135,7 +133,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         Expanded(
           child: _buildOverviewCard(
             title: 'Active',
-            value: clients.length.toString(),
+            value: activeClients.length.toString(),
             icon: FontAwesomeIcons.fire,
           ),
         ),
@@ -255,7 +253,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                           ),
                         ),
                         child: Text(
-                          client.status.toString(),
+                          client.status.value,
                           style: AppTextStyles.caption.copyWith(
                             color: isActive
                                 ? AppColors.success

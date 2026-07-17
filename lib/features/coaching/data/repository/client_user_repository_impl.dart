@@ -78,21 +78,22 @@ class ClientUserRepositoryImpl extends ClientUserRepository {
         );
       }
 
-      final postResult = await _clientUserService.getClientUsers(
+      final clientUsersResult = await _clientUserService.getClientUsers(
         userResult.data!.token,
         page,
       );
 
-      if (!postResult.isSuccess || postResult.data == null) {
+      if (!clientUsersResult.isSuccess || clientUsersResult.data == null) {
         return Result.failure(
           AppError(
             message:
-                postResult.error?.message ?? "Failed to fetch client users",
+                clientUsersResult.error?.message ??
+                "Failed to fetch client users",
           ),
         );
       }
 
-      final pagedDto = postResult.data!;
+      final pagedDto = clientUsersResult.data!;
       final paged = PagedResponse<ClientUser>(
         content: pagedDto.content.map((e) => e.toClientUser()).toList(),
         page: pagedDto.page,

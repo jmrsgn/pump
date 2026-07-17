@@ -12,6 +12,7 @@ class CustomTextField extends StatefulWidget {
   final bool isMultiline;
   final InputDecoration? decoration;
   final ValueChanged<String>? onChanged;
+  final bool enabled;
 
   const CustomTextField({
     super.key,
@@ -23,6 +24,7 @@ class CustomTextField extends StatefulWidget {
     this.isMultiline = false,
     this.decoration,
     this.onChanged,
+    this.enabled = true,
   });
 
   @override
@@ -122,6 +124,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           FilteringTextInputFormatter.digitsOnly,
       ],
       onChanged: widget.onChanged,
+      enabled: widget.enabled,
     );
   }
 }
