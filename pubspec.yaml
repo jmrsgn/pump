@@ -66,7 +66,7 @@ dependencies:
 #  uuid: ^3.1.0
 #  validators: ^4.1.0
   logger: ^2.4.0
-  font_awesome_flutter: ^10.7.0
+  font_awesome_flutter: ^11.0.0
 
 dev_dependencies:
   floor_generator: ^1.2.0

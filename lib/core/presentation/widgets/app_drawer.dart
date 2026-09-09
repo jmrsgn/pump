@@ -205,7 +205,7 @@ class AppDrawer extends StatelessWidget {
           horizontal: AppDimens.dimen14,
           vertical: AppDimens.dimen2,
         ),
-        leading: Icon(
+        leading: FaIcon(
           item.icon,
           color: isSelected ? AppColors.primary : AppColors.textPrimary,
           size: AppDimens.dimen18,
@@ -255,7 +255,7 @@ class AppDrawer extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimens.dimen18),
         ),
-        leading: const Icon(
+        leading: const FaIcon(
           FontAwesomeIcons.rightFromBracket,
           color: AppColors.error,
           size: AppDimens.dimen18,

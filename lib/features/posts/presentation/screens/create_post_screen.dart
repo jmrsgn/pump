@@ -116,7 +116,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
           : AppStrings.editPost,
       appBarActions: [
         IconButton(
-          icon: const Icon(
+          icon: const FaIcon(
             FontAwesomeIcons.paperPlane,
             size: AppDimens.dimen20,
           ),
@@ -332,7 +332,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          const FaIcon(
                             FontAwesomeIcons.wandMagicSparkles,
                             color: Colors.white,
                             size: AppDimens.dimen14,

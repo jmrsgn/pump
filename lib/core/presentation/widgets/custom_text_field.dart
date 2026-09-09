@@ -8,7 +8,7 @@ class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
   final bool obscureText;
   final TextInputType? keyboardType;
-  final IconData? prefixIcon;
+  final Widget? prefixIcon;
   final bool isMultiline;
   final InputDecoration? decoration;
   final ValueChanged<String>? onChanged;
@@ -81,7 +81,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
     return InputDecoration(
       hintText: widget.hint,
-      prefixIcon: widget.prefixIcon == null ? null : Icon(widget.prefixIcon),
+      prefixIcon: widget.prefixIcon,
       suffixIcon: _showClear
           ? IconButton(
               icon: const Icon(Icons.clear, size: 20),

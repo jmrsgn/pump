@@ -106,7 +106,7 @@ class _PostWidgetState extends ConsumerState<PostWidget>
               children: [
                 Row(
                   children: [
-                    Icon(
+                    FaIcon(
                       FontAwesomeIcons.solidThumbsUp,
                       color: AppColors.info,
                       size: AppDimens.dimen12,
@@ -228,7 +228,7 @@ class _PostWidgetState extends ConsumerState<PostWidget>
       borderRadius: BorderRadius.circular(AppDimens.dimen4),
       child: Row(
         children: [
-          Icon(
+          FaIcon(
             isLikedByCurrentUser
                 ? FontAwesomeIcons.solidThumbsUp
                 : FontAwesomeIcons.thumbsUp,
@@ -256,7 +256,7 @@ class _PostWidgetState extends ConsumerState<PostWidget>
       onTap: widget.onPostInfoTap,
       child: Row(
         children: [
-          Icon(
+          FaIcon(
             FontAwesomeIcons.comment,
             color: AppColors.textDisabled,
             size: AppDimens.dimen16,
@@ -276,7 +276,7 @@ class _PostWidgetState extends ConsumerState<PostWidget>
   Widget _buildShareButton() {
     return Row(
       children: [
-        Icon(
+        FaIcon(
           FontAwesomeIcons.share,
           color: AppColors.textDisabled,
           size: AppDimens.dimen16,

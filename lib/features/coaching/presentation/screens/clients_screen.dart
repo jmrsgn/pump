@@ -105,7 +105,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
       child: CustomTextField(
         controller: _searchController,
         hint: AppStrings.searchClients,
-        prefixIcon: Icons.search_rounded,
+        prefixIcon: const Icon(Icons.search_rounded),
         onChanged: (value) {
           ref.read(clientsViewModelProvider.notifier).searchClients(value);
         },
@@ -144,7 +144,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
   Widget _buildOverviewCard({
     required String title,
     required String value,
-    required IconData icon,
+    required FaIconData icon,
   }) {
     return Container(
       padding: EdgeInsets.all(AppDimens.dimen16),
@@ -161,7 +161,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
               color: AppColors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppDimens.dimen14),
             ),
-            child: Icon(
+            child: FaIcon(
               icon,
               color: AppColors.primary,
               size: AppDimens.dimen18,
@@ -322,7 +322,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
     );
   }
 
-  Widget _buildInfoChip({required IconData icon, required String label}) {
+  Widget _buildInfoChip({required FaIconData icon, required String label}) {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: AppDimens.dimen10,
@@ -334,7 +334,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
       ),
       child: Row(
         children: [
-          Icon(icon, size: AppDimens.dimen12, color: AppColors.textSecondary),
+          FaIcon(icon, size: AppDimens.dimen12, color: AppColors.textSecondary),
 
           UiUtils.addHorizontalSpaceS(),
 

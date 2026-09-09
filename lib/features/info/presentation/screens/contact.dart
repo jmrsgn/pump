@@ -44,7 +44,7 @@ class _ContactScreenState extends State<ContactScreen> {
                     color: AppColors.primary.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: FaIcon(
                     FontAwesomeIcons.paperPlane,
                     color: AppColors.primary,
                     size: AppDimens.dimen26,

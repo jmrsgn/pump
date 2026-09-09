@@ -533,7 +533,7 @@ class AboutScreen extends StatelessWidget {
           UiUtils.addVerticalSpaceL(),
 
           _buildSocialCard(
-            icon: Icons.email_outlined,
+            icon: const Icon(Icons.email_outlined),
             title: AppStrings.email,
             subtitle: AppStrings.devEmail,
             onTap: _launchEmail,
@@ -542,7 +542,7 @@ class AboutScreen extends StatelessWidget {
           UiUtils.addVerticalSpaceM(),
 
           _buildSocialCard(
-            icon: Icons.call_outlined,
+            icon: const Icon(Icons.call_outlined),
             title: AppStrings.phone,
             subtitle: AppStrings.devMobileNo,
             onTap: _launchPhone,
@@ -551,7 +551,7 @@ class AboutScreen extends StatelessWidget {
           UiUtils.addVerticalSpaceM(),
 
           _buildSocialCard(
-            icon: FontAwesomeIcons.github,
+            icon: const FaIcon(FontAwesomeIcons.github),
             title: AppStrings.github,
             subtitle: AppStrings.devGithubUsername,
             onTap: _launchGithub,
@@ -562,7 +562,7 @@ class AboutScreen extends StatelessWidget {
   }
 
   Widget _buildSocialCard({
-    required IconData icon,
+    required Widget icon,
     required String title,
     required String subtitle,
     VoidCallback? onTap,
@@ -585,11 +585,7 @@ class AboutScreen extends StatelessWidget {
                 color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppDimens.dimen12),
               ),
-              child: Icon(
-                icon,
-                color: AppColors.primary,
-                size: AppDimens.dimen20,
-              ),
+              child: icon,
             ),
 
             UiUtils.addHorizontalSpaceM(),

@@ -41,7 +41,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     color: AppColors.primary.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: FaIcon(
                     FontAwesomeIcons.message,
                     color: AppColors.primary,
                     size: AppDimens.dimen26,

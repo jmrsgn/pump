@@ -324,7 +324,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
         const Spacer(),
         if (post.isOwnedByCurrentUser)
           IconButton(
-            icon: const Icon(
+            icon: const FaIcon(
               FontAwesomeIcons.ellipsis,
               size: AppDimens.dimen16,
             ),
@@ -390,7 +390,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
       children: [
         Row(
           children: [
-            Icon(
+            FaIcon(
               FontAwesomeIcons.solidThumbsUp,
               color: AppColors.info,
               size: AppDimens.dimen12,
@@ -420,7 +420,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
       borderRadius: BorderRadius.circular(AppDimens.dimen4),
       child: Row(
         children: [
-          Icon(
+          FaIcon(
             isLiked
                 ? FontAwesomeIcons.solidThumbsUp
                 : FontAwesomeIcons.thumbsUp,
@@ -457,7 +457,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
       borderRadius: BorderRadius.circular(AppDimens.dimen4),
       child: Row(
         children: [
-          Icon(
+          FaIcon(
             FontAwesomeIcons.comment,
             color: AppColors.textDisabled,
             size: AppDimens.dimen16,
@@ -479,7 +479,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
   Widget _buildShareButton() {
     return Row(
       children: [
-        Icon(
+        FaIcon(
           FontAwesomeIcons.share,
           color: AppColors.textDisabled,
           size: AppDimens.dimen16,
@@ -504,7 +504,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
           children: [
             ListTile(
               tileColor: AppColors.surface,
-              leading: const Icon(
+              leading: const FaIcon(
                 FontAwesomeIcons.pen,
                 size: AppDimens.dimen16,
               ),
@@ -516,7 +516,7 @@ class _PostInfoScreenState extends ConsumerState<PostInfoScreen>
             ),
             ListTile(
               tileColor: AppColors.surface,
-              leading: const Icon(
+              leading: const FaIcon(
                 FontAwesomeIcons.trash,
                 size: AppDimens.dimen16,
                 color: AppColors.error,

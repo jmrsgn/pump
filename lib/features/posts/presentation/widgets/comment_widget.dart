@@ -136,7 +136,7 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
                               style: AppTextStyles.caption,
                             ),
                             UiUtils.addHorizontalSpaceS(),
-                            Icon(
+                            FaIcon(
                               isLikedByCurrentUser
                                   ? FontAwesomeIcons.solidThumbsUp
                                   : FontAwesomeIcons.thumbsUp,
@@ -169,7 +169,7 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
             children: [
               ListTile(
                 tileColor: AppColors.surface,
-                leading: const Icon(
+                leading: const FaIcon(
                   FontAwesomeIcons.pen,
                   size: AppDimens.dimen16,
                 ),
@@ -183,7 +183,7 @@ class _CommentWidgetState extends ConsumerState<CommentWidget>
               ),
               ListTile(
                 tileColor: AppColors.surface,
-                leading: const Icon(
+                leading: const FaIcon(
                   FontAwesomeIcons.trash,
                   size: AppDimens.dimen16,
                   color: AppColors.error,

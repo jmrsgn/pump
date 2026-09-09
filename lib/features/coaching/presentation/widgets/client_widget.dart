@@ -92,7 +92,10 @@ class ClientWidget extends StatelessWidget {
               onPressed: () {
                 NavigationUtils.navigateTo(context, AppRoutes.clientOverview);
               },
-              icon: Icon(FontAwesomeIcons.arrowRight, size: AppDimens.dimen16),
+              icon: FaIcon(
+                FontAwesomeIcons.arrowRight,
+                size: AppDimens.dimen16,
+              ),
             ),
           ],
         ),

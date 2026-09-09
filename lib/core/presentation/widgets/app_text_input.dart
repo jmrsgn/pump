@@ -87,7 +87,7 @@ class _AppTextInputState extends State<AppTextInput> {
                 shape: BoxShape.circle,
               ),
 
-              child: const Icon(
+              child: const FaIcon(
                 FontAwesomeIcons.paperclip,
                 size: AppDimens.dimen16,
                 color: AppColors.primary,
@@ -166,7 +166,7 @@ class _AppTextInputState extends State<AppTextInput> {
                   shape: BoxShape.circle,
                 ),
 
-                child: Icon(
+                child: FaIcon(
                   _canSend
                       ? FontAwesomeIcons.paperPlane
                       : FontAwesomeIcons.microphone,

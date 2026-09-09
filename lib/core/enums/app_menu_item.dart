@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../constants/app/app_strings.dart';
@@ -42,7 +41,7 @@ enum AppMenuItem {
   );
 
   final String title;
-  final IconData icon;
+  final FaIconData icon;
   final String route;
 
   const AppMenuItem({

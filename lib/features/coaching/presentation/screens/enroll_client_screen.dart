@@ -352,7 +352,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     return CustomTextField(
       hint: 'Search User',
       controller: _searchController,
-      prefixIcon: Icons.search,
+      prefixIcon: const Icon(Icons.search),
       enabled: selectedUser == null,
       onChanged: (value) {
         _searchDebounce?.cancel();
@@ -525,7 +525,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
   Widget _buildGenderChip({
     required String label,
     required Gender gender,
-    required IconData icon,
+    required FaIconData icon,
   }) {
     final isSelected = selectedGender == gender;
 
@@ -584,7 +584,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
                 hint: 'Height (cm)',
                 controller: _heightController,
                 keyboardType: TextInputType.number,
-                prefixIcon: Icons.height,
+                prefixIcon: const Icon(Icons.height),
               ),
             ),
 
@@ -595,7 +595,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
                 hint: 'Weight (kg)',
                 controller: _weightController,
                 keyboardType: TextInputType.number,
-                prefixIcon: FontAwesomeIcons.weightScale,
+                prefixIcon: const FaIcon(FontAwesomeIcons.weightScale),
               ),
             ),
           ],
@@ -607,7 +607,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
           hint: 'Goal Weight (kg)',
           controller: _goalWeightController,
           keyboardType: TextInputType.number,
-          prefixIcon: Icons.track_changes,
+          prefixIcon: const Icon(Icons.track_changes),
         ),
       ],
     );
