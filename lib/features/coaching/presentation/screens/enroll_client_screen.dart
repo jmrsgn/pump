@@ -16,9 +16,9 @@ import 'package:pump/core/presentation/widgets/custom_text_field.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
-import 'package:pump/features/coaching/enums/activity_level.dart';
-import 'package:pump/features/coaching/enums/fitness_goal.dart';
-import 'package:pump/features/coaching/enums/gender.dart';
+import 'package:pump/features/coaching/data/enums/activity_level.dart';
+import 'package:pump/features/coaching/data/enums/fitness_goal.dart';
+import 'package:pump/features/coaching/data/enums/gender.dart';
 import 'package:pump/features/coaching/presentation/provider/client_user_providers.dart';
 import 'package:pump/features/coaching/presentation/state/enroll_client_state.dart';
 import 'package:pump/features/coaching/presentation/viewmodels/enroll_client_viewmodel.dart';
@@ -549,25 +549,30 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
           ),
         ),
         child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FaIcon(
-                icon,
-                size: AppDimens.dimen16,
-                color: isSelected ? AppColors.primary : AppColors.textPrimary,
-              ),
-
-              UiUtils.addHorizontalSpaceS(),
-
-              Text(
-                label,
-                style: AppTextStyles.body.copyWith(
-                  fontWeight: FontWeight.w600,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FaIcon(
+                  icon,
+                  size: AppDimens.dimen16,
                   color: isSelected ? AppColors.primary : AppColors.textPrimary,
                 ),
-              ),
-            ],
+
+                UiUtils.addHorizontalSpaceS(),
+
+                Text(
+                  label,
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

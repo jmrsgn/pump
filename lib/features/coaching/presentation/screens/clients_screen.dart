@@ -12,7 +12,7 @@ import 'package:pump/core/routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/coaching/domain/entity/client_user.dart';
-import 'package:pump/features/coaching/enums/coaching_status.dart';
+import 'package:pump/features/coaching/data/enums/coaching_status.dart';
 import 'package:pump/features/coaching/presentation/provider/client_user_providers.dart';
 import 'package:pump/features/coaching/presentation/viewmodels/clients_viewmodel.dart';
 

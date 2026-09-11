@@ -3,9 +3,9 @@ import 'package:pump/features/coaching/data/dto/request/create_client_user_reque
 import 'package:pump/features/coaching/domain/repository/client_user_repository.dart';
 
 import '../../../../core/data/dto/response/result.dart';
-import '../../enums/activity_level.dart';
-import '../../enums/fitness_goal.dart';
-import '../../enums/gender.dart';
+import '../../data/enums/activity_level.dart';
+import '../../data/enums/fitness_goal.dart';
+import '../../data/enums/gender.dart';
 
 class CreateClientUserUseCase {
   final ClientUserRepository _clientUserRepository;

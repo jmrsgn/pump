@@ -1,4 +1,4 @@
-import 'package:pump/features/coaching/enums/training_split.dart';
+import 'package:pump/features/coaching/data/enums/training_split.dart';
 
 import 'exercise.dart';
 import 'log_exercise.dart';

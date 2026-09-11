@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:pump/core/constants/app/app_strings.dart';
 import 'package:pump/core/presentation/widgets/custom_bottom_nav_bar.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
 import 'package:pump/features/coaching/presentation/screens/client_info_screen.dart';
 import 'package:pump/features/coaching/presentation/screens/progress_and_analytics_screen.dart';
 import 'package:pump/features/coaching/presentation/screens/training_block_screen.dart';
-
-import '../../../../core/constants/app/app_strings.dart';
+import 'package:pump/features/coaching/enums/client_overview_tab.dart';
 
 class ClientOverviewScreen extends StatefulWidget {
   const ClientOverviewScreen({super.key});
@@ -14,65 +14,63 @@ class ClientOverviewScreen extends StatefulWidget {
   State<ClientOverviewScreen> createState() => _ClientOverviewScreenState();
 }
 
-enum ClientOverviewTab { clientInfo, progress, trainingBlock }
-
 extension ClientOverviewTabExtension on ClientOverviewTab {
-  String get title {
-    switch (this) {
-      case ClientOverviewTab.clientInfo:
-        return AppStrings.clientInfo;
-      case ClientOverviewTab.progress:
-        return AppStrings.progressAndAnalytics;
-      case ClientOverviewTab.trainingBlock:
-        return AppStrings.trainingBlock;
-    }
-  }
+  String get title => switch (this) {
+    ClientOverviewTab.clientInfo => AppStrings.clientInfo,
+    ClientOverviewTab.progress => AppStrings.progressAndAnalytics,
+    ClientOverviewTab.trainingBlock => AppStrings.trainingBlock,
+  };
 }
 
 class _ClientOverviewScreenState extends State<ClientOverviewScreen> {
   ClientOverviewTab _selectedTab = ClientOverviewTab.clientInfo;
 
-  void _onTap(int index) {
-    setState(() {
-      _selectedTab = ClientOverviewTab.values[index];
-    });
-  }
-
-  Widget get _currentScreen {
-    switch (_selectedTab) {
-      case ClientOverviewTab.clientInfo:
-        return ClientInfoScreen(onTileTap: _onTap);
-      case ClientOverviewTab.progress:
-        return const ProgressAndAnalyticsScreen();
-      case ClientOverviewTab.trainingBlock:
-        return const TrainingBlockScreen();
-    }
-  }
-
-  late final List<BottomNavigationBarItem> _items = [
-    const BottomNavigationBarItem(
+  static const List<BottomNavigationBarItem> _navigationItems = [
+    BottomNavigationBarItem(
       icon: Icon(Icons.person),
       label: AppStrings.clientInfo,
     ),
-    const BottomNavigationBarItem(
+    BottomNavigationBarItem(
       icon: Icon(Icons.show_chart),
       label: AppStrings.progressAndAnalytics,
     ),
-    const BottomNavigationBarItem(
+    BottomNavigationBarItem(
       icon: Icon(Icons.fitness_center),
       label: AppStrings.trainingBlock,
     ),
   ];
 
+  void _onTabSelected(ClientOverviewTab tab) {
+    setState(() {
+      _selectedTab = tab;
+    });
+  }
+
+  void _onBottomNavTapped(int index) {
+    setState(() {
+      _selectedTab = ClientOverviewTab.values[index];
+    });
+  }
+
+  Widget _buildCurrentScreen() {
+    return switch (_selectedTab) {
+      ClientOverviewTab.clientInfo => ClientInfoScreen(
+        onNavigateToTab: _onTabSelected,
+      ),
+      ClientOverviewTab.progress => const ProgressAndAnalyticsScreen(),
+      ClientOverviewTab.trainingBlock => const TrainingBlockScreen(),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
       appBarTitle: _selectedTab.title,
-      body: _currentScreen,
+      body: _buildCurrentScreen(),
       bottomNavigationBar: CustomBottomNavigationBar(
-        items: _items,
+        items: _navigationItems,
         selectedIndex: _selectedTab.index,
-        onItemTapped: (int index) => _onTap(index),
+        onItemTapped: _onBottomNavTapped,
       ),
     );
   }

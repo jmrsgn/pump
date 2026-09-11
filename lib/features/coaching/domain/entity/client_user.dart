@@ -1,8 +1,8 @@
-import 'package:pump/features/coaching/enums/coaching_status.dart';
+import 'package:pump/features/coaching/data/enums/coaching_status.dart';
 
-import '../../enums/activity_level.dart';
-import '../../enums/fitness_goal.dart';
-import '../../enums/gender.dart';
+import '../../data/enums/activity_level.dart';
+import '../../data/enums/fitness_goal.dart';
+import '../../data/enums/gender.dart';
 
 class ClientUser {
   final String id;

@@ -1,8 +1,8 @@
 import 'package:pump/features/coaching/domain/entity/client_user.dart';
-import 'package:pump/features/coaching/enums/activity_level.dart';
-import 'package:pump/features/coaching/enums/coaching_status.dart';
-import 'package:pump/features/coaching/enums/fitness_goal.dart';
-import 'package:pump/features/coaching/enums/gender.dart';
+import 'package:pump/features/coaching/data/enums/activity_level.dart';
+import 'package:pump/features/coaching/data/enums/coaching_status.dart';
+import 'package:pump/features/coaching/data/enums/fitness_goal.dart';
+import 'package:pump/features/coaching/data/enums/gender.dart';
 
 class ClientUserResponse {
   final String? id;

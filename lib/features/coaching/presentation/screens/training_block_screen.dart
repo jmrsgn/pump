@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pump/core/utils/ui_utils.dart';
-import 'package:pump/features/coaching/enums/training_split.dart';
+import 'package:pump/features/coaching/data/enums/training_split.dart';
 
 import '../../../../core/constants/app/app_dimens.dart';
 import '../../../../core/constants/app/app_strings.dart';

@@ -17,6 +17,7 @@ class AppDimens {
   static const double dimen16 = 16.0;
   static const double dimen18 = 18.0;
   static const double dimen20 = 20.0;
+  static const double dimen22 = 22.0;
   static const double dimen24 = 24.0;
   static const double dimen26 = 26.0;
   static const double dimen28 = 28.0;
@@ -31,9 +32,11 @@ class AppDimens {
   static const double dimen60 = 60.0;
   static const double dimen64 = 64.0;
   static const double dimen80 = 80.0;
+  static const double dimen90 = 90.0;
   static const double dimen86 = 86.0;
   static const double dimen120 = 120.0;
   static const double dimen180 = 180.0;
+  static const double dimen300 = 300.0;
   static const double dimen500 = 500.0;
 
   // Text Sizes

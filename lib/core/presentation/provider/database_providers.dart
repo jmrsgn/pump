@@ -12,3 +12,4 @@ final userDaoProvider = FutureProvider<UserDao>((ref) async {
   final db = await ref.watch(appDatabaseProvider.future);
   return db.userDao;
 });
+›
