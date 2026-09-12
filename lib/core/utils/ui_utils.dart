@@ -111,26 +111,20 @@ class UiUtils {
   }) => showSnackbar(
     context,
     message: message,
-    backgroundColor: AppColors.snackBarSuccess,
+    backgroundColor: AppColors.success,
   );
 
   static void showSnackBarError(
     BuildContext context, {
     required String message,
-  }) => showSnackbar(
-    context,
-    message: message,
-    backgroundColor: AppColors.snackBarError,
-  );
+  }) =>
+      showSnackbar(context, message: message, backgroundColor: AppColors.error);
 
   static void showSnackBarInfo(
     BuildContext context, {
     required String message,
-  }) => showSnackbar(
-    context,
-    message: message,
-    backgroundColor: AppColors.snackBarInfo,
-  );
+  }) =>
+      showSnackbar(context, message: message, backgroundColor: AppColors.info);
 
   /// Create avatar using the App's default theme
   static CircleAvatar _buildAvatar({

@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:pump/core/constants/app/app_strings.dart';
 import 'package:pump/core/presentation/widgets/custom_bottom_nav_bar.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
+import 'package:pump/features/coaching/enums/client_overview_tab.dart';
 import 'package:pump/features/coaching/presentation/screens/client_info_screen.dart';
 import 'package:pump/features/coaching/presentation/screens/progress_and_analytics_screen.dart';
 import 'package:pump/features/coaching/presentation/screens/training_block_screen.dart';
-import 'package:pump/features/coaching/enums/client_overview_tab.dart';
 
 class ClientOverviewScreen extends StatefulWidget {
-  const ClientOverviewScreen({super.key});
+  final bool hasTrainingBlock;
+
+  const ClientOverviewScreen({super.key, this.hasTrainingBlock = true});
 
   @override
   State<ClientOverviewScreen> createState() => _ClientOverviewScreenState();
@@ -25,30 +27,52 @@ extension ClientOverviewTabExtension on ClientOverviewTab {
 class _ClientOverviewScreenState extends State<ClientOverviewScreen> {
   ClientOverviewTab _selectedTab = ClientOverviewTab.clientInfo;
 
-  static const List<BottomNavigationBarItem> _navigationItems = [
-    BottomNavigationBarItem(
-      icon: Icon(Icons.person),
-      label: AppStrings.clientInfo,
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.show_chart),
-      label: AppStrings.progressAndAnalytics,
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.fitness_center),
-      label: AppStrings.trainingBlock,
-    ),
-  ];
+  List<ClientOverviewTab> get _visibleTabs {
+    if (!widget.hasTrainingBlock) {
+      return [ClientOverviewTab.clientInfo];
+    }
+
+    return [
+      ClientOverviewTab.clientInfo,
+      ClientOverviewTab.progress,
+      ClientOverviewTab.trainingBlock,
+    ];
+  }
+
+  List<BottomNavigationBarItem> get _navigationItems {
+    return _visibleTabs.map((tab) {
+      return BottomNavigationBarItem(
+        icon: Icon(_getTabIcon(tab)),
+        label: tab.title,
+      );
+    }).toList();
+  }
+
+  IconData _getTabIcon(ClientOverviewTab tab) {
+    return switch (tab) {
+      ClientOverviewTab.clientInfo => Icons.person,
+      ClientOverviewTab.progress => Icons.show_chart,
+      ClientOverviewTab.trainingBlock => Icons.fitness_center,
+    };
+  }
 
   void _onTabSelected(ClientOverviewTab tab) {
+    if (!_visibleTabs.contains(tab)) {
+      return;
+    }
+
     setState(() {
       _selectedTab = tab;
     });
   }
 
   void _onBottomNavTapped(int index) {
+    if (index < 0 || index >= _visibleTabs.length) {
+      return;
+    }
+
     setState(() {
-      _selectedTab = ClientOverviewTab.values[index];
+      _selectedTab = _visibleTabs[index];
     });
   }
 
@@ -64,14 +88,18 @@ class _ClientOverviewScreenState extends State<ClientOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final showBottomNavigation = _visibleTabs.length >= 2;
+
     return CustomScaffold(
       appBarTitle: _selectedTab.title,
       body: _buildCurrentScreen(),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        items: _navigationItems,
-        selectedIndex: _selectedTab.index,
-        onItemTapped: _onBottomNavTapped,
-      ),
+      bottomNavigationBar: showBottomNavigation
+          ? CustomBottomNavigationBar(
+              items: _navigationItems,
+              selectedIndex: _visibleTabs.indexOf(_selectedTab),
+              onItemTapped: _onBottomNavTapped,
+            )
+          : null,
     );
   }
 }

@@ -5,11 +5,23 @@ import 'package:pump/core/presentation/theme/app_colors.dart';
 import 'package:pump/core/presentation/theme/app_text_styles.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/coaching/enums/client_overview_tab.dart';
+import 'package:pump/features/coaching/presentation/screens/create_training_block_screen.dart';
+import 'package:pump/core/presentation/widgets/custom_button.dart';
+import 'package:pump/features/coaching/presentation/screens/create_training_block_screen.dart';
 
 class ClientInfoScreen extends StatelessWidget {
   final ValueChanged<ClientOverviewTab>? onNavigateToTab;
 
-  const ClientInfoScreen({super.key, this.onNavigateToTab});
+  /// Temporary UI state.
+  ///
+  /// This will eventually come from the client's coaching data.
+  final bool hasTrainingBlock;
+
+  const ClientInfoScreen({
+    super.key,
+    this.onNavigateToTab,
+    this.hasTrainingBlock = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,18 +32,36 @@ class ClientInfoScreen extends StatelessWidget {
         children: [
           _buildProfileCard(),
           UiUtils.addVerticalSpaceL(),
+
           _buildPhysicalStats(),
           UiUtils.addVerticalSpaceL(),
-          _buildTrainingCard(),
+
+          _buildFitnessInfo(),
           UiUtils.addVerticalSpaceL(),
-          _buildNutritionCard(),
+
+          if (hasTrainingBlock) ...[
+            _buildTrainingCard(),
+            UiUtils.addVerticalSpaceL(),
+
+            _buildNutritionCard(),
+            UiUtils.addVerticalSpaceL(),
+
+            _buildProgressCard(),
+            UiUtils.addVerticalSpaceL(),
+
+            _buildCoachingNotesCard(),
+            UiUtils.addVerticalSpaceL(),
+
+            _buildExtrasCard(),
+            UiUtils.addVerticalSpaceL(),
+          ],
+
+          // if (!hasTrainingBlock) ...[
+          //   UiUtils.addVerticalSpaceL(),
+          //   _buildCreateTrainingBlockButton(context),
+          // ],
           UiUtils.addVerticalSpaceL(),
-          _buildProgressCard(),
-          UiUtils.addVerticalSpaceL(),
-          _buildCoachingNotesCard(),
-          UiUtils.addVerticalSpaceL(),
-          _buildExtrasCard(),
-          UiUtils.addVerticalSpaceL(),
+          _buildCreateTrainingBlockButton(context),
         ],
       ),
     );
@@ -105,6 +135,7 @@ class ClientInfoScreen extends StatelessWidget {
       children: [
         _buildSectionHeader(AppStrings.physicalStats),
         UiUtils.addVerticalSpaceS(),
+
         GridView.count(
           crossAxisCount: 2,
           crossAxisSpacing: AppDimens.padding8,
@@ -125,12 +156,12 @@ class ClientInfoScreen extends StatelessWidget {
             ),
             _buildStatCard(
               label: AppStrings.bodyFat,
-              value: '20%',
+              value: '-',
               icon: Icons.percent,
             ),
             _buildStatCard(
               label: AppStrings.muscleMass,
-              value: '30 kg',
+              value: '-',
               icon: Icons.fitness_center,
             ),
           ],
@@ -191,6 +222,28 @@ class ClientInfoScreen extends StatelessWidget {
   }
 
   // ---------------------------------------------------------------------------
+  // Fitness Information
+  // ---------------------------------------------------------------------------
+
+  Widget _buildFitnessInfo() {
+    return _buildSectionCard(
+      title: 'Fitness Info',
+      icon: Icons.track_changes_outlined,
+      children: [
+        _buildInfoRow(label: 'Weight Goal', value: '60 kg'),
+        _buildDivider(),
+        _buildInfoRow(label: 'Fitness Goal', value: 'Recomposition'),
+        _buildDivider(),
+        _buildInfoRow(label: 'Activity Level', value: 'Moderately Active'),
+        if (hasTrainingBlock) ...[
+          _buildDivider(),
+          _buildInfoRow(label: 'Current Phase', value: 'Cut'),
+        ],
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
   // Training
   // ---------------------------------------------------------------------------
 
@@ -242,8 +295,6 @@ class ClientInfoScreen extends StatelessWidget {
             Expanded(child: _buildMacroItem('Fat', '72g')),
           ],
         ),
-        UiUtils.addVerticalSpaceL(),
-        _buildInfoRow(label: 'Meal plan', value: 'Lean Bulk'),
       ],
     );
   }
@@ -440,6 +491,31 @@ class ClientInfoScreen extends StatelessWidget {
       child: Divider(
         height: 1,
         color: AppColors.textHint.withValues(alpha: 0.15),
+      ),
+    );
+  }
+
+  Widget _buildCreateTrainingBlockButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: CustomButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CreateTrainingBlockScreen(
+                clientName: "John Martin Marasigan",
+                clientAge: 25,
+                clientGender: "Male",
+                clientHeight: 163.0,
+                clientCurrentWeight: 64.35,
+                clientGoalWeight: 60.0,
+                clientFitnessGoal: "Recomposition",
+              ),
+            ),
+          );
+        },
+        label: 'Create Training Block',
       ),
     );
   }
