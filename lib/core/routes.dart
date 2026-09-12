@@ -5,7 +5,7 @@ import 'package:pump/features/auth/presentation/screens/login_screen.dart';
 import 'package:pump/features/auth/presentation/screens/register_screen.dart';
 import 'package:pump/features/chat/presentation/screens/messages.dart';
 import 'package:pump/features/coaching/presentation/screens/client_overview_screen.dart';
-import 'package:pump/features/coaching/presentation/screens/clients_screen.dart';
+import 'package:pump/features/coaching/presentation/screens/coaching_screen.dart';
 import 'package:pump/features/info/presentation/screens/contact.dart';
 import 'package:pump/features/info/presentation/screens/feedback.dart';
 import 'package:pump/features/posts/presentation/screens/create_post_screen.dart';
@@ -78,7 +78,7 @@ class AppRoutes {
         case register:
           return MaterialPageRoute(builder: (_) => RegisterScreen());
         case coaching:
-          return MaterialPageRoute(builder: (_) => const ClientsScreen());
+          return MaterialPageRoute(builder: (_) => CoachingScreen());
         case clientOverview:
           return MaterialPageRoute(
             builder: (_) => const ClientOverviewScreen(),

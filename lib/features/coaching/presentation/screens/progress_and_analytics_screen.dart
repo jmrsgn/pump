@@ -75,7 +75,7 @@ class ProgressAndAnalyticsScreen extends StatelessWidget {
     required IconData icon,
   }) {
     return Card(
-      color: AppColors.surfaceLight,
+      color: AppColors.surface,
       child: Padding(
         padding: const EdgeInsets.all(AppDimens.padding12),
         child: Column(
@@ -196,7 +196,7 @@ class ProgressAndAnalyticsScreen extends StatelessWidget {
     final weeklyRate = _getWeeklyRate(weekNumber);
 
     return Card(
-      color: AppColors.surfaceLight,
+      color: AppColors.surface,
       clipBehavior: Clip.antiAlias,
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -240,7 +240,7 @@ class ProgressAndAnalyticsScreen extends StatelessWidget {
                 vertical: AppDimens.padding4,
               ),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: AppColors.surfaceLight,
                 borderRadius: BorderRadius.circular(AppDimens.radius8),
               ),
               child: Text(
@@ -377,7 +377,7 @@ class ProgressAndAnalyticsScreen extends StatelessWidget {
     return Container(
       height: AppDimens.dimen44,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.background,
         borderRadius: BorderRadius.circular(AppDimens.radius8),
       ),
       child: TextField(
@@ -419,7 +419,7 @@ class ProgressAndAnalyticsScreen extends StatelessWidget {
           vertical: AppDimens.padding12,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.surfaceLight,
           borderRadius: BorderRadius.circular(AppDimens.radius8),
         ),
         child: Row(
@@ -568,7 +568,7 @@ class ProgressAndAnalyticsScreen extends StatelessWidget {
     required List<Widget> children,
   }) {
     return Card(
-      color: AppColors.surfaceLight,
+      color: AppColors.surface,
       child: Padding(
         padding: const EdgeInsets.all(AppDimens.padding16),
         child: Column(

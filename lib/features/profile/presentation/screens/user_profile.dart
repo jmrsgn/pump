@@ -36,34 +36,6 @@ class UserProfileScreen extends StatelessWidget {
               leading: Icons.edit_outlined,
             ),
 
-            UiUtils.addVerticalSpaceS(),
-
-            _buildProfileTile(
-              title: AppStrings.paymentMethod,
-              subtitle: AppStrings.manageBillingAndPaymentMethods,
-              leading: Icons.payment_outlined,
-            ),
-
-            UiUtils.addVerticalSpaceXL(),
-
-            _buildSectionTitle(AppStrings.fitness),
-
-            UiUtils.addVerticalSpaceM(),
-
-            _buildProfileTile(
-              title: AppStrings.clients,
-              subtitle: AppStrings.manageClientsAndCoachingSessions,
-              leading: Icons.groups_outlined,
-            ),
-
-            UiUtils.addVerticalSpaceS(),
-
-            _buildProfileTile(
-              title: AppStrings.coach,
-              subtitle: AppStrings.viewCoachingProfileAndSettings,
-              leading: Icons.fitness_center_outlined,
-            ),
-
             UiUtils.addVerticalSpaceXL(),
 
             _buildSectionTitle(AppStrings.support),
@@ -143,33 +115,6 @@ class UserProfileScreen extends StatelessWidget {
                 color: AppColors.success,
                 fontWeight: FontWeight.w600,
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard({required String title, required String value}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: AppDimens.dimen18),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppDimens.dimen16),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: AppTextStyles.heading3.copyWith(color: AppColors.primary),
-          ),
-
-          UiUtils.addVerticalSpaceXS(),
-
-          Text(
-            title,
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.textSecondary,
             ),
           ),
         ],

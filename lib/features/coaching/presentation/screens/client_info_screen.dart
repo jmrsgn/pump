@@ -43,7 +43,7 @@ class ClientInfoScreen extends StatelessWidget {
 
   Widget _buildProfileCard() {
     return Card(
-      color: AppColors.surfaceLight,
+      color: AppColors.surface,
       child: Padding(
         padding: const EdgeInsets.all(AppDimens.padding16),
         child: Row(
@@ -145,7 +145,7 @@ class ClientInfoScreen extends StatelessWidget {
     required IconData icon,
   }) {
     return Card(
-      color: AppColors.surfaceLight,
+      color: AppColors.surface,
       child: Padding(
         padding: const EdgeInsets.all(AppDimens.padding12),
         child: Row(
@@ -342,7 +342,7 @@ class ClientInfoScreen extends StatelessWidget {
     required List<Widget> children,
   }) {
     return Card(
-      color: AppColors.surfaceLight,
+      color: AppColors.surface,
       child: Padding(
         padding: const EdgeInsets.all(AppDimens.padding16),
         child: Column(
@@ -413,7 +413,7 @@ class ClientInfoScreen extends StatelessWidget {
           vertical: AppDimens.padding12,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.surfaceLight,
           borderRadius: BorderRadius.circular(AppDimens.radius8),
         ),
         child: Row(
