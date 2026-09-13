@@ -5,6 +5,8 @@ import 'package:pump/core/presentation/theme/app_text_styles.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/coaching/presentation/screens/clients_screen.dart';
+import 'package:pump/features/coaching/presentation/screens/my_coach_screen.dart';
+import 'package:pump/features/coaching/presentation/screens/payment_method_screen.dart';
 
 class CoachingScreen extends StatelessWidget {
   const CoachingScreen({super.key});
@@ -13,7 +15,7 @@ class CoachingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Temporary hardcoded role.
     // This will eventually come from the authenticated user.
-    const bool isCoach = true;
+    const bool isCoach = false;
 
     return CustomScaffold(
       appBarTitle: 'Coaching',
@@ -115,8 +117,10 @@ class CoachingScreen extends StatelessWidget {
           title: 'My Coach',
           description: 'View information about your coach.',
           onTap: () {
-            // TODO:
-            // Navigate to CoachInfoScreen.
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const MyCoachScreen()),
+            );
           },
         ),
 
@@ -127,8 +131,10 @@ class CoachingScreen extends StatelessWidget {
           title: 'Payment Method',
           description: 'Manage your coaching payment method.',
           onTap: () {
-            // TODO:
-            // Navigate to PaymentMethodScreen.
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PaymentMethodScreen()),
+            );
           },
         ),
       ],

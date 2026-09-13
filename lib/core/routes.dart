@@ -6,14 +6,14 @@ import 'package:pump/features/auth/presentation/screens/register_screen.dart';
 import 'package:pump/features/chat/presentation/screens/messages.dart';
 import 'package:pump/features/coaching/presentation/screens/client_overview_screen.dart';
 import 'package:pump/features/coaching/presentation/screens/coaching_screen.dart';
-import 'package:pump/features/info/presentation/screens/contact.dart';
-import 'package:pump/features/info/presentation/screens/feedback.dart';
+import 'package:pump/features/info/presentation/screens/contact_screen.dart';
+import 'package:pump/features/info/presentation/screens/feedback_screen.dart';
 import 'package:pump/features/posts/presentation/screens/create_post_screen.dart';
 import 'package:pump/features/posts/presentation/screens/liked_posts_screen.dart';
 import 'package:pump/features/posts/presentation/screens/post_info_screen.dart';
 
 import '../features/coaching/presentation/screens/enroll_client_screen.dart';
-import '../features/info/presentation/screens/about.dart';
+import '../features/info/presentation/screens/about_screen.dart';
 import '../features/posts/domain/entity/post.dart';
 import '../features/posts/presentation/screens/main_feed_screen.dart';
 import '../features/profile/presentation/screens/user_profile.dart';
