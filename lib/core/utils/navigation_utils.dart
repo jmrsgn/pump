@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pump/core/routes.dart';
+import 'package:pump/core/app_routes.dart';
 
 class NavigationUtils {
   NavigationUtils._();

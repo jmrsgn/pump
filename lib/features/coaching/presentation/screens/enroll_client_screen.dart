@@ -31,7 +31,7 @@ class EnrollClientScreen extends ConsumerStatefulWidget {
 }
 
 class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
-  static const debugTag = "EnrollClientScreen";
+  static const String _debugTag = 'EnrollClientScreen';
 
   final _searchController = TextEditingController();
   final _ageController = TextEditingController();
@@ -43,12 +43,12 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
 
   String selectedGoal = AppStrings.fatLoss;
   String selectedActivityLevel = AppStrings.moderatelyActive;
+
   Gender selectedGender = Gender.male;
 
   UserSummary? selectedUser;
 
   OverlayEntry? _searchOverlay;
-
   Timer? _searchDebounce;
 
   EnrollClientViewModel get _enrollClientViewModel =>
@@ -65,38 +65,8 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     _goalWeightController.dispose();
 
     _searchDebounce?.cancel();
+
     super.dispose();
-  }
-
-  void _onEnrollPressed() {
-    if (selectedUser == null) {
-      UiUtils.showSnackBarError(context, message: "Please select a user");
-      return;
-    }
-
-    final age = int.tryParse(_ageController.text.trim());
-    final height = double.tryParse(_heightController.text.trim());
-    final weight = double.tryParse(_weightController.text.trim());
-    final goalWeight = double.tryParse(_goalWeightController.text.trim());
-
-    if ([height, weight, goalWeight, age].any((e) => e == null)) {
-      UiUtils.showSnackBarError(
-        context,
-        message: ValidationErrorConstants.allFieldsAreRequired,
-      );
-      return;
-    }
-
-    _enrollClientViewModel.createClientUser(
-      userId: selectedUser!.id,
-      gender: selectedGender,
-      age: age!,
-      heightCm: height!,
-      currentWeight: weight!,
-      goalWeight: goalWeight!,
-      activityLevel: ActivityLevel.fromValue(selectedActivityLevel),
-      fitnessGoal: FitnessGoal.fromValue(selectedGoal),
-    );
   }
 
   @override
@@ -116,140 +86,497 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
         _removeSearchOverlay();
       }
 
-      if (_searchOverlay != null) {
-        _searchOverlay?.markNeedsBuild();
-      }
+      _searchOverlay?.markNeedsBuild();
 
       if (next.errorMessage != null) {
         UiUtils.showSnackBarError(context, message: next.errorMessage!);
       }
 
       if (next.isEnrollSuccess) {
-        // Navigates back to Coaching Screen
         NavigationUtils.pop(context, true);
       }
     });
 
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        _removeSearchOverlay();
+      },
       child: CustomScaffold(
+        appBarTitle: AppStrings.enrollClient,
+        backgroundColor: AppColors.background,
         isLoading: enrollClientState.isLoading,
-        body: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimens.dimen24,
-                  vertical: AppDimens.dimen20,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(AppDimens.dimen18),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(
-                            alpha: AppDimens.alpha0_08,
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.person_add_alt_1,
-                          color: AppColors.primary,
-                          size: AppDimens.dimen30,
-                        ),
-                      ),
-                    ),
-
-                    UiUtils.addVerticalSpaceXL(),
-
-                    Text(
-                      AppStrings.enrollClient,
-                      style: AppTextStyles.heading1,
-                    ),
-
-                    UiUtils.addVerticalSpaceS(),
-
-                    Text(
-                      AppStrings.enrollClientHelperText,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-
-                    UiUtils.addVerticalSpaceL(),
-
-                    _buildRequiredFieldsNotice(),
-
-                    UiUtils.addVerticalSpaceL(),
-
-                    _buildSectionLabel(AppStrings.personalInformation),
-
-                    UiUtils.addVerticalSpaceL(),
-
-                    CompositedTransformTarget(
-                      link: _searchLayerLink,
-                      child: _buildUserSearch(),
-                    ),
-
-                    UiUtils.addVerticalSpaceM(),
-
-                    if (selectedUser != null) _buildSelectedUserCard(),
-
-                    _buildGenderSelection(),
-
-                    UiUtils.addVerticalSpaceXXL(),
-
-                    _buildSectionLabel(AppStrings.bodyMetrics),
-
-                    UiUtils.addVerticalSpaceL(),
-
-                    _buildBodyMetrics(),
-
-                    UiUtils.addVerticalSpaceXXL(),
-
-                    _buildSectionLabel(AppStrings.fitnessGoal),
-
-                    UiUtils.addVerticalSpaceL(),
-
-                    _buildFitnessGoals(),
-
-                    UiUtils.addVerticalSpaceXXL(),
-
-                    _buildSectionLabel(AppStrings.activityLevel),
-
-                    UiUtils.addVerticalSpaceL(),
-
-                    _buildActivityLevels(),
-
-                    UiUtils.addVerticalSpaceXXL(),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: CustomButton(
-                        onPressed: _onEnrollPressed,
-                        label: AppStrings.enrollClient,
-                      ),
-                    ),
-
-                    UiUtils.addVerticalSpaceXXL(),
-                  ],
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(
+            AppDimens.padding16,
+            AppDimens.padding16,
+            AppDimens.padding16,
+            AppDimens.padding24,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppStrings.enrollClientHelperText,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
                 ),
               ),
+
+              UiUtils.addVerticalSpaceM(),
+
+              _buildRequiredFieldsNotice(),
+
+              UiUtils.addVerticalSpaceXL(),
+
+              _buildClientSection(),
+
+              UiUtils.addVerticalSpaceXL(),
+
+              _buildPersonalInformationSection(),
+
+              UiUtils.addVerticalSpaceXL(),
+
+              _buildBodyMetricsSection(),
+
+              UiUtils.addVerticalSpaceXL(),
+
+              _buildFitnessGoalSection(),
+
+              UiUtils.addVerticalSpaceXL(),
+
+              _buildActivityLevelSection(),
+
+              UiUtils.addVerticalSpaceXL(),
+
+              SizedBox(
+                width: double.infinity,
+                child: CustomButton(
+                  onPressed: _onEnrollPressed,
+                  label: AppStrings.enrollClient,
+                ),
+              ),
+
+              UiUtils.addVerticalSpaceXL(),
+
+              Center(child: UiUtils.addCopyright()),
+
+              UiUtils.addVerticalSpaceM(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Client
+  // ---------------------------------------------------------------------------
+
+  Widget _buildClientSection() {
+    return _buildSection(
+      title: 'Client',
+      icon: Icons.person_search_outlined,
+      child: selectedUser == null
+          ? CompositedTransformTarget(
+              link: _searchLayerLink,
+              child: _buildUserSearch(),
+            )
+          : _buildSelectedUserCard(),
+    );
+  }
+
+  Widget _buildUserSearch() {
+    return CustomTextField(
+      hint: 'Search User',
+      controller: _searchController,
+      prefixIcon: const Icon(Icons.search),
+      onChanged: (value) {
+        _searchDebounce?.cancel();
+
+        final query = value.trim();
+
+        if (query.isEmpty) {
+          LoggerUtility.d(_debugTag, 'Search query is empty');
+
+          _removeSearchOverlay();
+          _enrollClientViewModel.clearSearchUsers();
+
+          return;
+        }
+
+        _searchDebounce = Timer(
+          Duration(milliseconds: UIConstants.milliseconds300),
+          () async {
+            final latestQuery = _searchController.text.trim();
+
+            LoggerUtility.d(_debugTag, 'latestQuery: [$latestQuery]');
+
+            if (latestQuery.isEmpty) {
+              _removeSearchOverlay();
+              return;
+            }
+
+            await _enrollClientViewModel.searchUsers(query: latestQuery);
+
+            if (!mounted ||
+                _searchController.text.trim().isEmpty ||
+                selectedUser != null) {
+              return;
+            }
+
+            _showSearchOverlay();
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSelectedUserCard() {
+    final userName = '${selectedUser!.firstName} ${selectedUser!.lastName}';
+
+    return Row(
+      children: [
+        UiUtils.buildAvatarMedium(
+          userName: userName,
+          profileImageUrl: selectedUser!.profileImageUrl,
+        ),
+
+        UiUtils.addHorizontalSpaceM(),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                userName,
+                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+              ),
+
+              UiUtils.addVerticalSpaceXS(),
+
+              Text(
+                'Selected client',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textHint,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        IconButton(
+          tooltip: 'Change client',
+          onPressed: _clearSelectedUser,
+          icon: const Icon(Icons.close, color: AppColors.textSecondary),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Personal Information
+  // ---------------------------------------------------------------------------
+
+  Widget _buildPersonalInformationSection() {
+    return _buildSection(
+      title: AppStrings.personalInformation,
+      icon: Icons.badge_outlined,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Gender',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textHint,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
+          UiUtils.addVerticalSpaceS(),
+
+          Row(
+            children: [
+              Expanded(
+                child: _buildGenderChip(
+                  label: AppStrings.male,
+                  gender: Gender.male,
+                  icon: FontAwesomeIcons.mars,
+                ),
+              ),
+
+              UiUtils.addHorizontalSpaceS(),
+
+              Expanded(
+                child: _buildGenderChip(
+                  label: AppStrings.female,
+                  gender: Gender.female,
+                  icon: FontAwesomeIcons.venus,
+                ),
+              ),
+            ],
+          ),
+
+          UiUtils.addVerticalSpaceM(),
+
+          CustomTextField(
+            hint: 'Age',
+            controller: _ageController,
+            keyboardType: TextInputType.number,
+            prefixIcon: const Icon(Icons.cake_outlined),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenderChip({
+    required String label,
+    required Gender gender,
+    required FaIconData icon,
+  }) {
+    final isSelected = selectedGender == gender;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppDimens.dimen12),
+      onTap: () {
+        setState(() {
+          selectedGender = gender;
+        });
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: UIConstants.milliseconds180),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimens.padding12,
+          vertical: AppDimens.padding12,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: AppDimens.alpha0_08)
+              : AppColors.background,
+          borderRadius: BorderRadius.circular(AppDimens.dimen12),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary
+                : AppColors.textHint.withValues(alpha: 0.12),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FaIcon(
+              icon,
+              size: AppDimens.dimen16,
+              color: isSelected ? AppColors.primary : AppColors.textSecondary,
             ),
 
-            _buildFooter(),
+            UiUtils.addHorizontalSpaceS(),
+
+            Text(
+              label,
+              style: AppTextStyles.bodySmall.copyWith(
+                fontWeight: FontWeight.w600,
+                color: isSelected ? AppColors.primary : AppColors.textPrimary,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Body Metrics
+  // ---------------------------------------------------------------------------
+
+  Widget _buildBodyMetricsSection() {
+    return _buildSection(
+      title: AppStrings.bodyMetrics,
+      icon: Icons.monitor_weight_outlined,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: CustomTextField(
+                  hint: 'Height (cm)',
+                  controller: _heightController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                ),
+              ),
+
+              UiUtils.addHorizontalSpaceS(),
+
+              Expanded(
+                child: CustomTextField(
+                  hint: 'Weight (kg)',
+                  controller: _weightController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          UiUtils.addVerticalSpaceM(),
+
+          CustomTextField(
+            hint: 'Goal Weight (kg)',
+            controller: _goalWeightController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Fitness Goal
+  // ---------------------------------------------------------------------------
+
+  Widget _buildFitnessGoalSection() {
+    return _buildSection(
+      title: AppStrings.fitnessGoal,
+      icon: Icons.flag_outlined,
+      child: Wrap(
+        spacing: AppDimens.dimen8,
+        runSpacing: AppDimens.dimen8,
+        children: [
+          _buildSelectionChip(AppStrings.fatLoss),
+          _buildSelectionChip(AppStrings.muscleGain),
+          _buildSelectionChip(AppStrings.maintenance),
+          _buildSelectionChip(AppStrings.recomposition),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectionChip(String goal) {
+    final isSelected = selectedGoal == goal;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppDimens.dimen50),
+      onTap: () {
+        setState(() {
+          selectedGoal = goal;
+        });
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: UIConstants.milliseconds180),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimens.padding12,
+          vertical: AppDimens.padding8,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: AppDimens.alpha0_12)
+              : AppColors.background,
+          borderRadius: BorderRadius.circular(AppDimens.dimen50),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary
+                : AppColors.textHint.withValues(alpha: 0.12),
+          ),
+        ),
+        child: Text(
+          goal,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: isSelected ? AppColors.primary : AppColors.textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Activity Level
+  // ---------------------------------------------------------------------------
+
+  Widget _buildActivityLevelSection() {
+    return _buildSection(
+      title: AppStrings.activityLevel,
+      icon: Icons.directions_run_outlined,
+      child: Column(
+        children: [
+          _buildActivityTile(title: AppStrings.sedentary),
+
+          _buildSectionDivider(),
+
+          _buildActivityTile(title: AppStrings.lightlyActive),
+
+          _buildSectionDivider(),
+
+          _buildActivityTile(title: AppStrings.moderatelyActive),
+
+          _buildSectionDivider(),
+
+          _buildActivityTile(title: AppStrings.veryActive),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActivityTile({required String title}) {
+    final isSelected = selectedActivityLevel == title;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppDimens.dimen12),
+      onTap: () {
+        setState(() {
+          selectedActivityLevel = title;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppDimens.padding12),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: AppTextStyles.bodySmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                ),
+              ),
+            ),
+
+            AnimatedSwitcher(
+              duration: Duration(milliseconds: UIConstants.milliseconds180),
+              child: isSelected
+                  ? const Icon(
+                      Icons.check_circle,
+                      key: ValueKey('selected'),
+                      color: AppColors.primary,
+                      size: AppDimens.dimen20,
+                    )
+                  : Icon(
+                      Icons.circle_outlined,
+                      key: const ValueKey('unselected'),
+                      color: AppColors.textHint,
+                      size: AppDimens.dimen20,
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Required Fields
+  // ---------------------------------------------------------------------------
+
   Widget _buildRequiredFieldsNotice() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppDimens.dimen14),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimens.padding12,
+        vertical: AppDimens.padding10,
+      ),
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: AppDimens.alpha0_08),
         borderRadius: BorderRadius.circular(AppDimens.dimen12),
@@ -258,7 +585,6 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
         ),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(
             Icons.info_outline,
@@ -281,6 +607,59 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Section
+  // ---------------------------------------------------------------------------
+
+  Widget _buildSection({
+    required String title,
+    required IconData icon,
+    required Widget child,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: AppDimens.dimen20, color: AppColors.primary),
+
+            UiUtils.addHorizontalSpaceS(),
+
+            Text(
+              title,
+              style: AppTextStyles.heading3.copyWith(
+                fontSize: AppDimens.textSize16,
+              ),
+            ),
+          ],
+        ),
+
+        UiUtils.addVerticalSpaceM(),
+
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppDimens.padding16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppDimens.dimen16),
+          ),
+          child: child,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionDivider() {
+    return Divider(
+      height: 1,
+      color: AppColors.textHint.withValues(alpha: 0.12),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Search Results
+  // ---------------------------------------------------------------------------
+
   Widget _buildSearchResults() {
     if (_searchController.text.trim().isEmpty || selectedUser != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -297,12 +676,17 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
         elevation: AppDimens.elevation8,
         borderRadius: BorderRadius.circular(AppDimens.dimen16),
         child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppDimens.padding16),
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(AppDimens.dimen16),
           ),
-          padding: const EdgeInsets.all(AppDimens.dimen16),
-          child: const Center(child: Text("No users found")),
+          child: Text(
+            'No users found',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.textHint),
+          ),
         ),
       );
     }
@@ -311,7 +695,7 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
       elevation: AppDimens.elevation8,
       borderRadius: BorderRadius.circular(AppDimens.dimen16),
       child: Container(
-        constraints: const BoxConstraints(maxHeight: 200),
+        constraints: const BoxConstraints(maxHeight: 240),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppDimens.dimen16),
@@ -320,17 +704,28 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
           padding: EdgeInsets.zero,
           shrinkWrap: true,
           itemCount: users.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
+          separatorBuilder: (_, _) => Divider(
+            height: 1,
+            color: AppColors.textHint.withValues(alpha: 0.12),
+          ),
           itemBuilder: (context, index) {
             final user = users[index];
-            final userName = "${user.firstName} ${user.lastName}";
+
+            final userName = '${user.firstName} ${user.lastName}';
 
             return ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppDimens.padding12,
+                vertical: AppDimens.padding4,
+              ),
               leading: UiUtils.buildAvatarSmall(
                 userName: userName,
                 profileImageUrl: user.profileImageUrl,
               ),
-              title: Text(userName),
+              title: Text(
+                userName,
+                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+              ),
               onTap: () {
                 _removeSearchOverlay();
 
@@ -348,72 +743,21 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     );
   }
 
-  Widget _buildUserSearch() {
-    return CustomTextField(
-      hint: 'Search User',
-      controller: _searchController,
-      prefixIcon: const Icon(Icons.search),
-      enabled: selectedUser == null,
-      onChanged: (value) {
-        _searchDebounce?.cancel();
-
-        final query = value.trim();
-
-        if (query.isEmpty) {
-          LoggerUtility.d(
-            debugTag,
-            "Search query is empty, will not proceed to _showSearchOverlay",
-          );
-          _searchDebounce?.cancel();
-          _removeSearchOverlay();
-          _enrollClientViewModel.clearSearchUsers();
-          return;
-        }
-
-        _searchDebounce = Timer(
-          Duration(milliseconds: UIConstants.milliseconds300),
-          () async {
-            final latestQuery = _searchController.text.trim();
-            LoggerUtility.d(debugTag, "latestQuery: [$latestQuery}]");
-
-            if (latestQuery.isEmpty) {
-              _removeSearchOverlay();
-              return;
-            }
-
-            await _enrollClientViewModel.searchUsers(query: latestQuery);
-
-            if (!mounted || _searchController.text.trim().isEmpty) {
-              LoggerUtility.d(
-                debugTag,
-                "Search query is empty, will not proceed to _showSearchOverlay",
-              );
-              return;
-            }
-
-            _showSearchOverlay();
-          },
-        );
-      },
-    );
-  }
-
   void _showSearchOverlay() {
     _removeSearchOverlay();
 
     _searchOverlay = OverlayEntry(
       builder: (context) {
         return Positioned(
-          width: MediaQuery.of(context).size.width - (AppDimens.dimen24 * 2),
+          width:
+              MediaQuery.of(context).size.width -
+              (AppDimens.padding16 * 2) -
+              (AppDimens.padding16 * 2),
           child: CompositedTransformFollower(
             link: _searchLayerLink,
             showWhenUnlinked: false,
             offset: const Offset(0, 64),
-            child: Material(
-              elevation: AppDimens.elevation12,
-              borderRadius: BorderRadius.circular(AppDimens.dimen16),
-              child: _buildSearchResults(),
-            ),
+            child: _buildSearchResults(),
           ),
         );
       },
@@ -427,53 +771,6 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     _searchOverlay = null;
   }
 
-  Widget _buildSelectedUserCard() {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(AppDimens.dimen16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppDimens.dimen16),
-          ),
-          child: Row(
-            children: [
-              UiUtils.buildAvatarMedium(
-                userName:
-                    "${selectedUser!.firstName} ${selectedUser!.lastName}",
-                profileImageUrl: selectedUser!.profileImageUrl,
-              ),
-
-              UiUtils.addHorizontalSpaceM(),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "${selectedUser?.firstName} ${selectedUser?.lastName}",
-                      style: AppTextStyles.body.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-
-                    Text('Selected User', style: AppTextStyles.bodySmall),
-                  ],
-                ),
-              ),
-
-              IconButton(
-                icon: const Icon(Icons.close, color: AppColors.textSecondary),
-                onPressed: _clearSelectedUser,
-              ),
-            ],
-          ),
-        ),
-        UiUtils.addVerticalSpaceM(),
-      ],
-    );
-  }
-
   void _clearSelectedUser() {
     _removeSearchOverlay();
     _enrollClientViewModel.clearSearchUsers();
@@ -484,262 +781,43 @@ class _EnrollClientScreenState extends ConsumerState<EnrollClientScreen> {
     });
   }
 
-  Widget _buildSectionLabel(String title) {
-    return Text(title, style: AppTextStyles.heading3);
-  }
+  // ---------------------------------------------------------------------------
+  // Enrollment
+  // ---------------------------------------------------------------------------
 
-  Widget _buildGenderSelection() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildGenderChip(
-            label: AppStrings.male,
-            gender: Gender.male,
-            icon: FontAwesomeIcons.venus,
-          ),
-        ),
+  void _onEnrollPressed() {
+    if (selectedUser == null) {
+      UiUtils.showSnackBarError(context, message: 'Please select a user');
 
-        UiUtils.addHorizontalSpaceS(),
+      return;
+    }
 
-        Expanded(
-          child: _buildGenderChip(
-            label: AppStrings.female,
-            gender: Gender.female,
-            icon: FontAwesomeIcons.mars,
-          ),
-        ),
+    final age = int.tryParse(_ageController.text.trim());
 
-        UiUtils.addHorizontalSpaceS(),
+    final height = double.tryParse(_heightController.text.trim());
 
-        Expanded(
-          child: CustomTextField(
-            hint: 'Age',
-            controller: _ageController,
-            keyboardType: TextInputType.number,
-          ),
-        ),
-      ],
-    );
-  }
+    final weight = double.tryParse(_weightController.text.trim());
 
-  Widget _buildGenderChip({
-    required String label,
-    required Gender gender,
-    required FaIconData icon,
-  }) {
-    final isSelected = selectedGender == gender;
+    final goalWeight = double.tryParse(_goalWeightController.text.trim());
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(AppDimens.dimen16),
-      onTap: () {
-        setState(() {
-          selectedGender = gender;
-        });
-      },
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: UIConstants.milliseconds180),
-        padding: const EdgeInsets.all(AppDimens.dimen16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.08)
-              : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppDimens.dimen16),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
-          ),
-        ),
-        child: Center(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FaIcon(
-                  icon,
-                  size: AppDimens.dimen16,
-                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                ),
+    if ([height, weight, goalWeight, age].any((value) => value == null)) {
+      UiUtils.showSnackBarError(
+        context,
+        message: ValidationErrorConstants.allFieldsAreRequired,
+      );
 
-                UiUtils.addHorizontalSpaceS(),
+      return;
+    }
 
-                Text(
-                  label,
-                  style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBodyMetrics() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: CustomTextField(
-                hint: 'Height (cm)',
-                controller: _heightController,
-                keyboardType: TextInputType.number,
-                prefixIcon: const Icon(Icons.height),
-              ),
-            ),
-
-            UiUtils.addHorizontalSpaceS(),
-
-            Expanded(
-              child: CustomTextField(
-                hint: 'Weight (kg)',
-                controller: _weightController,
-                keyboardType: TextInputType.number,
-                prefixIcon: const FaIcon(FontAwesomeIcons.weightScale),
-              ),
-            ),
-          ],
-        ),
-
-        UiUtils.addVerticalSpaceM(),
-
-        CustomTextField(
-          hint: 'Goal Weight (kg)',
-          controller: _goalWeightController,
-          keyboardType: TextInputType.number,
-          prefixIcon: const Icon(Icons.track_changes),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFitnessGoals() {
-    return Wrap(
-      spacing: AppDimens.dimen12,
-      runSpacing: AppDimens.dimen12,
-      children: [
-        _buildSelectionChip(AppStrings.fatLoss),
-        _buildSelectionChip(AppStrings.muscleGain),
-        _buildSelectionChip(AppStrings.maintenance),
-        _buildSelectionChip(AppStrings.recomposition),
-      ],
-    );
-  }
-
-  Widget _buildActivityLevels() {
-    return Column(
-      children: [
-        _buildActivityTile(title: AppStrings.sedentary),
-
-        UiUtils.addVerticalSpaceS(),
-
-        _buildActivityTile(title: AppStrings.lightlyActive),
-
-        UiUtils.addVerticalSpaceS(),
-
-        _buildActivityTile(title: AppStrings.moderatelyActive),
-
-        UiUtils.addVerticalSpaceS(),
-
-        _buildActivityTile(title: AppStrings.veryActive),
-      ],
-    );
-  }
-
-  Widget _buildSelectionChip(String goal) {
-    final bool isSelected = selectedGoal == goal;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(AppDimens.dimen50),
-      onTap: () {
-        setState(() {
-          selectedGoal = goal;
-        });
-      },
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: UIConstants.milliseconds180),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppDimens.dimen16,
-          vertical: AppDimens.dimen10,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: AppDimens.alpha0_12)
-              : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppDimens.dimen50),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
-          ),
-        ),
-        child: Text(
-          goal,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: isSelected ? AppColors.primary : AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActivityTile({required String title}) {
-    final bool isSelected = selectedActivityLevel == title;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(AppDimens.dimen16),
-      onTap: () {
-        setState(() {
-          selectedActivityLevel = title;
-        });
-      },
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: UIConstants.milliseconds180),
-        padding: const EdgeInsets.all(AppDimens.dimen16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: AppDimens.alpha0_08)
-              : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppDimens.dimen16),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
-          ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: AppTextStyles.body.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                ),
-              ),
-            ),
-
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: AppColors.primary,
-                size: AppDimens.dimen20,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFooter() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppDimens.dimen8),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: UiUtils.addCopyright(),
-      ),
+    _enrollClientViewModel.createClientUser(
+      userId: selectedUser!.id,
+      gender: selectedGender,
+      age: age!,
+      heightCm: height!,
+      currentWeight: weight!,
+      goalWeight: goalWeight!,
+      activityLevel: ActivityLevel.fromValue(selectedActivityLevel),
+      fitnessGoal: FitnessGoal.fromValue(selectedGoal),
     );
   }
 }

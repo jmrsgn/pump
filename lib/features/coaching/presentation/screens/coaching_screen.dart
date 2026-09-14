@@ -3,10 +3,9 @@ import 'package:pump/core/constants/app/app_dimens.dart';
 import 'package:pump/core/presentation/theme/app_colors.dart';
 import 'package:pump/core/presentation/theme/app_text_styles.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
+import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
-import 'package:pump/features/coaching/presentation/screens/clients_screen.dart';
-import 'package:pump/features/coaching/presentation/screens/my_coach_screen.dart';
-import 'package:pump/features/coaching/presentation/screens/payment_method_screen.dart';
+import 'package:pump/core/app_routes.dart';
 
 class CoachingScreen extends StatelessWidget {
   const CoachingScreen({super.key});
@@ -15,7 +14,7 @@ class CoachingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Temporary hardcoded role.
     // This will eventually come from the authenticated user.
-    const bool isCoach = false;
+    const bool isCoach = true;
 
     return CustomScaffold(
       appBarTitle: 'Coaching',
@@ -79,10 +78,7 @@ class CoachingScreen extends StatelessWidget {
           title: 'My Clients',
           description: 'View and manage your clients.',
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ClientsScreen()),
-            );
+            NavigationUtils.navigateTo(context, AppRoutes.clients);
           },
         ),
       ],
@@ -117,10 +113,7 @@ class CoachingScreen extends StatelessWidget {
           title: 'My Coach',
           description: 'View information about your coach.',
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const MyCoachScreen()),
-            );
+            NavigationUtils.navigateTo(context, AppRoutes.myCoach);
           },
         ),
 
@@ -131,10 +124,7 @@ class CoachingScreen extends StatelessWidget {
           title: 'Payment Method',
           description: 'Manage your coaching payment method.',
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const PaymentMethodScreen()),
-            );
+            NavigationUtils.navigateTo(context, AppRoutes.paymentMethod);
           },
         ),
       ],

@@ -1,12 +1,12 @@
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../constants/app/app_strings.dart';
-import '../routes.dart';
+import '../app_routes.dart';
 
 enum AppMenuItem {
   coaching(
     title: AppStrings.coaching,
-    icon: FontAwesomeIcons.bolt,
+    icon: FontAwesomeIcons.userGroup,
     route: AppRoutes.coaching,
   ),
   profile(

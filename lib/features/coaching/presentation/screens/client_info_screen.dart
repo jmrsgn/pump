@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:pump/core/app_routes.dart';
 import 'package:pump/core/constants/app/app_dimens.dart';
 import 'package:pump/core/constants/app/app_strings.dart';
 import 'package:pump/core/presentation/theme/app_colors.dart';
 import 'package:pump/core/presentation/theme/app_text_styles.dart';
+import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/coaching/enums/client_overview_tab.dart';
 import 'package:pump/features/coaching/presentation/screens/create_training_block_screen.dart';
@@ -500,19 +502,18 @@ class ClientInfoScreen extends StatelessWidget {
       width: double.infinity,
       child: CustomButton(
         onPressed: () {
-          Navigator.push(
+          NavigationUtils.navigateTo(
             context,
-            MaterialPageRoute(
-              builder: (_) => CreateTrainingBlockScreen(
-                clientName: "John Martin Marasigan",
-                clientAge: 25,
-                clientGender: "Male",
-                clientHeight: 163.0,
-                clientCurrentWeight: 64.35,
-                clientGoalWeight: 60.0,
-                clientFitnessGoal: "Recomposition",
-              ),
-            ),
+            AppRoutes.createTrainingBlock,
+            arguments: {
+              'clientName': "John Martin Marasigan",
+              'clientAge': 25,
+              'clientGender': "Male",
+              'clientHeight': 163.0,
+              'clientCurrentWeight': 64.35,
+              'clientGoalWeight': 60.0,
+              'clientFitnessGoal': "Recomposition",
+            },
           );
         },
         label: 'Create Training Block',

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pump/core/constants/app/app_constants.dart';
 import 'package:pump/core/presentation/widgets/custom_button.dart';
-import 'package:pump/core/routes.dart';
+import 'package:pump/core/app_routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/auth/presentation/viewmodels/login_viewmodel.dart';

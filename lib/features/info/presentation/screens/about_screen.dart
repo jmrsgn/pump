@@ -343,7 +343,7 @@ class AboutScreen extends StatelessWidget {
   Widget _buildWorkflowDivider() {
     return Padding(
       padding: const EdgeInsets.only(
-        left: AppDimens.dimen20,
+        left: AppDimens.dimen60,
         top: AppDimens.padding8,
         bottom: AppDimens.padding8,
       ),
@@ -403,47 +403,47 @@ class AboutScreen extends StatelessWidget {
     return _buildSection(
       title: 'About the Developer',
       icon: Icons.code_outlined,
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CircleAvatar(
-            radius: AppDimens.dimen36,
-            backgroundImage: AssetImage('assets/images/jm.jpg'),
+          Row(
+            children: [
+              const CircleAvatar(
+                radius: AppDimens.dimen36,
+                backgroundImage: AssetImage('assets/images/jm.jpg'),
+              ),
+
+              UiUtils.addHorizontalSpaceM(),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppStrings.devName,
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+
+                    Text(
+                      AppStrings.devTitle,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textHint,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
 
-          UiUtils.addHorizontalSpaceM(),
+          UiUtils.addVerticalSpaceM(),
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppStrings.devName,
-                  style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-
-                UiUtils.addVerticalSpaceXS(),
-
-                Text(
-                  AppStrings.devTitle,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textHint,
-                  ),
-                ),
-
-                UiUtils.addVerticalSpaceS(),
-
-                Text(
-                  'Pump is a personal project built to explore '
-                  'full-stack application development, mobile '
-                  'development, microservices, and cloud-native engineering.',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
+          Text(
+            'A software engineer focused on building scalable, maintainable applications across backend, mobile, and web development. I enjoy solving complex problems, exploring new technologies, and turning ideas into practical products—like Pump.',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -459,25 +459,47 @@ class AboutScreen extends StatelessWidget {
     return _buildSection(
       title: 'Connect',
       icon: Icons.link_outlined,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppDimens.padding16,
+        vertical: AppDimens.padding12,
+      ),
       child: Column(
         children: [
           _buildConnectItem(
-            icon: const Icon(Icons.email_outlined, size: AppDimens.dimen20),
+            icon: const Icon(
+              Icons.email_outlined,
+              size: AppDimens.dimen20,
+              color: Colors.redAccent,
+            ),
+            iconBackgroundColor: Colors.redAccent,
             title: 'Email',
             value: AppStrings.devEmail,
             onTap: _launchEmail,
           ),
 
-          _buildDivider(),
-
           _buildConnectItem(
             icon: const FaIcon(
               FontAwesomeIcons.github,
               size: AppDimens.dimen20,
+              color: Colors.white,
             ),
+            iconBackgroundColor: Colors.white,
             title: 'GitHub',
             value: AppStrings.devGithubUsername,
             onTap: _launchGithub,
+          ),
+
+          _buildConnectItem(
+            icon: const Icon(
+              Icons.language_outlined,
+              size: AppDimens.dimen20,
+              color: AppColors.primary,
+            ),
+            iconBackgroundColor: AppColors.primary,
+            title: 'Portfolio',
+            value: '',
+            onTap: _launchPortfolio,
+            isLast: true,
           ),
         ],
       ),
@@ -486,54 +508,69 @@ class AboutScreen extends StatelessWidget {
 
   Widget _buildConnectItem({
     required Widget icon,
+    required Color iconBackgroundColor,
     required String title,
     required String value,
     required VoidCallback onTap,
+    bool isLast = false,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppDimens.dimen12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppDimens.padding8),
-          child: Row(
-            children: [
-              _buildIconContainerWidget(icon),
-
-              UiUtils.addHorizontalSpaceM(),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: AppTextStyles.body.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+    return Padding(
+      padding: EdgeInsets.only(bottom: isLast ? 0 : AppDimens.padding8),
+      child: Column(
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(AppDimens.dimen12),
+              child: Row(
+                children: [
+                  _buildIconContainerWidget(
+                    icon,
+                    backgroundColor: iconBackgroundColor.withValues(
+                      alpha: 0.12,
                     ),
+                  ),
 
-                    UiUtils.addVerticalSpaceXS(),
+                  UiUtils.addHorizontalSpaceM(),
 
-                    Text(
-                      value,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textHint,
-                      ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: AppTextStyles.body.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+
+                        if (value.isNotEmpty) ...[
+                          UiUtils.addVerticalSpaceXS(),
+
+                          Text(
+                            value,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textHint,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
 
-              Icon(
-                Icons.open_in_new,
-                size: AppDimens.dimen18,
-                color: AppColors.textHint,
+                  Icon(
+                    Icons.open_in_new,
+                    size: AppDimens.dimen18,
+                    color: AppColors.textHint,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+
+          if (!isLast) ...[UiUtils.addVerticalSpaceS(), _buildDivider()],
+        ],
       ),
     );
   }
@@ -546,6 +583,9 @@ class AboutScreen extends StatelessWidget {
     required String title,
     required IconData icon,
     required Widget child,
+    EdgeInsetsGeometry contentPadding = const EdgeInsets.all(
+      AppDimens.padding16,
+    ),
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -556,7 +596,7 @@ class AboutScreen extends StatelessWidget {
 
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(AppDimens.padding16),
+          padding: contentPadding,
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(AppDimens.dimen16),
@@ -597,13 +637,16 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildIconContainerWidget(Widget icon) {
+  Widget _buildIconContainerWidget(
+    Widget icon, {
+    required Color backgroundColor,
+  }) {
     return Container(
       width: AppDimens.dimen40,
       height: AppDimens.dimen40,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(AppDimens.dimen12),
       ),
       child: icon,
@@ -653,5 +696,13 @@ class AboutScreen extends StatelessWidget {
     );
 
     await launchUrl(githubUri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _launchPortfolio() async {
+    final Uri portfolioUri = Uri.parse(
+      'https://marasiganjohnmartin.vercel.app/',
+    );
+
+    await launchUrl(portfolioUri, mode: LaunchMode.externalApplication);
   }
 }

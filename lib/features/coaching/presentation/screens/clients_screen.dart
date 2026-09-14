@@ -8,7 +8,7 @@ import 'package:pump/core/presentation/theme/app_text_styles.dart';
 import 'package:pump/core/presentation/widgets/custom_button.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
 import 'package:pump/core/presentation/widgets/custom_text_field.dart';
-import 'package:pump/core/routes.dart';
+import 'package:pump/core/app_routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/coaching/domain/entity/client_user.dart';
@@ -124,7 +124,11 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
           child: _buildOverviewCard(
             title: 'Total Clients',
             value: clients.length.toString(),
-            icon: FontAwesomeIcons.users,
+            icon: const Icon(
+              Icons.people_outline,
+              size: AppDimens.dimen20,
+              color: AppColors.primary,
+            ),
           ),
         ),
 
@@ -134,7 +138,11 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
           child: _buildOverviewCard(
             title: 'Active',
             value: activeClients.length.toString(),
-            icon: FontAwesomeIcons.fire,
+            icon: const FaIcon(
+              FontAwesomeIcons.fire,
+              size: AppDimens.dimen20,
+              color: AppColors.primary,
+            ),
           ),
         ),
       ],
@@ -144,7 +152,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
   Widget _buildOverviewCard({
     required String title,
     required String value,
-    required FaIconData icon,
+    required Widget icon,
   }) {
     return Container(
       padding: EdgeInsets.all(AppDimens.dimen16),
@@ -161,11 +169,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
               color: AppColors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppDimens.dimen14),
             ),
-            child: FaIcon(
-              icon,
-              color: AppColors.primary,
-              size: AppDimens.dimen18,
-            ),
+            child: icon,
           ),
 
           UiUtils.addVerticalSpaceM(),
