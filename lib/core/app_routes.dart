@@ -15,6 +15,7 @@ import 'package:pump/features/posts/presentation/screens/create_post_screen.dart
 import 'package:pump/features/posts/presentation/screens/liked_posts_screen.dart';
 import 'package:pump/features/posts/presentation/screens/post_info_screen.dart';
 import 'package:pump/features/coaching/presentation/screens/create_training_block_screen.dart';
+import 'package:pump/features/coaching/domain/entity/client_user.dart';
 
 import '../features/coaching/presentation/screens/enroll_client_screen.dart';
 import '../features/info/presentation/screens/about_screen.dart';
@@ -97,8 +98,10 @@ class AppRoutes {
         case coaching:
           return MaterialPageRoute(builder: (_) => CoachingScreen());
         case clientOverview:
+          final client = settings.arguments as ClientUser;
+
           return MaterialPageRoute(
-            builder: (_) => const ClientOverviewScreen(),
+            builder: (_) => ClientOverviewScreen(client: client),
           );
         case enrollClient:
           return MaterialPageRoute(builder: (_) => const EnrollClientScreen());

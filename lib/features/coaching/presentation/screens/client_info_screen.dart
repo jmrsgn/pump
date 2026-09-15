@@ -4,14 +4,15 @@ import 'package:pump/core/constants/app/app_dimens.dart';
 import 'package:pump/core/constants/app/app_strings.dart';
 import 'package:pump/core/presentation/theme/app_colors.dart';
 import 'package:pump/core/presentation/theme/app_text_styles.dart';
+import 'package:pump/core/presentation/widgets/custom_button.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
+import 'package:pump/features/coaching/data/enums/coaching_status.dart';
+import 'package:pump/features/coaching/domain/entity/client_user.dart';
 import 'package:pump/features/coaching/enums/client_overview_tab.dart';
-import 'package:pump/features/coaching/presentation/screens/create_training_block_screen.dart';
-import 'package:pump/core/presentation/widgets/custom_button.dart';
-import 'package:pump/features/coaching/presentation/screens/create_training_block_screen.dart';
 
 class ClientInfoScreen extends StatelessWidget {
+  final ClientUser client;
   final ValueChanged<ClientOverviewTab>? onNavigateToTab;
 
   /// Temporary UI state.
@@ -21,6 +22,7 @@ class ClientInfoScreen extends StatelessWidget {
 
   const ClientInfoScreen({
     super.key,
+    required this.client,
     this.onNavigateToTab,
     this.hasTrainingBlock = true,
   });
@@ -32,38 +34,42 @@ class ClientInfoScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildProfileCard(),
+          _buildProfileCard(client),
+
           UiUtils.addVerticalSpaceL(),
 
-          _buildPhysicalStats(),
+          _buildPhysicalStats(client),
+
           UiUtils.addVerticalSpaceL(),
 
-          _buildFitnessInfo(),
+          _buildFitnessInfo(client),
+
           UiUtils.addVerticalSpaceL(),
 
           if (hasTrainingBlock) ...[
             _buildTrainingCard(),
+
             UiUtils.addVerticalSpaceL(),
 
             _buildNutritionCard(),
+
             UiUtils.addVerticalSpaceL(),
 
             _buildProgressCard(),
+
             UiUtils.addVerticalSpaceL(),
 
             _buildCoachingNotesCard(),
+
             UiUtils.addVerticalSpaceL(),
 
             _buildExtrasCard(),
+
             UiUtils.addVerticalSpaceL(),
           ],
 
-          // if (!hasTrainingBlock) ...[
-          //   UiUtils.addVerticalSpaceL(),
-          //   _buildCreateTrainingBlockButton(context),
-          // ],
-          UiUtils.addVerticalSpaceL(),
-          _buildCreateTrainingBlockButton(context),
+          if (!hasTrainingBlock)
+            _buildCreateTrainingBlockButton(context, client),
         ],
       ),
     );
@@ -73,50 +79,62 @@ class ClientInfoScreen extends StatelessWidget {
   // Profile
   // ---------------------------------------------------------------------------
 
-  Widget _buildProfileCard() {
+  Widget _buildProfileCard(ClientUser client) {
+    final name = '${client.firstName} ${client.lastName}'.trim();
+
+    final isActive = client.coachingStatus == CoachingStatus.active;
+
     return Card(
       color: AppColors.surface,
       child: Padding(
         padding: const EdgeInsets.all(AppDimens.padding16),
         child: Row(
           children: [
-            const CircleAvatar(
-              radius: AppDimens.radius36,
-              backgroundImage: AssetImage('assets/images/jm.jpg'),
+            _buildProfileAvatar(
+              name: name,
+              profileImageUrl: client.profileImageUrl,
             ),
+
             UiUtils.addHorizontalSpaceL(),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'John Martin Marasigan',
+                    name,
                     style: AppTextStyles.heading3.copyWith(
                       fontSize: AppDimens.textSize18,
                     ),
                   ),
+
                   UiUtils.addVerticalSpaceXS(),
-                  Text('25 years old • Male', style: AppTextStyles.bodySmall),
+
+                  Text(
+                    '${client.age} years old • ${client.gender.value}',
+                    style: AppTextStyles.bodySmall,
+                  ),
+
                   UiUtils.addVerticalSpaceXS(),
+
                   Row(
                     children: [
-                      Icon(Icons.circle, size: 8, color: AppColors.success),
+                      Icon(
+                        Icons.circle,
+                        size: AppDimens.dimen8,
+                        color: isActive ? AppColors.success : AppColors.error,
+                      ),
+
                       UiUtils.addHorizontalSpaceXS(),
+
                       Text(
-                        'Active',
+                        client.coachingStatus.value,
                         style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.success,
+                          color: isActive ? AppColors.success : AppColors.error,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
-                  ),
-                  UiUtils.addVerticalSpaceXS(),
-                  Text(
-                    'Since Oct 2025',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textHint,
-                    ),
                   ),
                 ],
               ),
@@ -127,15 +145,42 @@ class ClientInfoScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildProfileAvatar({
+    required String name,
+    required String profileImageUrl,
+  }) {
+    if (profileImageUrl.isEmpty) {
+      return CircleAvatar(
+        radius: AppDimens.radius36,
+        backgroundColor: AppColors.primary.withValues(
+          alpha: AppDimens.alpha0_12,
+        ),
+        child: Text(
+          name.isEmpty ? '?' : name[0],
+          style: AppTextStyles.heading2.copyWith(
+            color: AppColors.primary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
+    }
+
+    return CircleAvatar(
+      radius: AppDimens.radius36,
+      backgroundImage: NetworkImage(profileImageUrl),
+    );
+  }
+
   // ---------------------------------------------------------------------------
   // Physical Stats
   // ---------------------------------------------------------------------------
 
-  Widget _buildPhysicalStats() {
+  Widget _buildPhysicalStats(ClientUser client) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(AppStrings.physicalStats),
+
         UiUtils.addVerticalSpaceS(),
 
         GridView.count(
@@ -148,12 +193,12 @@ class ClientInfoScreen extends StatelessWidget {
           children: [
             _buildStatCard(
               label: AppStrings.height,
-              value: '163 cm',
+              value: '${client.heightCm.toStringAsFixed(0)} cm',
               icon: Icons.height,
             ),
             _buildStatCard(
               label: AppStrings.weight,
-              value: '64.35 kg',
+              value: '${client.currentWeight.toStringAsFixed(2)} kg',
               icon: Icons.monitor_weight_outlined,
             ),
             _buildStatCard(
@@ -195,7 +240,9 @@ class ClientInfoScreen extends StatelessWidget {
                 color: AppColors.textOnPrimary,
               ),
             ),
+
             UiUtils.addHorizontalSpaceS(),
+
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -207,7 +254,9 @@ class ClientInfoScreen extends StatelessWidget {
                       color: AppColors.textHint,
                     ),
                   ),
+
                   UiUtils.addVerticalSpaceXS(),
+
                   Text(
                     value,
                     style: AppTextStyles.heading3.copyWith(
@@ -227,18 +276,31 @@ class ClientInfoScreen extends StatelessWidget {
   // Fitness Information
   // ---------------------------------------------------------------------------
 
-  Widget _buildFitnessInfo() {
+  Widget _buildFitnessInfo(ClientUser client) {
     return _buildSectionCard(
       title: 'Fitness Info',
       icon: Icons.track_changes_outlined,
       children: [
-        _buildInfoRow(label: 'Weight Goal', value: '60 kg'),
+        _buildInfoRow(
+          label: 'Weight Goal',
+          value: '${client.goalWeight.toStringAsFixed(0)} kg',
+        ),
+
         _buildDivider(),
-        _buildInfoRow(label: 'Fitness Goal', value: 'Recomposition'),
+
+        _buildInfoRow(label: 'Fitness Goal', value: client.fitnessGoal.value),
+
         _buildDivider(),
-        _buildInfoRow(label: 'Activity Level', value: 'Moderately Active'),
+
+        _buildInfoRow(
+          label: 'Activity Level',
+          value: client.activityLevel.value,
+        ),
+
         if (hasTrainingBlock) ...[
           _buildDivider(),
+
+          // TODO: Replace with training block data.
           _buildInfoRow(label: 'Current Phase', value: 'Cut'),
         ],
       ],
@@ -254,12 +316,19 @@ class ClientInfoScreen extends StatelessWidget {
       title: AppStrings.trainingInfo,
       icon: Icons.fitness_center,
       children: [
+        // TODO: Replace with training block data.
         _buildInfoRow(label: 'Program', value: 'Program ni Kuya O'),
+
         _buildDivider(),
+
         _buildInfoRow(label: 'Frequency', value: '4x / week'),
+
         _buildDivider(),
+
         _buildInfoRow(label: AppStrings.lastWorkout, value: 'Nov 20, 2025'),
+
         UiUtils.addVerticalSpaceS(),
+
         _buildActionTile(
           title: AppStrings.tapToViewTrainingBlock,
           icon: Icons.arrow_forward,
@@ -280,16 +349,21 @@ class ClientInfoScreen extends StatelessWidget {
       title: AppStrings.nutritionInfo,
       icon: Icons.restaurant_outlined,
       children: [
+        // TODO: Replace with training block nutrition data.
         Text(
           '2,583 cal',
           style: AppTextStyles.heading3.copyWith(fontSize: AppDimens.dimen22),
         ),
+
         UiUtils.addVerticalSpaceXS(),
+
         Text(
           'Daily calorie target',
           style: AppTextStyles.bodySmall.copyWith(color: AppColors.textHint),
         ),
+
         UiUtils.addVerticalSpaceL(),
+
         Row(
           children: [
             Expanded(child: _buildMacroItem('Protein', '194g')),
@@ -309,7 +383,9 @@ class ClientInfoScreen extends StatelessWidget {
           value,
           style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
         ),
+
         UiUtils.addVerticalSpaceXS(),
+
         Text(
           label,
           style: AppTextStyles.bodySmall.copyWith(color: AppColors.textHint),
@@ -327,8 +403,11 @@ class ClientInfoScreen extends StatelessWidget {
       title: AppStrings.progressAndAnalytics,
       icon: Icons.show_chart,
       children: [
+        // TODO: Replace with check-in data.
         _buildInfoRow(label: 'Next check-in', value: 'Nov 23, 2025'),
+
         UiUtils.addVerticalSpaceS(),
+
         _buildActionTile(
           title: AppStrings.tapToViewChartsAndPhotos,
           icon: Icons.arrow_forward,
@@ -349,11 +428,14 @@ class ClientInfoScreen extends StatelessWidget {
       title: AppStrings.coachingNotes,
       icon: Icons.notes_outlined,
       children: [
+        // TODO: Replace with coaching data.
         _buildInfoRow(
           label: 'Last note',
           value: 'Overall size, especially chest',
         ),
+
         _buildDivider(),
+
         _buildInfoRow(label: 'Reminders', value: 'NA'),
       ],
     );
@@ -368,11 +450,14 @@ class ClientInfoScreen extends StatelessWidget {
       title: AppStrings.extras,
       icon: Icons.more_horiz,
       children: [
+        // TODO: Replace with coaching data.
         _buildInfoRow(
           label: 'Supplements',
           value: 'Whey Protein, Creatine, Pre-workout',
         ),
+
         _buildDivider(),
+
         _buildInfoRow(label: 'Injuries', value: 'Neck'),
       ],
     );
@@ -408,7 +493,9 @@ class ClientInfoScreen extends StatelessWidget {
                   size: AppDimens.dimen20,
                   color: AppColors.textOnPrimary,
                 ),
+
                 UiUtils.addHorizontalSpaceS(),
+
                 Expanded(
                   child: Text(
                     title,
@@ -419,7 +506,9 @@ class ClientInfoScreen extends StatelessWidget {
                 ),
               ],
             ),
+
             UiUtils.addVerticalSpaceL(),
+
             ...children,
           ],
         ),
@@ -438,6 +527,7 @@ class ClientInfoScreen extends StatelessWidget {
             style: AppTextStyles.bodySmall.copyWith(color: AppColors.textHint),
           ),
         ),
+
         Expanded(
           flex: 3,
           child: Text(
@@ -480,6 +570,7 @@ class ClientInfoScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             Icon(icon, size: AppDimens.dimen18, color: AppColors.info),
           ],
         ),
@@ -497,7 +588,16 @@ class ClientInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCreateTrainingBlockButton(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // Create Training Block
+  // ---------------------------------------------------------------------------
+
+  Widget _buildCreateTrainingBlockButton(
+    BuildContext context,
+    ClientUser client,
+  ) {
+    final name = '${client.firstName} ${client.lastName}'.trim();
+
     return SizedBox(
       width: double.infinity,
       child: CustomButton(
@@ -506,13 +606,13 @@ class ClientInfoScreen extends StatelessWidget {
             context,
             AppRoutes.createTrainingBlock,
             arguments: {
-              'clientName': "John Martin Marasigan",
-              'clientAge': 25,
-              'clientGender': "Male",
-              'clientHeight': 163.0,
-              'clientCurrentWeight': 64.35,
-              'clientGoalWeight': 60.0,
-              'clientFitnessGoal': "Recomposition",
+              'clientName': name,
+              'clientAge': client.age,
+              'clientGender': client.gender.value,
+              'clientHeight': client.heightCm,
+              'clientCurrentWeight': client.currentWeight,
+              'clientGoalWeight': client.goalWeight,
+              'clientFitnessGoal': client.fitnessGoal.value,
             },
           );
         },

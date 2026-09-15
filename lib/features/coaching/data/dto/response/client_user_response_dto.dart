@@ -13,6 +13,7 @@ class ClientUserResponse {
   final String? profileImageUrl;
 
   final Gender? gender;
+  final int? age;
   final DateTime? birthDate;
 
   final double? heightCm;
@@ -25,7 +26,8 @@ class ClientUserResponse {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  final CoachingStatus? status;
+  final CoachingStatus? coachingStatus;
+  final bool hasActiveTrainingBlock;
 
   ClientUserResponse({
     this.id,
@@ -34,6 +36,7 @@ class ClientUserResponse {
     this.lastName,
     this.profileImageUrl,
     this.gender,
+    this.age,
     this.birthDate,
     this.heightCm,
     this.currentWeight,
@@ -42,7 +45,8 @@ class ClientUserResponse {
     this.fitnessGoal,
     this.createdAt,
     this.updatedAt,
-    this.status,
+    this.coachingStatus,
+    required this.hasActiveTrainingBlock,
   });
 
   factory ClientUserResponse.fromJson(Map<String, dynamic> json) {
@@ -55,6 +59,8 @@ class ClientUserResponse {
       profileImageUrl: json['profileImageUrl'],
 
       gender: json['gender'] == null ? null : Gender.fromValue(json['gender']),
+
+      age: json['age'] == null ? null : json['age'] as int,
 
       birthDate: json['birthDate'] == null
           ? null
@@ -82,9 +88,11 @@ class ClientUserResponse {
           ? null
           : DateTime.parse(json['updatedAt']),
 
-      status: json['status'] == null
+      coachingStatus: json['coachingStatus'] == null
           ? null
-          : CoachingStatus.fromValue(json['status']),
+          : CoachingStatus.fromValue(json['coachingStatus']),
+
+      hasActiveTrainingBlock: json['hasActiveTrainingBlock'] as bool,
     );
   }
 
@@ -104,7 +112,8 @@ class ClientUserResponse {
       'fitnessGoal': fitnessGoal?.value,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
-      "status": status,
+      "coachingStatus": coachingStatus,
+      "hasActiveTrainingBlock": hasActiveTrainingBlock,
     };
   }
 
@@ -116,6 +125,7 @@ class ClientUserResponse {
       lastName: lastName ?? '',
       profileImageUrl: profileImageUrl ?? '',
       gender: gender ?? Gender.male,
+      age: age ?? 0,
       birthDate: birthDate ?? DateTime.now(),
       heightCm: heightCm ?? 0,
       currentWeight: currentWeight ?? 0,
@@ -124,7 +134,8 @@ class ClientUserResponse {
       fitnessGoal: fitnessGoal ?? FitnessGoal.maintenance,
       createdAt: createdAt ?? DateTime.now(),
       updatedAt: updatedAt ?? DateTime.now(),
-      status: status ?? CoachingStatus.inactive,
+      coachingStatus: coachingStatus ?? CoachingStatus.inactive,
+      hasActiveTrainingBlock: hasActiveTrainingBlock,
     );
   }
 }

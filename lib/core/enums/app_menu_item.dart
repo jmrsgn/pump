@@ -6,7 +6,7 @@ import '../app_routes.dart';
 enum AppMenuItem {
   coaching(
     title: AppStrings.coaching,
-    icon: FontAwesomeIcons.userGroup,
+    icon: FontAwesomeIcons.bolt,
     route: AppRoutes.coaching,
   ),
   profile(

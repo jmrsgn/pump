@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:pump/core/constants/app/app_strings.dart';
 import 'package:pump/core/presentation/widgets/custom_bottom_nav_bar.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
+import 'package:pump/features/coaching/domain/entity/client_user.dart';
 import 'package:pump/features/coaching/enums/client_overview_tab.dart';
 import 'package:pump/features/coaching/presentation/screens/client_info_screen.dart';
 import 'package:pump/features/coaching/presentation/screens/progress_and_analytics_screen.dart';
 import 'package:pump/features/coaching/presentation/screens/training_block_screen.dart';
 
 class ClientOverviewScreen extends StatefulWidget {
-  final bool hasTrainingBlock;
+  final ClientUser client;
 
-  const ClientOverviewScreen({super.key, this.hasTrainingBlock = true});
+  const ClientOverviewScreen({super.key, required this.client});
 
   @override
   State<ClientOverviewScreen> createState() => _ClientOverviewScreenState();
@@ -28,7 +29,7 @@ class _ClientOverviewScreenState extends State<ClientOverviewScreen> {
   ClientOverviewTab _selectedTab = ClientOverviewTab.clientInfo;
 
   List<ClientOverviewTab> get _visibleTabs {
-    if (!widget.hasTrainingBlock) {
+    if (!widget.client.hasActiveTrainingBlock) {
       return [ClientOverviewTab.clientInfo];
     }
 
@@ -79,6 +80,8 @@ class _ClientOverviewScreenState extends State<ClientOverviewScreen> {
   Widget _buildCurrentScreen() {
     return switch (_selectedTab) {
       ClientOverviewTab.clientInfo => ClientInfoScreen(
+        client: widget.client,
+        hasTrainingBlock: widget.client.hasActiveTrainingBlock,
         onNavigateToTab: _onTabSelected,
       ),
       ClientOverviewTab.progress => const ProgressAndAnalyticsScreen(),
