@@ -4,7 +4,7 @@ import 'package:pump/core/utils/secure_storage.dart';
 
 import '../../../../core/constants/error/system_error_constants.dart';
 import '../../../../core/data/dto/response/result.dart';
-import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repository/auth_repository.dart';
 import '../dto/auth_response_dto.dart';
 import '../dto/login_request_dto.dart';
 import '../dto/register_request_dto.dart';

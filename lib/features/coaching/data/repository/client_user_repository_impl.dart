@@ -12,7 +12,7 @@ import '../../../../core/domain/entity/user_summary.dart';
 import '../../../../core/utilities/logger_utility.dart';
 import '../dto/request/create_client_user_request_dto.dart';
 
-class ClientUserRepositoryImpl extends ClientUserRepository {
+class ClientUserRepositoryImpl implements ClientUserRepository {
   static const debugTag = "ClientUserRepositoryImpl";
 
   final ClientUserService _clientUserService;
