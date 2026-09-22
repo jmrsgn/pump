@@ -1,8 +1,8 @@
-import 'package:pump/features/coaching/enums/coaching_status.dart';
+import 'package:pump/features/coaching/data/enums/coaching_status.dart';
 
-import '../../enums/activity_level.dart';
-import '../../enums/fitness_goal.dart';
-import '../../enums/gender.dart';
+import '../../data/enums/activity_level.dart';
+import '../../data/enums/fitness_goal.dart';
+import '../../data/enums/gender.dart';
 
 class ClientUser {
   final String id;
@@ -13,6 +13,7 @@ class ClientUser {
   final String profileImageUrl;
 
   final Gender gender;
+  final int age;
   final DateTime birthDate;
 
   final double heightCm;
@@ -25,7 +26,8 @@ class ClientUser {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  final CoachingStatus status;
+  final CoachingStatus coachingStatus;
+  final bool hasActiveTrainingBlock;
 
   const ClientUser({
     required this.id,
@@ -34,6 +36,7 @@ class ClientUser {
     required this.lastName,
     required this.profileImageUrl,
     required this.gender,
+    required this.age,
     required this.birthDate,
     required this.heightCm,
     required this.currentWeight,
@@ -42,7 +45,8 @@ class ClientUser {
     required this.fitnessGoal,
     required this.createdAt,
     required this.updatedAt,
-    required this.status,
+    required this.coachingStatus,
+    required this.hasActiveTrainingBlock,
   });
 
   String get fullName => '$firstName $lastName';

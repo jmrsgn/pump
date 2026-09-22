@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pump/core/app_routes.dart';
 import 'package:pump/core/constants/app/app_dimens.dart';
 import 'package:pump/core/constants/app/app_strings.dart';
+import 'package:pump/core/constants/app/ui_constants.dart';
 import 'package:pump/core/presentation/theme/app_colors.dart';
 import 'package:pump/core/presentation/theme/app_text_styles.dart';
 import 'package:pump/core/presentation/widgets/custom_button.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
 import 'package:pump/core/presentation/widgets/custom_text_field.dart';
-import 'package:pump/core/routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
+import 'package:pump/features/coaching/data/enums/coaching_status.dart';
 import 'package:pump/features/coaching/domain/entity/client_user.dart';
-import 'package:pump/features/coaching/enums/coaching_status.dart';
 import 'package:pump/features/coaching/presentation/provider/client_user_providers.dart';
 import 'package:pump/features/coaching/presentation/viewmodels/clients_viewmodel.dart';
-
-import '../../../../core/constants/app/ui_constants.dart';
 
 class ClientsScreen extends ConsumerStatefulWidget {
   const ClientsScreen({super.key});
@@ -36,9 +35,16 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
     super.initState();
 
     Future.microtask(() {
-      // TODO: FOR NOW, always page is 0, implement scrolling
+      // TODO: FOR NOW, always page is 0, implement scrolling.
       _clientsViewModel.getClientUsers(0);
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+
+    super.dispose();
   }
 
   @override
@@ -52,9 +58,15 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         isLoading: clientsState.isLoading,
         backgroundColor: AppColors.background,
         appBarTitle: AppStrings.clients,
-        body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppDimens.dimen16),
-          child: Column(
+        body: RefreshIndicator(
+          color: AppColors.primary,
+          backgroundColor: AppColors.surface,
+          onRefresh: _refreshClients,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: AppDimens.dimen16),
             children: [
               UiUtils.addVerticalSpaceS(),
 
@@ -66,35 +78,44 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
 
               UiUtils.addVerticalSpaceL(),
 
-              Expanded(
-                child: ListView.separated(
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: clients.length,
-                  separatorBuilder: (_, __) => UiUtils.addVerticalSpaceM(),
-                  itemBuilder: (context, index) {
-                    final client = clients[index];
+              if (clients.isEmpty)
+                _buildEmptyState()
+              else
+                ..._buildClientList(context, clients),
 
-                    return _buildClientCard(context, client: client);
-                  },
-                ),
-              ),
+              // Prevent the floating action button from covering
+              // the last client card.
+              UiUtils.addVerticalSpaceXXL(),
+              UiUtils.addVerticalSpaceXXL(),
             ],
           ),
         ),
         floatingActionButton: Padding(
-          padding: EdgeInsets.only(bottom: AppDimens.dimen8),
+          padding: const EdgeInsets.only(bottom: AppDimens.dimen8),
           child: CustomButton(
             prefixIcon: Icons.add_rounded,
             label: AppStrings.enroll,
             onPressed: () async {
               _searchController.clear();
-              await NavigationUtils.navigateTo(context, AppRoutes.enrollClient);
+
+              final result = await NavigationUtils.navigateTo(
+                context,
+                AppRoutes.enrollClient,
+              );
+
+              if (result == true && mounted) {
+                await _refreshClients();
+              }
             },
           ),
         ),
       ),
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // Search
+  // ---------------------------------------------------------------------------
 
   Widget _buildSearchField() {
     return Container(
@@ -107,15 +128,19 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         hint: AppStrings.searchClients,
         prefixIcon: const Icon(Icons.search_rounded),
         onChanged: (value) {
-          ref.read(clientsViewModelProvider.notifier).searchClients(value);
+          _clientsViewModel.searchClients(value);
         },
       ),
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Overview
+  // ---------------------------------------------------------------------------
+
   Widget _buildOverviewSection(List<ClientUser> clients) {
     final activeClients = clients.where(
-      (client) => client.status == CoachingStatus.active,
+      (client) => client.coachingStatus == CoachingStatus.active,
     );
 
     return Row(
@@ -124,7 +149,11 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
           child: _buildOverviewCard(
             title: 'Total Clients',
             value: clients.length.toString(),
-            icon: FontAwesomeIcons.users,
+            icon: const Icon(
+              Icons.people_outline,
+              size: AppDimens.dimen20,
+              color: AppColors.primary,
+            ),
           ),
         ),
 
@@ -134,7 +163,11 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
           child: _buildOverviewCard(
             title: 'Active',
             value: activeClients.length.toString(),
-            icon: FontAwesomeIcons.fire,
+            icon: const Icon(
+              Icons.check_circle_outline_rounded,
+              size: AppDimens.dimen20,
+              color: AppColors.primary,
+            ),
           ),
         ),
       ],
@@ -144,10 +177,10 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
   Widget _buildOverviewCard({
     required String title,
     required String value,
-    required FaIconData icon,
+    required Widget icon,
   }) {
     return Container(
-      padding: EdgeInsets.all(AppDimens.dimen16),
+      padding: const EdgeInsets.all(AppDimens.dimen16),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppDimens.dimen20),
@@ -156,16 +189,12 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.all(AppDimens.dimen10),
+            padding: const EdgeInsets.all(AppDimens.dimen10),
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppDimens.dimen14),
             ),
-            child: FaIcon(
-              icon,
-              color: AppColors.primary,
-              size: AppDimens.dimen18,
-            ),
+            child: icon,
           ),
 
           UiUtils.addVerticalSpaceM(),
@@ -188,6 +217,23 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Client List
+  // ---------------------------------------------------------------------------
+
+  List<Widget> _buildClientList(
+    BuildContext context,
+    List<ClientUser> clients,
+  ) {
+    return [
+      for (int index = 0; index < clients.length; index++) ...[
+        _buildClientCard(context, client: clients[index]),
+
+        if (index != clients.length - 1) UiUtils.addVerticalSpaceM(),
+      ],
+    ];
+  }
+
   Widget _buildClientCard(BuildContext context, {required ClientUser client}) {
     final name = '${client.firstName} ${client.lastName}';
     final profileImageUrl = client.profileImageUrl;
@@ -196,15 +242,19 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
 
     const lastCheckIn = '--';
 
-    final bool isActive = client.status == CoachingStatus.active;
+    final isActive = client.coachingStatus == CoachingStatus.active;
 
     return GestureDetector(
       onTap: () {
-        NavigationUtils.navigateTo(context, AppRoutes.clientOverview);
+        NavigationUtils.navigateTo(
+          context,
+          AppRoutes.clientOverview,
+          arguments: client,
+        );
       },
       child: AnimatedContainer(
         duration: Duration(milliseconds: UIConstants.milliseconds180),
-        padding: EdgeInsets.all(AppDimens.dimen16),
+        padding: const EdgeInsets.all(AppDimens.dimen16),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppDimens.dimen24),
@@ -236,7 +286,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                       UiUtils.addHorizontalSpaceM(),
 
                       Container(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: AppDimens.dimen10,
                           vertical: AppDimens.dimen4,
                         ),
@@ -253,7 +303,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                           ),
                         ),
                         child: Text(
-                          client.status.value,
+                          client.coachingStatus.value,
                           style: AppTextStyles.caption.copyWith(
                             color: isActive
                                 ? AppColors.success
@@ -277,14 +327,22 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                   Row(
                     children: [
                       _buildInfoChip(
-                        icon: FontAwesomeIcons.weightScale,
+                        icon: const Icon(
+                          Icons.monitor_weight_outlined,
+                          size: AppDimens.dimen12,
+                          color: AppColors.textSecondary,
+                        ),
                         label: weight,
                       ),
 
                       UiUtils.addHorizontalSpaceS(),
 
                       _buildInfoChip(
-                        icon: FontAwesomeIcons.clock,
+                        icon: const FaIcon(
+                          FontAwesomeIcons.clock,
+                          size: AppDimens.dimen12,
+                          color: AppColors.textSecondary,
+                        ),
                         label: lastCheckIn,
                       ),
                     ],
@@ -298,6 +356,46 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Empty State
+  // ---------------------------------------------------------------------------
+
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppDimens.dimen40),
+      child: Column(
+        children: [
+          Icon(
+            Icons.people_outline,
+            size: AppDimens.dimen40,
+            color: AppColors.textHint,
+          ),
+
+          UiUtils.addVerticalSpaceM(),
+
+          Text(
+            'No clients yet',
+            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+          ),
+
+          UiUtils.addVerticalSpaceXS(),
+
+          Text(
+            'Pull down to refresh or enroll a new client.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Profile
+  // ---------------------------------------------------------------------------
+
   Widget _buildProfileAvatar({
     required String name,
     required String profileImageUrl,
@@ -307,7 +405,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         radius: AppDimens.dimen36,
         backgroundColor: AppColors.primary.withValues(alpha: 0.12),
         child: Text(
-          name.isEmpty ? "?" : name[0],
+          name.isEmpty ? '?' : name[0],
           style: AppTextStyles.heading2.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w700,
@@ -315,16 +413,16 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         ),
       );
     }
+
     return CircleAvatar(
-      backgroundImage: profileImageUrl.isEmpty
-          ? null
-          : NetworkImage(profileImageUrl),
+      radius: AppDimens.dimen36,
+      backgroundImage: NetworkImage(profileImageUrl),
     );
   }
 
-  Widget _buildInfoChip({required FaIconData icon, required String label}) {
+  Widget _buildInfoChip({required Widget icon, required String label}) {
     return Container(
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: AppDimens.dimen10,
         vertical: AppDimens.dimen6,
       ),
@@ -334,7 +432,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
       ),
       child: Row(
         children: [
-          FaIcon(icon, size: AppDimens.dimen12, color: AppColors.textSecondary),
+          icon,
 
           UiUtils.addHorizontalSpaceS(),
 
@@ -348,5 +446,17 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         ],
       ),
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Methods
+  // ---------------------------------------------------------------------------
+
+  Future<void> _refreshClients() async {
+    FocusScope.of(context).unfocus();
+
+    _searchController.clear();
+
+    await _clientsViewModel.getClientUsers(0);
   }
 }

@@ -4,9 +4,9 @@ import 'package:pump/features/coaching/domain/usecases/create_client_user_usecas
 import 'package:pump/features/coaching/presentation/state/enroll_client_state.dart';
 
 import '../../../../core/utilities/logger_utility.dart';
-import '../../enums/activity_level.dart';
-import '../../enums/fitness_goal.dart';
-import '../../enums/gender.dart';
+import '../../data/enums/activity_level.dart';
+import '../../data/enums/fitness_goal.dart';
+import '../../data/enums/gender.dart';
 
 class EnrollClientViewModel extends BaseViewModel<EnrollClientState> {
   static const debugTag = "EnrollClientViewModel";

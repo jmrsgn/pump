@@ -6,7 +6,7 @@ import 'package:pump/core/presentation/theme/app_text_styles.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 
-import '../../../../core/routes.dart';
+import '../../../../core/app_routes.dart';
 
 class ClientWidget extends StatelessWidget {
   final String name;

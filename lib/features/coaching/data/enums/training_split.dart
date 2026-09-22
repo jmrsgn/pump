@@ -1,4 +1,4 @@
-import '../../../core/constants/app/app_strings.dart';
+import '../../../../core/constants/app/app_strings.dart';
 
 enum TrainingSplit {
   pull(label: AppStrings.pull),

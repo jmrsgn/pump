@@ -11,12 +11,16 @@ import '../../../../core/domain/usecases/search_users_usecase.dart';
 import '../state/clients_state.dart';
 import '../viewmodels/enroll_client_viewmodel.dart';
 
+// ----------------------------------------------------------------------------
 // Services
+// ----------------------------------------------------------------------------
 final clientUserServiceProvider = Provider<ClientUserService>((ref) {
   return ClientUserService();
 });
 
+// ----------------------------------------------------------------------------
 // Repositories
+// ----------------------------------------------------------------------------
 final clientUserRepositoryProvider = Provider<ClientUserRepositoryImpl>((ref) {
   return ClientUserRepositoryImpl(
     ref.watch(clientUserServiceProvider),
@@ -24,7 +28,9 @@ final clientUserRepositoryProvider = Provider<ClientUserRepositoryImpl>((ref) {
   );
 });
 
+// ----------------------------------------------------------------------------
 // UseCases
+// ----------------------------------------------------------------------------
 final createClientUserUseCaseProvider = Provider<CreateClientUserUseCase>(
   (ref) => CreateClientUserUseCase(ref.watch(clientUserRepositoryProvider)),
 );
@@ -37,7 +43,9 @@ final searchUsersUseCaseProvider = Provider<SearchUsersUseCase>(
   (ref) => SearchUsersUseCase(ref.watch(clientUserRepositoryProvider)),
 );
 
+// ----------------------------------------------------------------------------
 // ViewModels
+// ----------------------------------------------------------------------------
 final enrollClientViewModelProvider =
     StateNotifierProvider<EnrollClientViewModel, EnrollClientState>((ref) {
       return EnrollClientViewModel(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pump/core/presentation/provider/user_providers.dart';
 import 'package:pump/core/presentation/viewmodels/user_viewmodel.dart';
-import 'package:pump/core/routes.dart';
+import 'package:pump/core/app_routes.dart';
 import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/features/auth/presentation/viewmodels/logout_viewmodel.dart';
 import 'package:pump/features/posts/presentation/viewmodels/main_feed_viewmodel.dart';

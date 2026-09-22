@@ -42,9 +42,4 @@ class AppColors {
   // Overlays / Shadows
   static const Color overlay = Color(0x80000000); // 50% black
   static const Color shadow = Color(0x33000000); // 20% black subtle shadow
-
-  // SnackBar Colors (toned to brand)
-  static const Color snackBarError = Color(0xFFE0624B); // Warmer red-orange
-  static const Color snackBarSuccess = Color(0xFF00A98A); // Muted teal
-  static const Color snackBarInfo = Color(0xFF8F47C2); // Deep, modern purple
 }

@@ -12,7 +12,7 @@ import '../../../../core/presentation/theme/app_colors.dart';
 import '../../../../core/presentation/theme/app_text_styles.dart';
 import '../../../../core/presentation/widgets/custom_scaffold.dart';
 import '../../../../core/presentation/widgets/custom_text_field.dart';
-import '../../../../core/routes.dart';
+import '../../../../core/app_routes.dart';
 import '../../../../core/utils/navigation_utils.dart';
 import '../provider/auth_providers.dart';
 

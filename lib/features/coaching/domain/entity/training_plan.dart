@@ -1,6 +1,6 @@
 import 'package:pump/features/coaching/domain/entity/training_day.dart';
 import 'package:pump/features/coaching/domain/entity/training_week.dart';
-import 'package:pump/features/coaching/enums/training_split.dart';
+import 'package:pump/features/coaching/data/enums/training_split.dart';
 
 class TrainingPlan {
   String planName;

@@ -10,20 +10,21 @@ class ApiConstants {
 
   // ---------------------------------------------------------------------------
 
-  /**
-   * http://10.0.2.2:<port> - for Android Emulator
-   * http://localhost:<port> - for IOS Simulator
-   */
+  static const String androidEmulatorUrl = "http://10.0.2.2";
+  static const String iosSimulatorUrl = "http://localhost"; 
+  static const String url = iosSimulatorUrl;
 
-  static const String authServiceHost = 'http://10.0.2.2:8081';
+  // ---------------------------------------------------------------------------
+
+  static const String authServiceHost = '$url:8081';
 
   static const String authServiceBaseUrl = '$authServiceHost/api/v1';
 
-  static const String socialServiceHost = 'http://10.0.2.2:8080';
+  static const String socialServiceHost = '$url:8080';
 
   static const String socialServiceBaseUrl = '$socialServiceHost/api/v1';
 
-  static const String coachingServiceHost = 'http://10.0.2.2:8082';
+  static const String coachingServiceHost = '$url:8082';
 
   static const String coachingServiceBaseUrl = '$coachingServiceHost/api/v1';
 
