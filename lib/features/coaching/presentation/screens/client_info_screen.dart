@@ -596,8 +596,6 @@ class ClientInfoScreen extends StatelessWidget {
     BuildContext context,
     ClientUser client,
   ) {
-    final name = '${client.firstName} ${client.lastName}'.trim();
-
     return SizedBox(
       width: double.infinity,
       child: CustomButton(
@@ -605,15 +603,7 @@ class ClientInfoScreen extends StatelessWidget {
           NavigationUtils.navigateTo(
             context,
             AppRoutes.createTrainingBlock,
-            arguments: {
-              'clientName': name,
-              'clientAge': client.age,
-              'clientGender': client.gender.value,
-              'clientHeight': client.heightCm,
-              'clientCurrentWeight': client.currentWeight,
-              'clientGoalWeight': client.goalWeight,
-              'clientFitnessGoal': client.fitnessGoal.value,
-            },
+            arguments: client,
           );
         },
         label: 'Create Training Block',

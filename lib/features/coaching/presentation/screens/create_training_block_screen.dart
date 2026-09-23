@@ -7,26 +7,12 @@ import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
 import 'package:pump/core/presentation/widgets/custom_text_field.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/coaching/data/enums/training_split.dart';
+import 'package:pump/features/coaching/domain/entity/client_user.dart';
 
 class CreateTrainingBlockScreen extends StatefulWidget {
-  final String clientName;
-  final int clientAge;
-  final String clientGender;
-  final double clientHeight;
-  final double clientCurrentWeight;
-  final double clientGoalWeight;
-  final String clientFitnessGoal;
+  final ClientUser client;
 
-  const CreateTrainingBlockScreen({
-    super.key,
-    required this.clientName,
-    required this.clientAge,
-    required this.clientGender,
-    required this.clientHeight,
-    required this.clientCurrentWeight,
-    required this.clientGoalWeight,
-    required this.clientFitnessGoal,
-  });
+  const CreateTrainingBlockScreen({super.key, required this.client});
 
   @override
   State<CreateTrainingBlockScreen> createState() =>
@@ -138,6 +124,8 @@ class _CreateTrainingBlockScreenState extends State<CreateTrainingBlockScreen> {
   // ---------------------------------------------------------------------------
 
   Widget _buildClientSection() {
+    final clientName = widget.client.fullName.trim();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -154,7 +142,7 @@ class _CreateTrainingBlockScreenState extends State<CreateTrainingBlockScreen> {
           ),
           child: Row(
             children: [
-              _buildClientAvatar(widget.clientName),
+              _buildClientAvatar(clientName),
 
               UiUtils.addHorizontalSpaceM(),
 
@@ -163,7 +151,7 @@ class _CreateTrainingBlockScreenState extends State<CreateTrainingBlockScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.clientName,
+                      clientName,
                       style: AppTextStyles.body.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -172,15 +160,16 @@ class _CreateTrainingBlockScreenState extends State<CreateTrainingBlockScreen> {
                     UiUtils.addVerticalSpaceXS(),
 
                     Text(
-                      '${widget.clientAge} years old • ${widget.clientGender}',
+                      '${widget.client.age} years old • '
+                      '${widget.client.gender.value}',
                       style: AppTextStyles.bodySmall,
                     ),
 
                     UiUtils.addVerticalSpaceXS(),
 
                     Text(
-                      '${widget.clientHeight.toStringAsFixed(0)} cm • '
-                      '${widget.clientCurrentWeight.toStringAsFixed(1)} kg',
+                      '${widget.client.heightCm.toStringAsFixed(0)} cm • '
+                      '${widget.client.currentWeight.toStringAsFixed(1)} kg',
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.textHint,
                       ),

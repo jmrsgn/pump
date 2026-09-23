@@ -112,22 +112,14 @@ class AppRoutes {
         case paymentMethod:
           return MaterialPageRoute(builder: (_) => const PaymentMethodScreen());
         case createTrainingBlock:
-          final args = settings.arguments;
+          final client = settings.arguments;
 
-          if (args is! CreateTrainingBlockArgs) {
+          if (client is! ClientUser) {
             return MaterialPageRoute(builder: (_) => InvalidRouteScreen());
           }
 
           return MaterialPageRoute(
-            builder: (_) => CreateTrainingBlockScreen(
-              clientName: args.clientName,
-              clientAge: args.clientAge,
-              clientGender: args.clientGender,
-              clientHeight: args.clientHeight,
-              clientCurrentWeight: args.clientCurrentWeight,
-              clientGoalWeight: args.clientGoalWeight,
-              clientFitnessGoal: args.clientFitnessGoal,
-            ),
+            builder: (_) => CreateTrainingBlockScreen(client: client),
           );
 
         // ---------------------------------------------------------------------------
@@ -180,25 +172,4 @@ class AppRoutes {
       return MaterialPageRoute(builder: (_) => InvalidRouteScreen());
     }
   }
-}
-
-// FOR NOW
-class CreateTrainingBlockArgs {
-  final String clientName;
-  final int clientAge;
-  final String clientGender;
-  final double clientHeight;
-  final double clientCurrentWeight;
-  final double clientGoalWeight;
-  final String clientFitnessGoal;
-
-  const CreateTrainingBlockArgs({
-    required this.clientName,
-    required this.clientAge,
-    required this.clientGender,
-    required this.clientHeight,
-    required this.clientCurrentWeight,
-    required this.clientGoalWeight,
-    required this.clientFitnessGoal,
-  });
 }
