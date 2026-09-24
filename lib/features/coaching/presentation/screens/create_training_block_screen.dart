@@ -1,33 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pump/core/app_routes.dart';
 import 'package:pump/core/constants/app/app_dimens.dart';
 import 'package:pump/core/presentation/theme/app_colors.dart';
 import 'package:pump/core/presentation/theme/app_text_styles.dart';
 import 'package:pump/core/presentation/widgets/custom_button.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
 import 'package:pump/core/presentation/widgets/custom_text_field.dart';
+import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/coaching/data/enums/training_split.dart';
+import 'package:pump/features/coaching/data/dto/request/create_training_block_request_dto.dart';
 import 'package:pump/features/coaching/domain/entity/client_user.dart';
+import 'package:pump/features/coaching/presentation/provider/training_block_providers.dart';
+import 'package:pump/features/coaching/presentation/state/create_training_block_state.dart';
 
-class CreateTrainingBlockScreen extends StatefulWidget {
+class CreateTrainingBlockScreen extends ConsumerStatefulWidget {
   final ClientUser client;
 
   const CreateTrainingBlockScreen({super.key, required this.client});
 
   @override
-  State<CreateTrainingBlockScreen> createState() =>
+  ConsumerState<CreateTrainingBlockScreen> createState() =>
       _CreateTrainingBlockScreenState();
 }
 
-class _CreateTrainingBlockScreenState extends State<CreateTrainingBlockScreen> {
+class _CreateTrainingBlockScreenState
+    extends ConsumerState<CreateTrainingBlockScreen> {
   // ---------------------------------------------------------------------------
   // Controllers
   // ---------------------------------------------------------------------------
 
   final _planNameController = TextEditingController();
-  final _numberOfWeeksController = TextEditingController(text: '12');
-  final _trainingDaysController = TextEditingController(text: '4');
-  final _exercisesPerDayController = TextEditingController(text: '3');
+  final _numberOfWeeksController = TextEditingController();
+  final _trainingDaysController = TextEditingController();
 
   final _maintenanceInputController = TextEditingController();
 
@@ -56,7 +62,6 @@ class _CreateTrainingBlockScreenState extends State<CreateTrainingBlockScreen> {
     _planNameController.dispose();
     _numberOfWeeksController.dispose();
     _trainingDaysController.dispose();
-    _exercisesPerDayController.dispose();
     _maintenanceInputController.dispose();
     _proteinController.dispose();
     _carbsController.dispose();
@@ -72,9 +77,27 @@ class _CreateTrainingBlockScreenState extends State<CreateTrainingBlockScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final createTrainingBlockState = ref.watch(
+      createTrainingBlockViewModelProvider,
+    );
+
+    ref.listen<CreateTrainingBlockState>(createTrainingBlockViewModelProvider, (
+      previous,
+      next,
+    ) {
+      if (previous?.isLoading != true || next.isLoading || !mounted) return;
+
+      if (next.isCreateSuccess) {
+        NavigationUtils.navigateAndRemoveAll(context, AppRoutes.clients);
+      } else if (next.errorMessage != null) {
+        UiUtils.showSnackBarError(context, message: next.errorMessage!);
+      }
+    });
+
     return CustomScaffold(
       appBarTitle: 'Create Training Block',
       backgroundColor: AppColors.background,
+      isLoading: createTrainingBlockState.isLoading,
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
@@ -239,14 +262,6 @@ class _CreateTrainingBlockScreenState extends State<CreateTrainingBlockScreen> {
               ),
             ),
           ],
-        ),
-
-        UiUtils.addVerticalSpaceM(),
-
-        CustomTextField(
-          hint: 'Exercises / Day',
-          controller: _exercisesPerDayController,
-          keyboardType: TextInputType.number,
         ),
 
         UiUtils.addVerticalSpaceL(),
@@ -592,16 +607,19 @@ class _CreateTrainingBlockScreenState extends State<CreateTrainingBlockScreen> {
   // ---------------------------------------------------------------------------
 
   Widget _buildCreateButton() {
+    final isLoading = ref.watch(createTrainingBlockViewModelProvider).isLoading;
     return SizedBox(
       width: double.infinity,
       child: CustomButton(
-        onPressed: _onCreatePressed,
+        onPressed: isLoading ? null : _onCreatePressed,
         label: 'Create Training Block',
       ),
     );
   }
 
   void _onCreatePressed() {
+    if (ref.read(createTrainingBlockViewModelProvider).isLoading) return;
+
     if (_planNameController.text.trim().isEmpty) {
       UiUtils.showSnackBarError(context, message: 'Please enter a plan name.');
       return;
@@ -615,7 +633,70 @@ class _CreateTrainingBlockScreenState extends State<CreateTrainingBlockScreen> {
       return;
     }
 
-    // UI-only for now.
-    UiUtils.showSnackBarSuccess(context, message: 'Training block created.');
+    int? readInteger(TextEditingController controller, String field) {
+      final value = int.tryParse(controller.text.trim());
+      if (value == null) {
+        UiUtils.showSnackBarError(
+          context,
+          message: 'Please enter a valid $field.',
+        );
+      }
+      return value;
+    }
+
+    // Number of weeks
+    final numberOfWeeks = readInteger(
+      _numberOfWeeksController,
+      'number of weeks',
+    );
+    if (numberOfWeeks == null) return;
+
+    // Training days
+    final trainingDays = readInteger(_trainingDaysController, 'training days');
+    if (trainingDays == null) return;
+
+    // Estimated Macros
+    final estimatedMacros = readInteger(
+      _maintenanceInputController,
+      'estimate',
+    );
+    if (estimatedMacros == null) return;
+
+    // Target Protein
+    final targetProteinInGrams = readInteger(
+      _proteinController,
+      'protein target',
+    );
+    if (targetProteinInGrams == null) return;
+
+    // Target Carbs
+    final targetCarbsInGrams = readInteger(_carbsController, 'carbs target');
+    if (targetCarbsInGrams == null) return;
+
+    // Target Fat
+    final targetFatInGrams = readInteger(_fatsController, 'fat target');
+    if (targetFatInGrams == null) return;
+
+    // Required Daily Steps
+    final requiredDailySteps = readInteger(_stepsController, 'daily steps');
+    if (requiredDailySteps == null) return;
+
+    final notes = _notesController.text.trim();
+    final request = CreateTrainingBlockRequest(
+      trainingBlockName: _planNameController.text.trim(),
+      numberOfWeeks: numberOfWeeks,
+      trainingDays: trainingDays,
+      trainingSplit: _selectedSplits.map((split) => split.label).join(', '),
+      estimatedMacros: estimatedMacros,
+      targetProteinInGrams: targetProteinInGrams,
+      targetCarbsInGrams: targetCarbsInGrams,
+      targetFatInGrams: targetFatInGrams,
+      requiredDailySteps: requiredDailySteps,
+      otherNotes: notes.isEmpty ? null : notes,
+    );
+
+    ref
+        .read(createTrainingBlockViewModelProvider.notifier)
+        .createTrainingBlock(widget.client.id, request);
   }
 }

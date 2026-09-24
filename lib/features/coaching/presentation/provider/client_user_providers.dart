@@ -31,12 +31,12 @@ final clientUserRepositoryProvider = Provider<ClientUserRepositoryImpl>((ref) {
 // ----------------------------------------------------------------------------
 // UseCases
 // ----------------------------------------------------------------------------
-final createClientUserUseCaseProvider = Provider<CreateClientUserUseCase>(
-  (ref) => CreateClientUserUseCase(ref.watch(clientUserRepositoryProvider)),
+final createClientUseCaseProvider = Provider<CreateClientUseCase>(
+  (ref) => CreateClientUseCase(ref.watch(clientUserRepositoryProvider)),
 );
 
-final getClientUsersUseCaseProvider = Provider<GetClientUsersUseCase>(
-  (ref) => GetClientUsersUseCase(ref.watch(clientUserRepositoryProvider)),
+final getClientsUseCaseProvider = Provider<GetClientsUseCase>(
+  (ref) => GetClientsUseCase(ref.watch(clientUserRepositoryProvider)),
 );
 
 final searchUsersUseCaseProvider = Provider<SearchUsersUseCase>(
@@ -49,12 +49,12 @@ final searchUsersUseCaseProvider = Provider<SearchUsersUseCase>(
 final enrollClientViewModelProvider =
     StateNotifierProvider<EnrollClientViewModel, EnrollClientState>((ref) {
       return EnrollClientViewModel(
-        ref.watch(createClientUserUseCaseProvider),
+        ref.watch(createClientUseCaseProvider),
         ref.watch(searchUsersUseCaseProvider),
       );
     });
 
 final clientsViewModelProvider =
     StateNotifierProvider<ClientsViewModel, ClientsState>((ref) {
-      return ClientsViewModel(ref.watch(getClientUsersUseCaseProvider));
+      return ClientsViewModel(ref.watch(getClientsUseCaseProvider));
     });

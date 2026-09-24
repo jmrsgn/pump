@@ -11,7 +11,7 @@ class ApiConstants {
   // ---------------------------------------------------------------------------
 
   static const String androidEmulatorUrl = "http://10.0.2.2";
-  static const String iosSimulatorUrl = "http://localhost"; 
+  static const String iosSimulatorUrl = "http://localhost";
   static const String url = iosSimulatorUrl;
 
   // ---------------------------------------------------------------------------
@@ -51,7 +51,12 @@ class ApiConstants {
       "$postUrl/$postId/comments/$commentId/like";
 
   // Coaching service endpoints
-  static const String clientUsersUrl = "$coachingServiceBaseUrl/users";
-  static const String createClientUserUrl = "$clientUsersUrl/create";
-  static const String searchUsersUrl = '$coachingServiceBaseUrl/users/search';
+  static const String usersUrl = "$coachingServiceBaseUrl/users";
+  static const String clientsUrl = "$coachingServiceBaseUrl/clients";
+
+  static const String createClientUrl = "$clientsUrl/create";
+  static const String searchUsersUrl = '$usersUrl/search';
+
+  static String createTrainingBlockUrl(String clientId) =>
+      '$clientsUrl/${Uri.encodeComponent(clientId)}/training-blocks/create';
 }

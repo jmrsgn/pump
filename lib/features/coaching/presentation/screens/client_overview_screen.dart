@@ -27,9 +27,10 @@ extension ClientOverviewTabExtension on ClientOverviewTab {
 
 class _ClientOverviewScreenState extends State<ClientOverviewScreen> {
   ClientOverviewTab _selectedTab = ClientOverviewTab.clientInfo;
+  late final bool _hasTrainingBlock = widget.client.hasActiveTrainingBlock;
 
   List<ClientOverviewTab> get _visibleTabs {
-    if (!widget.client.hasActiveTrainingBlock) {
+    if (!_hasTrainingBlock) {
       return [ClientOverviewTab.clientInfo];
     }
 
@@ -81,7 +82,7 @@ class _ClientOverviewScreenState extends State<ClientOverviewScreen> {
     return switch (_selectedTab) {
       ClientOverviewTab.clientInfo => ClientInfoScreen(
         client: widget.client,
-        hasTrainingBlock: widget.client.hasActiveTrainingBlock,
+        hasTrainingBlock: _hasTrainingBlock,
         onNavigateToTab: _onTabSelected,
       ),
       ClientOverviewTab.progress => const ProgressAndAnalyticsScreen(),

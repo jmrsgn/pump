@@ -11,7 +11,7 @@ import '../../data/enums/gender.dart';
 class EnrollClientViewModel extends BaseViewModel<EnrollClientState> {
   static const debugTag = "EnrollClientViewModel";
 
-  final CreateClientUserUseCase _createClientUserUseCase;
+  final CreateClientUseCase _createClientUserUseCase;
   final SearchUsersUseCase _searchUsersUseCase;
 
   EnrollClientViewModel(this._createClientUserUseCase, this._searchUsersUseCase)

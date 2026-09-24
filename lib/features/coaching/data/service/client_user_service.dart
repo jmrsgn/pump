@@ -16,14 +16,14 @@ import '../dto/response/client_user_response_dto.dart';
 class ClientUserService {
   static const debugTag = "ClientUserService";
 
-  // createClientUser ----------------------------------------------------------
-  Future<Result<void, ApiErrorResponse>> createClientUser(
+  // createClient ----------------------------------------------------------
+  Future<Result<void, ApiErrorResponse>> createClient(
     String token,
     CreateClientUserRequest request,
   ) async {
     try {
       final response = await http.post(
-        Uri.parse(ApiConstants.createClientUserUrl),
+        Uri.parse(ApiConstants.createClientUrl),
         headers: {
           ...ApiConstants.headerTypeJson,
           'Authorization': 'Bearer $token',
@@ -49,7 +49,7 @@ class ClientUserService {
         ),
       );
     } catch (e, stack) {
-      LoggerUtility.e(debugTag, "createClientUser", e, stack);
+      LoggerUtility.e(debugTag, "createClient", e, stack);
       return Result.failure(
         ApiErrorResponse(
           status: HttpStatus.internalServerError,
@@ -60,12 +60,12 @@ class ClientUserService {
     }
   }
 
-  // getClientUsers ------------------------------------------------------------
+  // getClients ----------------------------------------------------------------
   Future<Result<PagedResponse<ClientUserResponse>, ApiErrorResponse>>
-  getClientUsers(String token, int page) async {
+  getClients(String token, int page) async {
     try {
       final response = await http.get(
-        Uri.parse("${ApiConstants.clientUsersUrl}?page=$page"),
+        Uri.parse("${ApiConstants.clientsUrl}?page=$page"),
         headers: {
           ...ApiConstants.headerTypeJson,
           'Authorization': 'Bearer $token',
@@ -93,7 +93,7 @@ class ClientUserService {
         ),
       );
     } catch (e, stack) {
-      LoggerUtility.e(debugTag, "getClientUsers", e, stack);
+      LoggerUtility.e(debugTag, "getClients", e, stack);
       return Result.failure(
         ApiErrorResponse(
           status: HttpStatus.internalServerError,

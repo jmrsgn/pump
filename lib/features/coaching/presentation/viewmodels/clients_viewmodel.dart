@@ -6,7 +6,7 @@ import 'package:pump/features/coaching/presentation/state/clients_state.dart';
 import '../../domain/entity/client_user.dart';
 
 class ClientsViewModel extends BaseViewModel<ClientsState> {
-  final GetClientUsersUseCase _getClientUsersUseCase;
+  final GetClientsUseCase _getClientUsersUseCase;
 
   ClientsViewModel(this._getClientUsersUseCase) : super(ClientsState.initial());
 

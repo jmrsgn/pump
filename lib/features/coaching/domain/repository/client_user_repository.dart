@@ -7,11 +7,9 @@ import '../../../../core/errors/app_error.dart';
 import '../../data/dto/request/create_client_user_request_dto.dart';
 
 abstract class ClientUserRepository {
-  Future<Result<void, AppError>> createClientUser(
-    CreateClientUserRequest request,
-  );
+  Future<Result<void, AppError>> createClient(CreateClientUserRequest request);
 
-  Future<Result<PagedResponse<ClientUser>, AppError>> getClientUsers(int page);
+  Future<Result<PagedResponse<ClientUser>, AppError>> getClients(int page);
 
   Future<Result<List<UserSummary>, AppError>> searchUsers(String query);
 }

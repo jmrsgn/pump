@@ -7,10 +7,10 @@ import '../../data/enums/activity_level.dart';
 import '../../data/enums/fitness_goal.dart';
 import '../../data/enums/gender.dart';
 
-class CreateClientUserUseCase {
+class CreateClientUseCase {
   final ClientUserRepository _clientUserRepository;
 
-  CreateClientUserUseCase(this._clientUserRepository);
+  CreateClientUseCase(this._clientUserRepository);
 
   Future<Result<void, AppError>> execute(
     String userId,
@@ -32,6 +32,6 @@ class CreateClientUserUseCase {
       activityLevel: activityLevel.value,
       fitnessGoal: fitnessGoal.value,
     );
-    return await _clientUserRepository.createClientUser(request);
+    return await _clientUserRepository.createClient(request);
   }
 }

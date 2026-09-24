@@ -4,12 +4,12 @@ import '../../../../core/errors/app_error.dart';
 import '../entity/client_user.dart';
 import '../repository/client_user_repository.dart';
 
-class GetClientUsersUseCase {
+class GetClientsUseCase {
   final ClientUserRepository _clientUserRepository;
 
-  GetClientUsersUseCase(this._clientUserRepository);
+  GetClientsUseCase(this._clientUserRepository);
 
   Future<Result<PagedResponse<ClientUser>, AppError>> execute(int page) async {
-    return await _clientUserRepository.getClientUsers(page);
+    return await _clientUserRepository.getClients(page);
   }
 }

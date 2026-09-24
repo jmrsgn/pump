@@ -20,12 +20,12 @@ class ClientUserRepositoryImpl implements ClientUserRepository {
 
   ClientUserRepositoryImpl(this._clientUserService, this._userRepositoryImpl);
 
-  // createClientUser ----------------------------------------------------------
+  // createClient ----------------------------------------------------------
   @override
-  Future<Result<void, AppError>> createClientUser(
+  Future<Result<void, AppError>> createClient(
     CreateClientUserRequest request,
   ) async {
-    LoggerUtility.d(debugTag, "Execute method: [createClientUser]");
+    LoggerUtility.d(debugTag, "Execute method: [createClient]");
 
     try {
       // Get authenticated user
@@ -37,33 +37,32 @@ class ClientUserRepositoryImpl implements ClientUserRepository {
         );
       }
 
-      final createClientUserResult = await _clientUserService.createClientUser(
+      final createClientResult = await _clientUserService.createClient(
         userResult.data!.token,
         request,
       );
 
-      if (!createClientUserResult.isSuccess) {
+      if (!createClientResult.isSuccess) {
         return Result.failure(
           AppError(
             message:
-                createClientUserResult.error?.message ??
-                "Create client user failed",
+                createClientResult.error?.message ?? "Create client failed",
           ),
         );
       }
 
       return Result.success(null);
     } catch (e, stack) {
-      LoggerUtility.e(debugTag, "createClientUser", e, stack);
+      LoggerUtility.e(debugTag, "createClient", e, stack);
       return Result.failure(
         AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
       );
     }
   }
 
-  // getClientUsers ------------------------------------------------------------
+  // getClients ------------------------------------------------------------
   @override
-  Future<Result<PagedResponse<ClientUser>, AppError>> getClientUsers(
+  Future<Result<PagedResponse<ClientUser>, AppError>> getClients(
     int page,
   ) async {
     LoggerUtility.d(debugTag, "Execute method: [getPosts]");
@@ -78,7 +77,7 @@ class ClientUserRepositoryImpl implements ClientUserRepository {
         );
       }
 
-      final clientUsersResult = await _clientUserService.getClientUsers(
+      final clientUsersResult = await _clientUserService.getClients(
         userResult.data!.token,
         page,
       );
