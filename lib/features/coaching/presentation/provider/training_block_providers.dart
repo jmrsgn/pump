@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pump/core/presentation/provider/user_providers.dart';
 import 'package:pump/features/coaching/data/repository/training_block_repository_impl.dart';
 import 'package:pump/features/coaching/data/service/training_block_service.dart';
+import 'package:pump/features/coaching/domain/usecases/add_training_exercises_usecase.dart';
 import 'package:pump/features/coaching/domain/usecases/create_training_block_usecase.dart';
 import 'package:pump/features/coaching/domain/usecases/get_active_training_block_usecase.dart';
 import 'package:pump/features/coaching/presentation/state/add_exercises_state.dart';
@@ -20,7 +21,8 @@ final trainingBlockScreenViewModelProvider = StateNotifierProvider.autoDispose
 
 final addExercisesViewModelProvider = StateNotifierProvider.autoDispose
     .family<AddExercisesViewModel, AddExercisesState, String>(
-      (ref, blockId) => AddExercisesViewModel(),
+      (ref, blockId) =>
+          AddExercisesViewModel(ref.watch(addTrainingExercisesUseCaseProvider)),
     );
 
 final trainingBlockServiceProvider = Provider<TrainingBlockService>(
@@ -33,6 +35,13 @@ final trainingBlockRepositoryProvider = Provider<TrainingBlockRepositoryImpl>(
     ref.watch(userRepositoryProvider),
   ),
 );
+
+final addTrainingExercisesUseCaseProvider =
+    Provider<AddTrainingExercisesUseCase>(
+      (ref) => AddTrainingExercisesUseCase(
+        ref.watch(trainingBlockRepositoryProvider),
+      ),
+    );
 
 final createTrainingBlockUseCaseProvider = Provider<CreateTrainingBlockUseCase>(
   (ref) =>

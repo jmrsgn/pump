@@ -60,6 +60,7 @@ class _AddExercisesScreenState extends ConsumerState<AddExercisesScreen> {
     return CustomScaffold(
       appBarTitle: AppStrings.addExercises,
       backgroundColor: AppColors.background,
+      isLoading: state.isLoading,
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
           AppDimens.padding16,
@@ -89,12 +90,31 @@ class _AddExercisesScreenState extends ConsumerState<AddExercisesScreen> {
               width: double.infinity,
               child: CustomButton(
                 label: 'Preview Program',
-                onPressed: () => NavigationUtils.pop(context, state),
+                isOutlineButton: true,
+                onPressed: state.isLoading
+                    ? null
+                    : () => NavigationUtils.pop(context, state),
               ),
             ),
+            UiUtils.addVerticalSpaceM(),
+            SizedBox(
+              width: double.infinity,
+              child: CustomButton(
+                label: 'Submit Program',
+                onPressed: state.isLoading
+                    ? null
+                    : () => _addExercisesViewModel.submit(
+                        widget.trainingBlock.id,
+                      ),
+              ),
+            ),
+            if (state.errorMessage != null) ...[
+              UiUtils.addVerticalSpaceS(),
+              Text(state.errorMessage!, style: AppTextStyles.error),
+            ],
             UiUtils.addVerticalSpaceS(),
             Text(
-              'Preview only. Changes are not saved to the backend.',
+              'Preview is local. Submission is unavailable until the Coaching Service API is implemented.',
               style: AppTextStyles.caption.copyWith(color: AppColors.textHint),
             ),
           ],

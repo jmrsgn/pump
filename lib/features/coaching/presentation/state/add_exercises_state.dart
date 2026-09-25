@@ -41,5 +41,14 @@ class EditableDay {
 
 class AddExercisesState {
   final List<EditableDay> days;
-  const AddExercisesState({this.days = const []});
+  final bool isLoading;
+  final String? errorMessage;
+  final bool isSubmitSuccess;
+
+  const AddExercisesState({
+    this.days = const [],
+    this.isLoading = false,
+    this.errorMessage,
+    this.isSubmitSuccess = false,
+  });
 }

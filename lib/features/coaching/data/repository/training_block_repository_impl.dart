@@ -7,6 +7,7 @@ import 'package:pump/core/utilities/logger_utility.dart';
 import 'package:pump/features/coaching/data/dto/request/create_training_block_request_dto.dart';
 import 'package:pump/features/coaching/data/service/training_block_service.dart';
 import 'package:pump/features/coaching/domain/entity/training_block.dart';
+import 'package:pump/features/coaching/domain/entity/training_program_input.dart';
 import 'package:pump/features/coaching/domain/repository/training_block_repository.dart';
 
 class TrainingBlockRepositoryImpl implements TrainingBlockRepository {
@@ -16,6 +17,20 @@ class TrainingBlockRepositoryImpl implements TrainingBlockRepository {
   final UserRepositoryImpl _userRepository;
 
   TrainingBlockRepositoryImpl(this._service, this._userRepository);
+
+  @override
+  Future<Result<void, AppError>> addTrainingExercises(
+    TrainingProgramInput input,
+  ) async {
+    // The Coaching Service programming contract is not available yet.
+    // Keep this boundary explicit and never report a local draft as persisted.
+    return Result.failure(
+      AppError(
+        message:
+            'Training exercise submission is unavailable until the Coaching Service API is implemented.',
+      ),
+    );
+  }
 
   @override
   Future<Result<TrainingBlock, AppError>> getActiveTrainingBlock(

@@ -3,6 +3,7 @@ import 'package:pump/core/data/dto/response/result.dart';
 import 'package:pump/core/errors/app_error.dart';
 import 'package:pump/features/coaching/data/dto/request/create_training_block_request_dto.dart';
 import 'package:pump/features/coaching/domain/entity/training_block.dart';
+import 'package:pump/features/coaching/domain/entity/training_program_input.dart';
 import 'package:pump/features/coaching/domain/repository/training_block_repository.dart';
 import 'package:pump/features/coaching/domain/usecases/get_active_training_block_usecase.dart';
 import 'package:pump/features/coaching/presentation/viewmodels/client_info_screen_viewmodel.dart';
@@ -12,6 +13,11 @@ class FakeTrainingBlockRepository implements TrainingBlockRepository {
 
   final Result<TrainingBlock, AppError> response;
   int calls = 0;
+
+  @override
+  Future<Result<void, AppError>> addTrainingExercises(
+    TrainingProgramInput input,
+  ) => throw UnimplementedError();
 
   @override
   Future<Result<TrainingBlock, AppError>> getActiveTrainingBlock(
@@ -69,9 +75,7 @@ void main() {
   test('specific no-active 404 becomes an empty loaded state', () async {
     final repository = FakeTrainingBlockRepository(
       Result.failure(
-        AppError(
-          message: ClientInfoScreenViewModel.noActiveBlockMessage,
-        ),
+        AppError(message: ClientInfoScreenViewModel.noActiveBlockMessage),
       ),
     );
     final viewModel = ClientInfoScreenViewModel(

@@ -231,4 +231,28 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('does not leave the editor when submission API is unavailable', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          onGenerateRoute: AppRoutes.generateRoute,
+          home: TrainingBlockScreen(trainingBlock: block),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add Exercises'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Submit Program'));
+    await tester.tap(find.text('Submit Program'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AddExercisesScreen), findsOneWidget);
+    expect(find.textContaining('submission is unavailable'), findsOneWidget);
+    expect(find.text('Local preview'), findsNothing);
+  });
 }
