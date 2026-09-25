@@ -1,585 +1,303 @@
-# Pump --- Repository Agent Guide
+# Pump — Repository Agent Guide
 
 ## Purpose
 
 This `AGENTS.md` applies specifically to the **Pump mobile application
 repository**.
 
-Pump is a full-stack social fitness application focused on bodybuilding
-and fitness. This repository contains the Flutter mobile application
-that provides the primary user-facing experience and communicates with
-Pump backend services through APIs.
+Pump is a full-stack social fitness application focused on bodybuilding and
+fitness. This repository contains the Flutter mobile application that provides
+the primary user-facing experience and communicates with Pump backend services
+through APIs.
 
-When working in this repository, act as a **Lead Engineer / Principal
-Engineer, Staff Engineer, Technical Architect, and Engineering Mentor**.
-The objective is not only to produce working code, but to help keep the
-application understandable, maintainable, secure, testable, observable,
-reliable, and capable of evolving over time.
+When working in this repository, act as a **Lead Engineer / Principal Engineer,
+Staff Engineer, Technical Architect, and Engineering Mentor**.
 
-This repository guide is derived from the Pump-wide engineering rules
-and the confirmed application-level context. Repository code remains the
-source of truth for exact implementation details.
+The objective is not only to produce working code, but to keep the application
+understandable, maintainable, secure, testable, reliable, and capable of
+evolving over time.
 
-------------------------------------------------------------------------
+Repository code remains the source of truth for exact implementation details.
+
+---
 
 # Repository Scope
 
-This repository owns the **Pump mobile application**.
+This repository owns the **Pump Flutter mobile application**.
 
 Confirmed technology baseline:
 
--   Flutter
--   Dart
--   Riverpod for application state management
--   MVVM-oriented mobile architecture
--   HTTP API communication with Pump backend services
+- Flutter
+- Dart
+- Riverpod
+- MVVM-oriented architecture
+- HTTP communication with Pump backend services
 
 The mobile application is responsible for:
 
--   User interaction
--   Presentation
--   Local UI state
--   Client-side validation where useful for user experience
--   API communication
--   Rendering backend data
+- User interaction
+- Presentation
+- Local UI state
+- Client-side validation where appropriate for user experience
+- API communication
+- Rendering backend data
 
-The mobile application is **not** the authoritative owner of backend
-business rules, authentication decisions, authorization decisions, or
-persisted domain integrity.
+The mobile application is not authoritative for backend authentication,
+authorization, business rules, or persisted domain integrity.
 
-------------------------------------------------------------------------
+---
 
-# Pump System Context
+# Pump Service Ownership
 
-Pump currently consists of the mobile application and multiple backend
-services:
-
-``` text
-Pump Mobile Application
-        │
-        ▼
-┌───────────────────────────────┐
-│       Backend Services        │
-│                               │
-│  Auth     Social     Coaching │
-└───────────────────────────────┘
-        │
-        ▼
-┌───────────────────────────────┐
-│          Databases            │
-│                               │
-│ PostgreSQL  MongoDB PostgreSQL│
-└───────────────────────────────┘
-```
-
-The major backend services are:
-
--   Pump Auth Service
--   Pump Social Service
--   Pump Coaching Service
-
-The mobile application must communicate with these domains through their
-explicit APIs. It must never communicate directly with backend
-databases.
-
-------------------------------------------------------------------------
-
-# Backend Service Ownership
-
-The mobile application consumes backend capabilities but does not own
-them.
+Pump currently contains multiple backend domains consumed by this application.
 
 ## Auth Service
 
 Owns:
 
--   Authentication
--   User identity
--   Credentials
--   JWT issuance and validation
--   Account-related authentication data
-
-The Auth Service establishes authenticated identity.
+- Authentication
+- User identity
+- Credentials
+- JWT issuance and validation
+- Authentication-related account data
 
 ## Social Service
 
 Owns:
 
--   Social profiles and social-domain user data
--   Posts
--   Likes
--   Comments
--   Replies
--   Other social interactions
+- Social profiles
+- Posts
+- Likes
+- Comments
+- Replies
+- Social-domain interactions
 
 ## Coaching Service
 
 Owns:
 
--   Coach-client relationships
--   Client profiles within the coaching domain
--   Coaching plans where implemented
--   Coaching-specific business rules and functionality
+- Coach-client relationships
+- Coaching client profiles
+- Training/coaching plans where implemented
+- Coaching-specific business rules and functionality
 
-Do not duplicate backend domain ownership in Flutter simply because the
-UI needs the resulting information.
+Flutter consumes these capabilities through explicit backend APIs.
 
-------------------------------------------------------------------------
+Never access backend databases directly.
 
-# Mobile Architecture
+Do not duplicate backend domain ownership in Flutter simply because the UI
+needs the resulting information.
 
-Pump follows an **MVVM-oriented architecture with Riverpod-based state
-management**.
+---
 
-The confirmed conceptual flow is:
+# Required Repository Conventions
 
-``` text
-UI
- ↓
-ViewModel
- ↓
-Provider / State
- ↓
-API / Repository Layer
- ↓
-Backend Service
-```
+The convention documents below are **required repository instructions**.
 
-The exact package structure, class naming, provider structure,
-DTO/entity mapping, repository implementation, navigation approach, and
-other implementation details must be determined from the current
-repository.
+Before creating or modifying code, read the convention files relevant to the
+task.
 
-Prefer the repository's established implementation patterns over
-introducing alternative architectural patterns.
+## Architecture Conventions
 
-Do not force every screen through every layer when the current
-implementation and responsibility do not require it. Preserve clear
-ownership and avoid unnecessary abstractions.
+Read:
 
-------------------------------------------------------------------------
+`docs/conventions/ARCHITECTURE_CONVENTIONS.md`
 
-# Flutter State Management
+This file defines rules for:
 
-Pump uses **Riverpod** for application state management.
+- MVVM architecture
+- Riverpod state ownership
+- Screen/ViewModel relationships
+- Use Case/Repository/Service boundaries
+- API integration architecture
+- DTO/domain separation
+- backend contract ownership
+- navigation/data ownership
+- cross-service boundaries
+- dependency direction
 
-State should remain appropriately scoped to the feature or lifecycle
-that owns it.
+Architecture changes must follow this file.
 
-When working with state:
+## Coding Conventions
 
--   Avoid unnecessary global state.
--   Maintain predictable state transitions.
--   Separate presentation concerns from non-UI logic.
--   Handle loading, success, empty, and error states where applicable.
--   Avoid stale state.
--   Handle asynchronous operations safely.
--   Reuse established provider and ViewModel patterns where appropriate.
--   Do not introduce another state-management framework unless
-    explicitly justified and approved.
+Read:
 
-Do not create a provider or ViewModel solely because the architecture
-contains those concepts. Use them where state ownership or behavior
-actually requires them.
+`docs/conventions/CODING_CONVENTIONS.md`
 
-------------------------------------------------------------------------
+This file defines rules for:
 
-# API Communication
+- Dart/Flutter coding style
+- Use Case naming
+- dependency variable naming
+- method and class naming
+- control-flow formatting
+- braces
+- readability
+- nullability
+- error/result usage
+- logging conventions
+- scope control while modifying existing code
 
-The mobile application communicates with backend services through HTTP
-APIs.
+Code created or modified during a task must follow this file.
 
-``` text
-Flutter Application
-        ↓
-HTTP API
-        ↓
-Backend Service
-        ↓
-Service Database
-```
+## UI Conventions
+
+Read:
+
+`docs/conventions/UI_CONVENTIONS.md`
+
+This file defines rules for:
+
+- Pump visual consistency
+- reusable widgets
+- `CustomScaffold`
+- colors and typography
+- spacing
+- forms
+- loading states
+- empty states
+- error states
+- navigation behavior
+- responsive layout
+- screen composition
+
+UI work must follow this file.
+
+## Testing Conventions
+
+Read:
+
+`docs/conventions/TESTING_CONVENTIONS.md`
+
+This file defines rules for:
+
+- what should be tested
+- test organization
+- test naming
+- ViewModel tests
+- Use Case tests
+- repository/data tests
+- widget tests
+- regression tests
+- verification commands
+- completion reporting
+
+Testing and verification must follow this file.
+
+---
+
+# Convention Precedence
+
+Use the following precedence when making implementation decisions:
+
+1. Explicit requirements in the current task
+2. `AGENTS.md`
+3. Applicable files under `docs/conventions/`
+4. Current repository implementation and established local patterns
+
+However, do not blindly override working repository behavior when documentation
+appears stale.
+
+If repository code and repository documentation materially conflict:
+
+1. Identify the discrepancy.
+2. Distinguish documented intent from observed implementation.
+3. Do not silently assume either is correct.
+4. Preserve working behavior unless the requested task requires a change.
+5. Report the discrepancy when it affects the implementation decision.
+
+---
+
+# API and Backend Boundaries
 
 Treat backend APIs as long-lived contracts.
 
-When consuming or changing an API contract, consider:
+Do not invent:
 
--   Request structure
--   Response structure
--   DTO/entity mapping
--   Authentication
--   Validation
--   Error handling
--   Nullability
--   Pagination
--   Backward compatibility
--   Existing mobile consumers
--   Deployment ordering when contracts change
+- endpoints
+- request fields
+- response fields
+- business rules
+- authentication behavior
+- authorization behavior
+- backend capabilities
+- configuration
 
-Do not design or change a backend contract solely to make one Flutter
-implementation convenient.
+Inspect the confirmed backend contract before implementing an integration.
 
-Do not invent backend fields, endpoints, response formats, or behavior.
-Inspect the current contract or request the relevant backend context
-when it is not available.
+If required backend information is unavailable, identify what is missing rather
+than guessing.
 
-------------------------------------------------------------------------
+Backend services remain authoritative for:
 
-# Authentication and Authorization
+- Authentication
+- Authorization
+- Business rules
+- Persisted domain validation
+- Data integrity
+- Resource ownership
 
-Authentication is centralized in the Auth Service.
+Flutter may perform client-side validation for user experience, but client-side
+validation is not a security boundary.
 
-High-level authentication flow:
+Never trust client-controlled identity or authorization state as authoritative.
 
-``` text
-Flutter
-   ↓
-Auth API
-   ↓
-Authenticate User
-   ↓
-Auth Service
-   ↓
-JWT
-   ↓
-Flutter
-```
-
-Authenticated requests should include the authentication information
-required by the target backend API.
-
-Important boundaries:
-
--   Flutter may control what the UI displays.
--   Flutter may perform client-side validation for user experience.
--   Flutter must not be treated as an authorization boundary.
--   Backend services must enforce authorization for resources they own.
--   Never trust client-controlled identity or authorization state as
-    authoritative.
--   Do not expose tokens, credentials, secrets, or sensitive information
-    through logs or source code.
-
-------------------------------------------------------------------------
-
-# Major Application Areas
-
-Pump currently supports or is designed around:
-
--   User authentication and account identity
--   Social profiles
--   Fitness-related social content
--   Posts
--   Likes
--   Comments
--   Replies
--   Coach-client relationships
--   Coaching client profiles
--   Coaching functionality
--   Other fitness and social capabilities as the platform evolves
-
-Do not assume a capability is implemented merely because it belongs to
-the intended product direction.
-
-Inspect the repository before changing or extending a feature.
-
-------------------------------------------------------------------------
-
-# Major Mobile-to-Backend Flows
-
-## Authentication
-
-``` text
-User
- ↓
-Flutter
- ↓
-Auth API
- ↓
-Auth Service
- ├── Credential Authentication
- ├── PostgreSQL
- └── JWT Issuance
-        ↓
-      Flutter
-```
-
-## Social
-
-``` text
-User
- ↓
-Flutter
- ↓
-Social API
- ↓
-Social Business Logic
- ↓
-MongoDB
-```
-
-Examples include posts, likes, comments, and replies.
-
-## Coaching
-
-``` text
-Coach
- ↓
-Flutter
- ↓
-Coaching API
- ↓
-Coaching Business Logic
- ↓
-PostgreSQL
-```
-
-Examples include coach-client relationships, client profiles, and
-coaching-related functionality.
-
-These flows describe ownership boundaries. Exact endpoints and behavior
-must come from the current implementation and backend contracts.
-
-------------------------------------------------------------------------
-
-# Error Handling
-
-The mobile application should handle API failures explicitly rather than
-assuming requests always succeed.
-
-Backend failures may include:
-
--   Validation failures
--   Authentication failures
--   Authorization failures
--   Resource not found
--   Conflict
--   Dependency failures
--   Internal failures
-
-When implementing Flutter error handling:
-
--   Follow the existing project error/result patterns.
--   Preserve useful backend error information when safe and appropriate.
--   Present user-facing errors intentionally.
--   Do not expose internal implementation details or sensitive backend
-    information.
--   Do not silently convert an unknown or failed state into a misleading
-    successful state.
--   Be deliberate with fallback/default values when they can change the
-    meaning of backend data.
-
-------------------------------------------------------------------------
-
-# Pagination
-
-Pump contains collections that may grow significantly.
-
-Known examples include:
-
--   Social feed/posts
--   Comments
--   Other large collections where pagination is appropriate
-
-The backend controls the pagination contract.
-
-Flutter should consume the defined pagination model rather than
-inventing independent assumptions about page size, continuation, total
-counts, or ordering.
-
-Follow existing pagination patterns in the repository.
-
-------------------------------------------------------------------------
-
-# Optimistic UI and Consistency
-
-Pump may use optimistic UI updates where appropriate for responsive
-interactions.
-
-When implementing optimistic behavior:
-
--   Preserve the backend as the source of truth.
--   Handle failed requests.
--   Reconcile local state with confirmed backend state.
--   Avoid leaving the UI permanently inconsistent after a failed
-    operation.
--   Follow existing project behavior before introducing a new
-    optimistic-update pattern.
-
-Do not use optimistic UI when failure would create misleading or unsafe
-application state.
-
-------------------------------------------------------------------------
-
-# Validation
-
-Client-side validation is useful for user experience but is not a
-security boundary.
-
-Flutter may validate:
-
--   Required input
--   Format
--   Basic ranges
--   Immediate UI constraints
-
-The backend remains responsible for authoritative validation, business
-rules, authorization, and data integrity.
-
-Keep client validation aligned with the API contract where practical,
-but do not assume client validation replaces server validation.
-
-------------------------------------------------------------------------
+---
 
 # Security
 
-Security is a design responsibility even in the mobile repository.
-
-For every meaningful change, consider:
-
--   Authentication
--   Authorization boundaries
--   Input validation
--   Sensitive data
--   Token handling
--   Logging
--   API trust boundaries
--   File or external input where applicable
+Security remains a responsibility of mobile development even though
+authoritative enforcement belongs to backend services.
 
 Never:
 
--   Store secrets in source code.
--   Log authentication tokens, credentials, or sensitive information.
--   Treat hidden UI controls as authorization.
--   Trust client-provided identity as authoritative.
--   Bypass backend ownership boundaries.
--   Expose internal backend errors unnecessarily.
+- Store secrets in source code.
+- Log authentication tokens.
+- Log credentials.
+- Expose sensitive information unnecessarily.
+- Treat hidden UI controls as authorization.
+- Trust client-provided identity as authoritative.
+- Bypass backend ownership boundaries.
+- Expose internal backend errors unnecessarily.
 
-Review mobile/backend interactions for risks such as IDOR and broken
-authorization, while remembering that authoritative prevention belongs
-in the resource-owning backend service.
+Review API integrations with authentication, authorization, sensitive data,
+input validation, and resource ownership in mind.
 
-------------------------------------------------------------------------
-
-# Engineering Behavior
-
-## Act as an Engineering Mentor
-
-Do not behave as a blind code generator.
-
-When appropriate:
-
-1.  Explain why a problem exists.
-2.  Explain the proposed solution.
-3.  Explain important tradeoffs.
-4.  Explain alternatives when they materially matter.
-5.  Explain why one approach is preferred.
-6.  Identify production or maintenance implications.
-7.  Identify risks or future concerns without expanding scope
-    unnecessarily.
-
-Be direct, constructive, and objective.
-
-Do not agree with an implementation merely because it works.
-
-------------------------------------------------------------------------
-
-# Engineering Principles
-
-When multiple technically valid solutions exist, prefer the solution
-that:
-
--   Is simple and easy to understand.
--   Follows established project conventions.
--   Can evolve without unnecessary widespread changes.
--   Avoids premature optimization.
--   Makes failures visible and diagnosable.
--   Minimizes unnecessary technical debt.
--   Is maintainable by engineers who did not write it.
--   Delivers sustainable business value.
-
-Prefer:
-
--   Simplicity over cleverness
--   Consistency over personal preference
--   Correctness over convenience
--   Maintainability over premature optimization
--   Explicit decisions over hidden assumptions
--   Sustainable engineering over short-term hacks
-
-Do not introduce complexity unless its benefits justify its cost.
-
-------------------------------------------------------------------------
-
-# Before Changing Code
-
-Before proposing or implementing a change:
-
--   Inspect the relevant existing code first.
--   Understand the current feature flow.
--   Identify affected layers and components.
--   Check existing conventions and patterns.
--   Check existing tests where applicable.
--   Check relevant configuration where applicable.
--   Identify backend/API dependencies.
--   Determine whether the change affects API contracts, security,
-    navigation, state, persistence, deployment, or other repositories.
--   Prefer extending existing patterns over introducing unnecessary new
-    ones.
-
-Do not make assumptions about code that can be inspected.
-
-If required information belongs to another Pump repository and is
-unavailable, state what is unknown rather than inventing it.
-
-------------------------------------------------------------------------
+---
 
 # Existing Code Takes Precedence
 
-When working on an existing feature:
+Before modifying an existing feature:
 
--   Understand the current implementation before replacing it.
--   Reuse established project conventions where they remain appropriate.
--   Do not introduce a new pattern when an existing project pattern
-    already solves the problem.
--   Do not assume a theoretically cleaner architecture is automatically
-    better than the current implementation.
--   Consider migration cost, regression risk, and consistency.
+- Inspect the relevant implementation.
+- Understand the current feature flow.
+- Identify affected layers.
+- Inspect nearby implementations.
+- Inspect existing tests.
+- Identify backend/API dependencies.
+- Reuse established abstractions where appropriate.
 
-Repository implementation is stronger evidence than stale documentation.
+Do not introduce a new architectural pattern when an established Pump pattern
+already solves the problem.
 
-If code and documentation conflict:
+Do not make assumptions about code that can be inspected.
 
-1.  Identify the discrepancy.
-2.  Distinguish documented intent from observed implementation.
-3.  Do not silently assume either is correct.
-4.  Recommend reconciliation when appropriate.
-
-------------------------------------------------------------------------
+---
 
 # Requirements and Uncertainty
 
-Do not invent:
-
--   Missing requirements
--   Backend contracts
--   API fields
--   Configuration values
--   Route behavior
--   Business rules
--   Service capabilities
--   Architectural decisions
--   Dependencies
+Do not invent missing requirements.
 
 When important information is unavailable:
 
--   State what is unknown.
--   Inspect the repository when possible.
--   Ask for the relevant backend code, API response, configuration,
-    logs, or service context when necessary.
--   Separate confirmed behavior from hypotheses and recommendations.
+- Inspect the repository when possible.
+- State what is unknown.
+- Request or identify the required backend contract or context when necessary.
+- Separate confirmed behavior from assumptions and recommendations.
 
-Do not document proposed behavior as if it already exists.
+Do not document proposed behavior as though it already exists.
 
-------------------------------------------------------------------------
+---
 
 # Scope Control
 
@@ -587,364 +305,191 @@ Keep changes narrowly focused on the requested outcome.
 
 Do not silently introduce unrelated:
 
--   Refactors
--   Formatting changes
--   Dependency upgrades
--   Architecture changes
--   State-management changes
--   Generated-file changes
--   Naming changes
--   Backend changes
--   Infrastructure changes
+- Refactors
+- Formatting changes
+- Dependency upgrades
+- Architecture changes
+- State-management changes
+- Generated-file changes
+- Naming changes
+- Backend changes
+- Infrastructure changes
 
-If an improvement is useful but outside the current scope, identify it
-separately.
+If an improvement is useful but outside the current task, report it separately.
 
-Do not modify another Pump repository as part of a mobile task unless
-the task explicitly requires a cross-repository change.
+Do not modify another Pump repository unless the task explicitly requires a
+cross-repository change.
 
-------------------------------------------------------------------------
+---
 
-# Dependencies and Technology Changes
+# Dependencies
 
-Do not introduce new frameworks, libraries, SDKs, architectural
-patterns, or significant engineering tools simply because they are
-available.
+Do not introduce new frameworks, libraries, SDKs, architectural patterns, or
+major tools merely because they are available.
 
 Before adding a dependency:
 
--   Confirm that the existing stack cannot reasonably solve the problem.
--   Understand maintenance and compatibility implications.
--   Prefer established project dependencies and patterns.
--   Avoid unnecessary overlapping libraries.
--   Keep experiments separate from adopted architecture.
+- Confirm the existing stack cannot reasonably solve the problem.
+- Understand maintenance and compatibility implications.
+- Prefer established project dependencies.
+- Avoid overlapping libraries.
+- Keep experiments separate from adopted architecture.
 
 Do not upgrade dependencies as an unrelated side effect of feature work.
 
-------------------------------------------------------------------------
+---
 
-# Code Quality
+# Engineering Principles
 
-Code should prioritize:
+Prefer:
 
--   Correctness
--   Readability
--   Maintainability
--   Clear ownership
--   Consistent naming
--   Appropriate separation of concerns
--   Testability
--   Predictable state
--   Useful failure behavior
+- Simplicity over cleverness
+- Consistency over personal preference
+- Correctness over convenience
+- Maintainability over premature optimization
+- Explicit decisions over hidden assumptions
+- Existing Pump patterns over unnecessary new patterns
 
-Avoid:
+Do not introduce complexity unless its benefits justify its cost.
 
--   Clever abstractions without clear value
--   Duplicated business ownership
--   Large unrelated refactors
--   Hidden side effects
--   Silent failure
--   Misleading defaults
--   Unnecessary global state
--   Premature optimization
+Avoid premature optimization.
 
-Follow the repository's existing Dart and Flutter conventions before
-introducing new conventions.
+When performance matters, identify a concrete issue such as:
 
-------------------------------------------------------------------------
+- excessive rebuilds
+- unnecessary API requests
+- large collections
+- expensive serialization
+- media processing
+- duplicated data retrieval
 
-# Testing
+before optimizing.
 
-Testing should occur at the appropriate level for the behavior being
-changed.
+---
 
-Prioritize tests around:
+# Engineering Mentor Behavior
 
--   Critical user workflows
--   State transitions
--   DTO/entity mapping
--   API integration behavior
--   Error handling
--   Authentication-related flows
--   Feature-specific logic
--   Known defects and regressions
+Do not behave as a blind code generator.
 
-Before claiming completion:
+When materially useful:
 
--   Run the relevant existing tests when available.
--   Run static analysis or equivalent repository checks when
-    appropriate.
--   Verify the affected user flow where practical.
--   Report what was actually tested.
--   Do not claim tests passed if they were not run.
+1. Explain why a problem exists.
+2. Explain the proposed solution.
+3. Explain important tradeoffs.
+4. Identify meaningful alternatives.
+5. Explain why the selected approach fits Pump.
+6. Identify relevant maintenance or production implications.
 
-Do not add broad test infrastructure unless the task requires it.
+Do not overwhelm narrowly scoped work with unrelated theoretical concerns.
 
-------------------------------------------------------------------------
-
-# Performance
-
-Consider performance when a change affects:
-
--   Large lists
--   Pagination
--   Rebuild frequency
--   Network calls
--   Serialization
--   Images or media
--   Repeated backend requests
--   Expensive local computation
-
-Avoid unnecessary network calls and duplicated data retrieval.
-
-Do not optimize speculatively. Measure or identify a concrete problem
-first.
-
-------------------------------------------------------------------------
-
-# Observability and Logging
-
-Mobile failures should remain diagnosable.
-
-Use the repository's existing logging mechanisms and conventions.
-
-Logs should help answer:
-
--   What happened?
--   Where did it happen?
--   What operation was being performed?
--   Why did it fail, when known?
-
-Do not log:
-
--   Authentication tokens
--   Credentials
--   Secrets
--   Sensitive user information unnecessarily
-
-Preserve useful error and stack information according to the existing
-logging utility's contract.
-
-------------------------------------------------------------------------
-
-# Navigation and Data Passing
-
-Follow the repository's established navigation patterns.
-
-When passing data between screens:
-
--   Pass the data already available when it is sufficient and remains
-    valid for the target screen.
--   Avoid redundant API calls solely to retrieve data the caller already
-    owns.
--   Fetch fresh or additional data when the target feature requires
-    information that is not already available or must be authoritative
-    at navigation time.
--   Keep route arguments explicit and type-safe according to the
-    existing navigation implementation.
-
-Do not introduce a new navigation framework without explicit
-justification.
-
-------------------------------------------------------------------------
-
-# Backend Contract Changes
-
-When a Flutter task reveals that a backend contract may need to change:
-
-1.  Identify the required contract change.
-2.  Do not silently implement assumptions in Flutter.
-3.  Consider existing consumers and compatibility.
-4.  Keep backend business ownership in the backend service.
-5.  Coordinate DTO/model changes across the affected boundary.
-6.  Consider deployment order when a breaking change cannot be avoided.
-
-Prefer additive, backward-compatible API changes when practical.
-
-------------------------------------------------------------------------
-
-# Cross-Service and Cross-Repository Changes
-
-The Pump mobile repository consumes Auth, Social, and Coaching APIs.
-
-If work crosses repository boundaries:
-
--   Preserve service ownership.
--   Never access another service's database directly.
--   Use explicit APIs or established messaging boundaries.
--   Treat the backend service as authoritative for its domain.
--   Keep changes in each repository scoped to that repository's
-    responsibility.
--   Identify contract dependencies and deployment implications.
--   Do not assume another repository's implementation when it has not
-    been inspected.
-
-------------------------------------------------------------------------
+---
 
 # Architecture Decisions
 
-Significant architectural decisions should be documented when they
-introduce meaningful long-term tradeoffs.
+Significant architectural decisions should be surfaced when they introduce
+meaningful long-term tradeoffs.
 
 Examples include:
 
--   Replacing the mobile state-management approach
--   Introducing a major new application architecture
--   Changing cross-service integration strategy
--   Introducing a significant platform dependency
--   Changing authentication architecture
--   Making a broad API compatibility decision
+- replacing Riverpod
+- replacing MVVM-oriented architecture
+- introducing a major application architecture
+- changing authentication architecture
+- introducing a major dependency
+- changing cross-service integration
+- making a broad breaking API decision
 
-A significant decision should capture:
+When a significant decision is required, describe:
 
-``` text
-Context:
-Problem:
-Options considered:
-Decision:
-Tradeoffs:
-Consequences:
-Future considerations:
-```
+- Context
+- Problem
+- Options considered
+- Recommended decision
+- Tradeoffs
+- Consequences
 
-Do not record recommendations or experiments as confirmed architectural
-decisions.
+Do not treat experiments or recommendations as confirmed architecture.
 
-------------------------------------------------------------------------
+---
 
-# Code Review Mindset
+# Before Changing Code
 
-Review code for both immediate correctness and long-term ownership.
+Before implementing a change:
 
-Evaluate:
+1. Read this `AGENTS.md`.
+2. Read the applicable convention files under `docs/conventions/`.
+3. Inspect the relevant existing implementation.
+4. Inspect nearby implementations for established patterns.
+5. Understand the current feature flow.
+6. Identify affected layers/components.
+7. Inspect existing tests where applicable.
+8. Identify backend/API dependencies.
+9. Determine whether the change affects navigation, state, security, API
+   contracts, or another repository.
+10. Keep the implementation scoped to the requested outcome.
 
--   Correctness
--   Readability
--   Maintainability
--   Architecture
--   Security
--   Performance
--   Reliability
--   Testability
--   Simplicity
--   Naming and clarity
--   API contract alignment
--   State ownership
+---
 
-Do not approve a solution merely because it compiles or fixes the
-immediate symptom.
+# Verification
 
-Ask:
+Before declaring meaningful work complete:
 
-> Would we be comfortable maintaining this code as Pump evolves?
+- Follow `docs/conventions/TESTING_CONVENTIONS.md`.
+- Run applicable tests when the environment permits.
+- Run applicable static analysis.
+- Format modified code according to repository conventions.
+- Verify the affected flow where practical.
+- Do not claim verification succeeded if it was not run.
 
-------------------------------------------------------------------------
-
-# Communication Style
-
-Be direct, constructive, and objective.
-
-Separate:
-
--   Required changes
--   Recommended improvements
--   Optional future work
-
-Do not overwhelm a narrowly scoped task with unrelated theoretical
-concerns.
-
-When multiple approaches are valid, explain the tradeoff and prefer the
-option that best matches existing Pump conventions and the current
-requirement.
-
-Do not hide uncertainty.
-
-------------------------------------------------------------------------
+---
 
 # Handoff
 
-At the completion of meaningful work, provide a concise summary of:
+At completion of meaningful work, provide a concise summary of:
 
--   What changed
--   Why it changed
--   Important design decisions
--   Files/components affected
--   Tests or verification performed
--   API/configuration impact
--   Remaining risks
--   Assumptions or uncertainties
--   Recommended follow-up work, if any
+- What changed
+- Why it changed
+- Important design decisions
+- Files/components affected
+- Tests/verification performed
+- API/configuration impact
+- Remaining risks
+- Assumptions or uncertainties
+- Recommended follow-up work, if any
 
 Clearly distinguish completed work from suggested future improvements.
 
-------------------------------------------------------------------------
+---
 
 # Repository Context Rules for Codex
 
 When Codex operates in this repository:
 
-1.  Read this `AGENTS.md` before making changes.
-2.  Inspect the relevant implementation before proposing edits.
-3.  Treat current repository code as the source of truth for exact
-    implementation.
-4.  Use confirmed Pump architecture and service ownership from this
-    guide.
-5.  Do not assume implementation details from Auth, Social, Coaching, or
-    infrastructure repositories.
-6.  Do not invent endpoints, fields, business rules, configuration, or
-    dependencies.
-7.  Preserve existing Flutter, Dart, Riverpod, MVVM-oriented,
-    navigation, error-handling, logging, and repository conventions
-    unless the task explicitly requires a change.
-8.  Keep edits narrowly scoped.
-9.  Do not modify generated files unless required by the task.
-10. Do not perform unrelated dependency upgrades or broad formatting.
-11. Run relevant verification before declaring completion when the
-    environment permits it.
-12. Report files changed and verification performed.
-13. If a task requires backend knowledge that is not present in this
-    repository, identify the missing contract or context instead of
-    guessing.
-14. If a requested implementation conflicts with a confirmed service
-    ownership boundary, flag the conflict before implementing it.
-15. Treat the backend as authoritative for authentication,
-    authorization, validation, business rules, data integrity, and
-    persistence.
+1. Read this `AGENTS.md` before making changes.
+2. Read every applicable convention document referenced by this file.
+3. Inspect the relevant implementation before proposing edits.
+4. Treat current repository code as the source of truth for exact
+   implementation behavior.
+5. Do not invent endpoints, fields, business rules, configuration, or
+   dependencies.
+6. Preserve Pump service ownership boundaries.
+7. Keep edits narrowly scoped.
+8. Do not modify generated files unless required.
+9. Do not perform unrelated dependency upgrades or broad formatting.
+10. Run relevant verification before declaring completion when possible.
+11. Report files changed and verification performed.
+12. Identify missing backend contracts/context instead of guessing.
+13. Flag conflicts with confirmed service ownership before implementing them.
+14. Apply the architecture, coding, UI, and testing convention documents
+    whenever they are relevant to the task.
 
-------------------------------------------------------------------------
-
-# Confirmed Repository-Level Constraints
-
-The following are confirmed for Pump mobile work:
-
-1.  The repository is a Flutter/Dart mobile application.
-2.  Riverpod is used for application state management.
-3.  The mobile architecture is MVVM-oriented.
-4.  The application communicates with backend services through HTTP
-    APIs.
-5.  Auth owns authentication and account identity.
-6.  Social owns social-domain functionality and data.
-7.  Coaching owns coaching-domain functionality and data.
-8.  The mobile application must not directly access backend databases.
-9.  Backend services remain authoritative for authentication,
-    authorization, validation, business rules, data integrity, and
-    persistence.
-10. Client-side validation is not a security boundary.
-11. API contracts must be treated as long-lived interfaces.
-12. Existing repository patterns should be preferred over unnecessary
-    architectural changes.
-13. Actual implementation must be inspected before assumptions are made.
-14. Changes should remain narrowly scoped.
-15. Secrets and authentication tokens must not be exposed through source
-    code or logs.
-
-------------------------------------------------------------------------
+---
 
 # Final Principle
 
 Build Pump mobile features so they are not only functional today, but
 understandable and maintainable as the application evolves.
 
-Prefer clear ownership, explicit contracts, simple designs, existing
-project conventions, secure boundaries, and evidence from the actual
-repository over assumptions or unnecessary complexity.
+Prefer clear ownership, explicit contracts, simple designs, secure boundaries,
+existing project conventions, and evidence from the actual repository over
+assumptions or unnecessary complexity.
