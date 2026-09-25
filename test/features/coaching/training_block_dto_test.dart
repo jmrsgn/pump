@@ -150,4 +150,72 @@ void main() {
     expect(result.data?.status, 'Active');
     expect(result.data?.createdAt, isNull);
   });
+
+  test(
+    'GET active block parses timestamps, status, and nullable notes',
+    () async {
+      const clientId = 'client-id';
+      final payload =
+          jsonDecode(successfulResponseBody) as Map<String, dynamic>;
+      final data = payload['data'] as Map<String, dynamic>;
+      data['status'] = 'Active';
+      data['createdAt'] = '2026-09-24T12:00:00Z';
+      data['updatedAt'] = '2026-09-25T12:00:00Z';
+      data['otherNotes'] = null;
+
+      final result = await http.runWithClient(
+        () => TrainingBlockService().getActiveTrainingBlock(
+          'test-token',
+          clientId,
+        ),
+        () => MockClient((outgoing) async {
+          expect(outgoing.method, 'GET');
+          expect(
+            outgoing.url.toString(),
+            ApiConstants.getActiveTrainingBlockUrl(clientId),
+          );
+          expect(outgoing.headers['authorization'], 'Bearer test-token');
+          expect(outgoing.body, isEmpty);
+          return http.Response(jsonEncode(payload), 200);
+        }),
+      );
+
+      expect(result.isSuccess, isTrue);
+      final block = result.data!.toTrainingBlock();
+      expect(block.status, 'Active');
+      expect(block.createdAt, DateTime.utc(2026, 9, 24, 12));
+      expect(block.updatedAt, DateTime.utc(2026, 9, 25, 12));
+      expect(block.otherNotes, isNull);
+      expect(block.trainingBlockName, 'Sample Training Block');
+    },
+  );
+
+  test('GET preserves the specific no-active 404 error', () async {
+    final result = await http.runWithClient(
+      () => TrainingBlockService().getActiveTrainingBlock(
+        'test-token',
+        'client-id',
+      ),
+      () => MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'data': null,
+            'error': {
+              'status': 404,
+              'error': 'Not Found',
+              'message': 'No active training block exists for this client',
+            },
+          }),
+          404,
+        ),
+      ),
+    );
+
+    expect(result.isFailure, isTrue);
+    expect(result.error?.status, 404);
+    expect(
+      result.error?.message,
+      'No active training block exists for this client',
+    );
+  });
 }

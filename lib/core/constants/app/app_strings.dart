@@ -186,7 +186,7 @@ class AppStrings {
   static const weight = "Weight";
   static const bodyFat = "Body Fat";
   static const muscleMass = "Muscle Mass";
-  static const trainingInfo = "Training Info";
+  static const trainingBlockInfo = "Training Block Info";
   static const lastWorkout = "Last Workout";
   static const nutritionInfo = "Nutrition Info";
   static const progressAndAnalytics = "Progress & Analytics";

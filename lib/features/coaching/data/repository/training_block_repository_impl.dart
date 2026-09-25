@@ -18,6 +18,39 @@ class TrainingBlockRepositoryImpl implements TrainingBlockRepository {
   TrainingBlockRepositoryImpl(this._service, this._userRepository);
 
   @override
+  Future<Result<TrainingBlock, AppError>> getActiveTrainingBlock(
+    String clientId,
+  ) async {
+    try {
+      final userResult = await _userRepository.getAuthenticatedUser();
+      if (!userResult.isSuccess || userResult.data == null) {
+        return Result.failure(
+          AppError(message: AuthErrorConstants.userIsNotAuthenticated),
+        );
+      }
+      final result = await _service.getActiveTrainingBlock(
+        userResult.data!.token,
+        clientId,
+      );
+      if (!result.isSuccess || result.data == null) {
+        return Result.failure(
+          AppError(
+            message:
+                result.error?.message ??
+                SystemErrorConstants.anUnexpectedErrorOccurred,
+          ),
+        );
+      }
+      return Result.success(result.data!.toTrainingBlock());
+    } catch (e, stack) {
+      LoggerUtility.e(debugTag, 'getActiveTrainingBlock', e, stack);
+      return Result.failure(
+        AppError(message: SystemErrorConstants.anUnexpectedErrorOccurred),
+      );
+    }
+  }
+
+  @override
   Future<Result<TrainingBlock, AppError>> createTrainingBlock(
     String clientId,
     CreateTrainingBlockRequest request,

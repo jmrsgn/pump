@@ -59,4 +59,7 @@ class ApiConstants {
 
   static String createTrainingBlockUrl(String clientId) =>
       '$clientsUrl/${Uri.encodeComponent(clientId)}/training-blocks/create';
+
+  static String getActiveTrainingBlockUrl(String clientId) =>
+      '$clientsUrl/${Uri.encodeComponent(clientId)}/training-blocks/active';
 }

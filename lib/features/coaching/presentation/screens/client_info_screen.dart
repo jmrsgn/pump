@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:pump/core/app_routes.dart';
 import 'package:pump/core/constants/app/app_dimens.dart';
 import 'package:pump/core/constants/app/app_strings.dart';
@@ -9,26 +11,77 @@ import 'package:pump/core/utils/navigation_utils.dart';
 import 'package:pump/core/utils/ui_utils.dart';
 import 'package:pump/features/coaching/data/enums/coaching_status.dart';
 import 'package:pump/features/coaching/domain/entity/client_user.dart';
+import 'package:pump/features/coaching/domain/entity/training_block.dart';
 import 'package:pump/features/coaching/enums/client_overview_tab.dart';
+import 'package:pump/features/coaching/presentation/provider/training_block_providers.dart';
+import 'package:pump/features/coaching/utils/check_in_date_utils.dart';
 
-class ClientInfoScreen extends StatelessWidget {
+class ClientInfoScreen extends ConsumerStatefulWidget {
   final ClientUser client;
   final ValueChanged<ClientOverviewTab>? onNavigateToTab;
-
-  /// Temporary UI state.
-  ///
-  /// This will eventually come from the client's coaching data.
-  final bool hasTrainingBlock;
 
   const ClientInfoScreen({
     super.key,
     required this.client,
     this.onNavigateToTab,
-    this.hasTrainingBlock = true,
   });
 
   @override
+  ConsumerState<ClientInfoScreen> createState() => _ClientInfoScreenState();
+}
+
+class _ClientInfoScreenState extends ConsumerState<ClientInfoScreen>
+    with WidgetsBindingObserver {
+  late DateTime _lastKnownLocalDay;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _lastKnownLocalDay = DateTime(now.year, now.month, now.day);
+    WidgetsBinding.instance.addObserver(this);
+    _loadTrainingBlock();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    final now = DateTime.now();
+    final localDay = DateTime(now.year, now.month, now.day);
+    if (localDay != _lastKnownLocalDay) {
+      setState(() => _lastKnownLocalDay = localDay);
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant ClientInfoScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.client.id != widget.client.id) _loadTrainingBlock();
+  }
+
+  void _loadTrainingBlock() {
+    Future.microtask(() {
+      if (mounted) {
+        ref
+            .read(clientInfoScreenViewModelProvider(widget.client.id).notifier)
+            .getActiveTrainingBlock(widget.client.id);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final client = widget.client;
+    final trainingBlockState = ref.watch(
+      clientInfoScreenViewModelProvider(client.id),
+    );
+    final trainingBlock = trainingBlockState.trainingBlock;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppDimens.padding4),
       child: Column(
@@ -46,20 +99,28 @@ class ClientInfoScreen extends StatelessWidget {
 
           UiUtils.addVerticalSpaceL(),
 
-          if (hasTrainingBlock) ...[
-            _buildTrainingCard(),
+          if (trainingBlockState.isLoading) ...[
+            const Center(child: CircularProgressIndicator()),
+          ] else if (trainingBlockState.errorMessage != null) ...[
+            _buildSectionCard(
+              title: AppStrings.trainingBlockInfo,
+              icon: Icons.error_outline,
+              children: [Text(trainingBlockState.errorMessage!)],
+            ),
+          ] else if (trainingBlock != null) ...[
+            _buildTrainingCard(trainingBlock),
 
             UiUtils.addVerticalSpaceL(),
 
-            _buildNutritionCard(),
+            _buildNutritionCard(trainingBlock),
 
             UiUtils.addVerticalSpaceL(),
 
-            _buildProgressCard(),
+            _buildProgressAndAnalyticsCard(),
 
             UiUtils.addVerticalSpaceL(),
 
-            _buildCoachingNotesCard(),
+            _buildCoachingNotesCard(trainingBlock),
 
             UiUtils.addVerticalSpaceL(),
 
@@ -68,7 +129,7 @@ class ClientInfoScreen extends StatelessWidget {
             UiUtils.addVerticalSpaceL(),
           ],
 
-          if (!hasTrainingBlock)
+          if (trainingBlockState.isLoaded && trainingBlock == null)
             _buildCreateTrainingBlockButton(context, client),
         ],
       ),
@@ -296,13 +357,6 @@ class ClientInfoScreen extends StatelessWidget {
           label: 'Activity Level',
           value: client.activityLevel.value,
         ),
-
-        if (hasTrainingBlock) ...[
-          _buildDivider(),
-
-          // TODO: Replace with training block data.
-          _buildInfoRow(label: 'Current Phase', value: 'Cut'),
-        ],
       ],
     );
   }
@@ -311,21 +365,50 @@ class ClientInfoScreen extends StatelessWidget {
   // Training
   // ---------------------------------------------------------------------------
 
-  Widget _buildTrainingCard() {
+  Widget _buildTrainingCard(TrainingBlock trainingBlock) {
     return _buildSectionCard(
-      title: AppStrings.trainingInfo,
+      title: AppStrings.trainingBlockInfo,
       icon: Icons.fitness_center,
       children: [
-        // TODO: Replace with training block data.
-        _buildInfoRow(label: 'Program', value: 'Program ni Kuya O'),
+        _buildInfoRow(label: 'Program', value: trainingBlock.trainingBlockName),
 
         _buildDivider(),
 
-        _buildInfoRow(label: 'Frequency', value: '4x / week'),
+        _buildInfoRow(
+          label: 'Frequency',
+          value: '${trainingBlock.trainingDays}x / week',
+        ),
 
         _buildDivider(),
 
-        _buildInfoRow(label: AppStrings.lastWorkout, value: 'Nov 20, 2025'),
+        _buildInfoRow(
+          label: 'Number of Weeks',
+          value: '${trainingBlock.numberOfWeeks}',
+        ),
+
+        _buildDivider(),
+
+        _buildInfoRow(
+          label: 'Training Split',
+          value: trainingBlock.trainingSplit,
+        ),
+
+        _buildDivider(),
+
+        _buildInfoRow(
+          label: 'Daily Steps',
+          value: '${trainingBlock.requiredDailySteps}',
+        ),
+
+        _buildDivider(),
+
+        _buildInfoRow(label: 'Status', value: trainingBlock.status),
+
+        if (trainingBlock.otherNotes != null &&
+            trainingBlock.otherNotes!.isNotEmpty) ...[
+          _buildDivider(),
+          _buildInfoRow(label: 'Other Notes', value: trainingBlock.otherNotes!),
+        ],
 
         UiUtils.addVerticalSpaceS(),
 
@@ -333,7 +416,7 @@ class ClientInfoScreen extends StatelessWidget {
           title: AppStrings.tapToViewTrainingBlock,
           icon: Icons.arrow_forward,
           onTap: () {
-            onNavigateToTab?.call(ClientOverviewTab.trainingBlock);
+            widget.onNavigateToTab?.call(ClientOverviewTab.trainingBlock);
           },
         ),
       ],
@@ -344,14 +427,13 @@ class ClientInfoScreen extends StatelessWidget {
   // Nutrition
   // ---------------------------------------------------------------------------
 
-  Widget _buildNutritionCard() {
+  Widget _buildNutritionCard(TrainingBlock trainingBlock) {
     return _buildSectionCard(
       title: AppStrings.nutritionInfo,
       icon: Icons.restaurant_outlined,
       children: [
-        // TODO: Replace with training block nutrition data.
         Text(
-          '2,583 cal',
+          '${trainingBlock.estimatedMacros} cal',
           style: AppTextStyles.heading3.copyWith(fontSize: AppDimens.dimen22),
         ),
 
@@ -366,9 +448,24 @@ class ClientInfoScreen extends StatelessWidget {
 
         Row(
           children: [
-            Expanded(child: _buildMacroItem('Protein', '194g')),
-            Expanded(child: _buildMacroItem('Carbs', '291g')),
-            Expanded(child: _buildMacroItem('Fat', '72g')),
+            Expanded(
+              child: _buildMacroItem(
+                'Protein',
+                '${trainingBlock.targetProteinInGrams}g',
+              ),
+            ),
+            Expanded(
+              child: _buildMacroItem(
+                'Carbs',
+                '${trainingBlock.targetCarbsInGrams}g',
+              ),
+            ),
+            Expanded(
+              child: _buildMacroItem(
+                'Fat',
+                '${trainingBlock.targetFatInGrams}g',
+              ),
+            ),
           ],
         ),
       ],
@@ -395,16 +492,35 @@ class ClientInfoScreen extends StatelessWidget {
   }
 
   // ---------------------------------------------------------------------------
-  // Progress
+  // Progress and Analytics
   // ---------------------------------------------------------------------------
 
-  Widget _buildProgressCard() {
+  Widget _buildProgressAndAnalyticsCard() {
+    final now = DateTime.now();
+    final checkInDate = CheckInDateUtils.currentOrNextSunday(now);
+    final approachingLabel = CheckInDateUtils.approachingLabel(
+      CheckInDateUtils.daysUntilSunday(now),
+    );
+
     return _buildSectionCard(
       title: AppStrings.progressAndAnalytics,
       icon: Icons.show_chart,
       children: [
-        // TODO: Replace with check-in data.
-        _buildInfoRow(label: 'Next check-in', value: 'Nov 23, 2025'),
+        _buildInfoRow(
+          label: 'Next check-in',
+          value: DateFormat('MMM d, yyyy').format(checkInDate),
+        ),
+
+        if (approachingLabel != null) ...[
+          UiUtils.addVerticalSpaceXS(),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              approachingLabel,
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.info),
+            ),
+          ),
+        ],
 
         UiUtils.addVerticalSpaceS(),
 
@@ -412,7 +528,7 @@ class ClientInfoScreen extends StatelessWidget {
           title: AppStrings.tapToViewChartsAndPhotos,
           icon: Icons.arrow_forward,
           onTap: () {
-            onNavigateToTab?.call(ClientOverviewTab.progress);
+            widget.onNavigateToTab?.call(ClientOverviewTab.progress);
           },
         ),
       ],
@@ -423,20 +539,17 @@ class ClientInfoScreen extends StatelessWidget {
   // Coaching Notes
   // ---------------------------------------------------------------------------
 
-  Widget _buildCoachingNotesCard() {
+  Widget _buildCoachingNotesCard(TrainingBlock trainingBlock) {
     return _buildSectionCard(
       title: AppStrings.coachingNotes,
       icon: Icons.notes_outlined,
       children: [
-        // TODO: Replace with coaching data.
         _buildInfoRow(
-          label: 'Last note',
-          value: 'Overall size, especially chest',
+          label: 'Other notes',
+          value: trainingBlock.otherNotes?.trim().isEmpty ?? true
+              ? 'No notes yet'
+              : trainingBlock.otherNotes!,
         ),
-
-        _buildDivider(),
-
-        _buildInfoRow(label: 'Reminders', value: 'NA'),
       ],
     );
   }

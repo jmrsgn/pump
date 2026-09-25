@@ -4,6 +4,10 @@ import 'package:pump/features/coaching/data/dto/request/create_training_block_re
 import 'package:pump/features/coaching/domain/entity/training_block.dart';
 
 abstract class TrainingBlockRepository {
+  Future<Result<TrainingBlock, AppError>> getActiveTrainingBlock(
+    String clientId,
+  );
+
   Future<Result<TrainingBlock, AppError>> createTrainingBlock(
     String clientId,
     CreateTrainingBlockRequest request,

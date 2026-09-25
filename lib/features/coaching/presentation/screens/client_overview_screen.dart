@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pump/core/constants/app/app_strings.dart';
 import 'package:pump/core/presentation/widgets/custom_bottom_nav_bar.dart';
 import 'package:pump/core/presentation/widgets/custom_scaffold.dart';
 import 'package:pump/features/coaching/domain/entity/client_user.dart';
 import 'package:pump/features/coaching/enums/client_overview_tab.dart';
+import 'package:pump/features/coaching/presentation/provider/training_block_providers.dart';
 import 'package:pump/features/coaching/presentation/screens/client_info_screen.dart';
 import 'package:pump/features/coaching/presentation/screens/progress_and_analytics_screen.dart';
 import 'package:pump/features/coaching/presentation/screens/training_block_screen.dart';
 
-class ClientOverviewScreen extends StatefulWidget {
+class ClientOverviewScreen extends ConsumerStatefulWidget {
   final ClientUser client;
 
   const ClientOverviewScreen({super.key, required this.client});
 
   @override
-  State<ClientOverviewScreen> createState() => _ClientOverviewScreenState();
+  ConsumerState<ClientOverviewScreen> createState() =>
+      _ClientOverviewScreenState();
 }
 
 extension ClientOverviewTabExtension on ClientOverviewTab {
@@ -25,12 +28,14 @@ extension ClientOverviewTabExtension on ClientOverviewTab {
   };
 }
 
-class _ClientOverviewScreenState extends State<ClientOverviewScreen> {
+class _ClientOverviewScreenState extends ConsumerState<ClientOverviewScreen> {
   ClientOverviewTab _selectedTab = ClientOverviewTab.clientInfo;
-  late final bool _hasTrainingBlock = widget.client.hasActiveTrainingBlock;
 
   List<ClientOverviewTab> get _visibleTabs {
-    if (!_hasTrainingBlock) {
+    if (ref
+            .read(clientInfoScreenViewModelProvider(widget.client.id))
+            .trainingBlock ==
+        null) {
       return [ClientOverviewTab.clientInfo];
     }
 
@@ -82,7 +87,6 @@ class _ClientOverviewScreenState extends State<ClientOverviewScreen> {
     return switch (_selectedTab) {
       ClientOverviewTab.clientInfo => ClientInfoScreen(
         client: widget.client,
-        hasTrainingBlock: _hasTrainingBlock,
         onNavigateToTab: _onTabSelected,
       ),
       ClientOverviewTab.progress => const ProgressAndAnalyticsScreen(),
@@ -92,6 +96,7 @@ class _ClientOverviewScreenState extends State<ClientOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(clientInfoScreenViewModelProvider(widget.client.id));
     final showBottomNavigation = _visibleTabs.length >= 2;
 
     return CustomScaffold(
