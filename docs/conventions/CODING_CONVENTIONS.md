@@ -346,3 +346,40 @@ Do not manually fight standard Dart formatting.
 
 These conventions define structural/readability preferences that remain valid
 after standard formatting.
+
+---
+
+# 17. Screen ViewModel and State Access
+
+Screens should define their ViewModel access once near the top of the screen
+State class rather than repeatedly reading the ViewModel provider throughout
+the implementation.
+
+For a `ConsumerState`, define the ViewModel getter near the top of the class,
+after local fields/controllers and before lifecycle methods.
+
+Example:
+
+```dart
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  LoginViewModel get _loginViewModel =>
+      ref.read(loginViewModelProvider.notifier);
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(loginViewModelProvider);
+
+    // ...
+  }
+}
+```

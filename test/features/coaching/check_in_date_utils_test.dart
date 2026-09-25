@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pump/features/coaching/presentation/utils/check_in_date_utils.dart';
+import 'package:pump/features/coaching/utils/check_in_date_utils.dart';
 
 void main() {
   group('current or upcoming Sunday', () {

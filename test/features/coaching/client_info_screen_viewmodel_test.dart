@@ -70,7 +70,6 @@ void main() {
     final repository = FakeTrainingBlockRepository(
       Result.failure(
         AppError(
-          status: 404,
           message: ClientInfoScreenViewModel.noActiveBlockMessage,
         ),
       ),
@@ -89,8 +88,8 @@ void main() {
 
   test('other 404 and server failures remain errors', () async {
     for (final error in [
-      AppError(status: 404, message: 'Client not found'),
-      AppError(status: 500, message: 'Service unavailable'),
+      AppError(message: 'Client not found'),
+      AppError(message: 'Service unavailable'),
     ]) {
       final repository = FakeTrainingBlockRepository(Result.failure(error));
       final viewModel = ClientInfoScreenViewModel(

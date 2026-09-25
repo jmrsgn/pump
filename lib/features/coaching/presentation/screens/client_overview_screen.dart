@@ -90,7 +90,11 @@ class _ClientOverviewScreenState extends ConsumerState<ClientOverviewScreen> {
         onNavigateToTab: _onTabSelected,
       ),
       ClientOverviewTab.progress => const ProgressAndAnalyticsScreen(),
-      ClientOverviewTab.trainingBlock => const TrainingBlockScreen(),
+      ClientOverviewTab.trainingBlock => TrainingBlockScreen(
+        trainingBlock: ref
+            .read(clientInfoScreenViewModelProvider(widget.client.id))
+            .trainingBlock!,
+      ),
     };
   }
 

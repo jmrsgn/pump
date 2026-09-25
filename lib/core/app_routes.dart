@@ -16,6 +16,9 @@ import 'package:pump/features/posts/presentation/screens/liked_posts_screen.dart
 import 'package:pump/features/posts/presentation/screens/post_info_screen.dart';
 import 'package:pump/features/coaching/presentation/screens/create_training_block_screen.dart';
 import 'package:pump/features/coaching/domain/entity/client_user.dart';
+import 'package:pump/features/coaching/domain/entity/training_block.dart';
+import 'package:pump/features/coaching/presentation/screens/add_exercises_screen.dart';
+import 'package:pump/features/coaching/presentation/state/add_exercises_state.dart';
 
 import '../features/coaching/presentation/screens/enroll_client_screen.dart';
 import '../features/info/presentation/screens/about_screen.dart';
@@ -41,6 +44,7 @@ class AppRoutes {
   static const String paymentMethod = '/payment_method';
   static const String clients = '/clients';
   static const String createTrainingBlock = '/create_training_block';
+  static const String addExercises = '/add_exercises';
 
   // Posts
   static const String mainFeed = '/main_feed';
@@ -120,6 +124,14 @@ class AppRoutes {
 
           return MaterialPageRoute(
             builder: (_) => CreateTrainingBlockScreen(client: client),
+          );
+        case addExercises:
+          final block = settings.arguments;
+          if (block is! TrainingBlock) {
+            return MaterialPageRoute(builder: (_) => InvalidRouteScreen());
+          }
+          return MaterialPageRoute<AddExercisesState>(
+            builder: (_) => AddExercisesScreen(trainingBlock: block),
           );
 
         // ---------------------------------------------------------------------------

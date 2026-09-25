@@ -197,6 +197,9 @@ class AppStrings {
   static const extras = "Extras";
   static const trainingBlock = "Training Block";
 
+  // Add Exercises Screen
+  static const addExercises = "Add Exercises";
+
   static String programTemplate(String program) => "Program: $program";
 
   static String startDateTemplate(String startDate) => "Start Date: $startDate";

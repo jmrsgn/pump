@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:pump/core/presentation/viewmodels/base_viewmodel.dart';
 import 'package:pump/core/utilities/logger_utility.dart';
 import 'package:pump/features/coaching/domain/usecases/get_active_training_block_usecase.dart';
