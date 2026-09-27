@@ -26,13 +26,13 @@ For every write:
 
 The current structure is expected to contain fields equivalent to:
 
--   `Date`
--   `Repository`
--   `Task / Description`
--   `Issues / Blockers`
--   `Commits`
--   `Status`
--   `Notes`
+- `Date`
+- `Repository`
+- `Task / Description`
+- `Issues / Blockers`
+- `Commits`
+- `Status`
+- `Notes`
 
 A Notion data source also has a title property, even if that property is
 unnamed or hidden in the current view. Preserve the existing title
@@ -47,7 +47,7 @@ of the record.
 
 Example --- existing September 9 entry:
 
-``` text
+```text
 Repository:
 pump
 
@@ -58,7 +58,7 @@ Task / Description:
 Later that day, verified work is completed in `pump-coaching-service`.
 Update the same September 9 entry:
 
-``` text
+```text
 Repository:
 pump
 pump-coaching-service
@@ -94,7 +94,13 @@ Do not create one Daily Development Log row per repository.
 11. Update other properties only when there is verified information
     relevant to them.
 12. Preserve unrelated existing content.
-13. Re-fetch or otherwise verify the resulting entry when practical.
+13. Re-fetch the resulting entry after processing to verify its final
+    content and retrieve its canonical Notion URL for the completion
+    response.
+
+If no write was required because the existing entry already accurately
+represents the verified work, still re-fetch the entry and retrieve its
+canonical Notion URL.
 
 ## Task / Description
 
@@ -102,15 +108,15 @@ Use concise bullet-style summaries of meaningful outcomes.
 
 Good examples:
 
--   Integrated training-block API calls into the Flutter coaching flow.
--   Added request/response models required by training-block creation.
--   Added coaching-service validation for training-block creation.
+- Integrated training-block API calls into the Flutter coaching flow.
+- Added request/response models required by training-block creation.
+- Added coaching-service validation for training-block creation.
 
 Avoid low-value implementation noise such as:
 
--   Edited file.
--   Fixed code.
--   Changed imports.
+- Edited file.
+- Fixed code.
+- Changed imports.
 
 Group tightly related edits into one useful development-log item when
 that produces a clearer history.
@@ -119,6 +125,19 @@ Describe the implemented outcome, not every file touched.
 
 Do not claim a feature is complete when repository evidence only shows
 partial implementation.
+
+For debugging or troubleshooting work, summarize the development outcome
+rather than copying the full investigation into the daily log.
+
+For example:
+
+- Resolved an iOS build failure caused by a dependency version conflict.
+
+Do not place detailed root-cause analysis, troubleshooting steps, commands,
+or reusable solution instructions in `Task / Description`. When those
+details represent reusable troubleshooting knowledge, route them to
+`Helpers` according to the main skill and
+`technical-documentation.md`.
 
 ## Duplicate Prevention
 
@@ -157,12 +176,12 @@ Use only status values supported by the live Notion schema.
 
 When the schema provides `Ongoing` and `Completed`:
 
--   `Ongoing` --- at least one material task represented by the daily
-    entry is still in progress, incomplete, blocked, or has unfinished
-    implementation directly related to the logged work.
--   `Completed` --- all material work represented by the daily entry is
-    complete to the extent claimed and available verification supports
-    that conclusion.
+- `Ongoing` --- at least one material task represented by the daily
+  entry is still in progress, incomplete, blocked, or has unfinished
+  implementation directly related to the logged work.
+- `Completed` --- all material work represented by the daily entry is
+  complete to the extent claimed and available verification supports
+  that conclusion.
 
 Do not infer `Completed` merely because code was edited, committed, or
 pushed.
@@ -190,44 +209,90 @@ not continue presenting it as active. Do not remove unrelated blockers.
 
 ## Commits
 
-Use the `Commits` property according to its live Notion type and the
-existing log convention.
+Record verified commits associated with the work being documented.
 
-Add a commit URL only when a real URL can be established from repository
-information.
+When processing a development-log request, inspect the current repository's
+commit history and determine which relevant commits were made since the most
+recently documented commit for that repository.
 
-Do not fabricate a GitHub URL from a commit hash or remote assumption.
+For the first documentation update for a repository on a date, include all
+verified commits from that date that occurred before the documentation
+request and are relevant to the work being recorded.
 
-If the work is uncommitted, do not invent a commit reference.
+For subsequent documentation updates on the same date, append only newly
+verified commits that have not already been recorded in the Daily Development
+Log.
 
-If a single-value `Commits` property already contains a value, do not
-overwrite it with a different commit merely because the skill is running
-from another repository. Preserve the existing value unless the live
-schema/convention supports a correct merged representation.
+Example:
 
-When multiple commit references cannot be represented safely without
-changing the schema, preserve the existing property and mention
-additional verified commit context in `Notes` only if that matches the
-established log convention.
+```text
+Commit A
+Commit B
+↓
+Documentation request
+↓
+Recorded commits:
+Commit A
+Commit B
+
+Commit C
+↓
+Later documentation request
+↓
+Recorded commits:
+Commit A
+Commit B
+Commit C
+```
+
+Do not add the same commit more than once.
+
+Do not include a commit merely because it appears in repository history.
+
+Verify that it belongs to the requested date or documentation period and is
+relevant to the work being documented.
+
+Use the Commits property according to its live Notion type and existing
+log convention.
+
+For every newly verified commit, add its canonical remote commit URL when
+that URL can be established safely from the repository's configured remote
+and verified commit.
+
+Preserve all previously recorded commit URLs and append only newly verified
+commit URLs.
+
+Do not include repository names in the Commits property merely to identify
+which repository owns a commit. Repository identity is represented by the
+Repository property.
+
+Do not fabricate a commit URL from an assumed repository, organization,
+branch, host, or remote.
+
+If relevant work is still uncommitted, do not invent a commit reference.
+
+Do not change the Notion schema merely to accommodate commit information.
 
 ## Notes
 
 Use `Notes` for useful context that does not belong in the main task
 summary, such as:
 
--   important implementation qualifications;
--   verification/test results worth preserving;
--   migration or configuration considerations;
--   concise follow-up context;
--   additional verified commit context when the `Commits` property
-    cannot safely hold it.
+- important implementation qualifications;
+- verification/test results worth preserving;
+- migration or configuration considerations;
+- concise follow-up context;
 
 Do not duplicate `Task / Description` in `Notes`.
 
 ## Missing Month
 
-If the requested month's database does not exist, do not silently create
-a new monthly database, data source, or schema.
+If the requested month's database does not exist, do not create a new
+monthly database, data source, schema, or page hierarchy automatically.
 
-Tell the user that the month is missing and ask whether they want the
-existing monthly structure extended.
+Report that the requested month's development-log structure does not exist
+and ask the user whether they want the established monthly structure
+extended for that month.
+
+Do not infer authorization to create a new month from a general request such
+as "document what we did today."
