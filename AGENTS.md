@@ -101,7 +101,7 @@ task.
 
 Read:
 
-`docs/conventions/ARCHITECTURE_CONVENTIONS.md`
+`docs/conventions/architecture-conventions.md`
 
 This file defines rules for:
 
@@ -122,7 +122,7 @@ Architecture changes must follow this file.
 
 Read:
 
-`docs/conventions/CODING_CONVENTIONS.md`
+`docs/conventions/coding-conventions.md`
 
 This file defines rules for:
 
@@ -144,7 +144,7 @@ Code created or modified during a task must follow this file.
 
 Read:
 
-`docs/conventions/UI_CONVENTIONS.md`
+`docs/conventions/ui-conventions.md`
 
 This file defines rules for:
 
@@ -167,7 +167,7 @@ UI work must follow this file.
 
 Read:
 
-`docs/conventions/TESTING_CONVENTIONS.md`
+`docs/conventions/testing-conventions.md`
 
 This file defines rules for:
 
@@ -434,7 +434,7 @@ Before implementing a change:
 
 Before declaring meaningful work complete:
 
-- Follow `docs/conventions/TESTING_CONVENTIONS.md`.
+- Follow `docs/conventions/testing-conventions.md`.
 - Run applicable tests when the environment permits.
 - Run applicable static analysis.
 - Format modified code according to repository conventions.
