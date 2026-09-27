@@ -2,8 +2,8 @@
 description: Document verified Pump development work in Notion. Use when
   asked to document today's progress, update the Pump Daily Development
   Log, record completed or ongoing work from a Pump repository, or
-  synchronize affected Notion API/technical documentation with
-  implemented changes.
+  synchronize affected durable Pump documentation with verified
+  development changes.
 name: pump-notion-documentation
 ---
 
@@ -14,18 +14,18 @@ Pump documentation in Notion.
 
 The skill has two responsibilities:
 
-1.  Maintain the date-based **Daily Development Log**.
-2.  Keep affected **technical documentation** accurate when
-    implementation changes APIs, contracts, architecture, persistence,
-    infrastructure, or other durable system behavior.
+1. Maintain the date-based **Daily Development Log**.
+2. Keep affected **durable Pump documentation** accurate when verified
+   development work changes features, APIs, frontend behavior, architecture,
+   persistence, infrastructure, releases, or reusable troubleshooting
+   knowledge.
 
 Do not invent implementation details, tests, commits, blockers, API
-contracts, or architecture decisions.
+contracts, architecture decisions, root causes, or verification results.
 
 ## Required Capability
 
-This skill requires access to Notion through the Notion MCP tools configured
-for the current project.
+This skill requires access to Notion through the Notion MCP tools configured for the current project.
 
 Treat MCP authentication, credential loading, and MCP server startup as
 infrastructure concerns outside this skill.
@@ -39,9 +39,7 @@ Do not:
 - start or configure the Notion MCP server manually;
 - modify `.codex/config.toml` as part of a documentation request.
 
-If the required Notion MCP tools are unavailable or a Notion operation fails
-because access is not configured, stop the documentation operation and report
-the MCP/access problem without attempting to retrieve credentials.
+If the required Notion MCP tools are unavailable or a Notion operation fails because access is not configured, stop the documentation operation and report the MCP/access problem without attempting to retrieve credentials.
 
 Never include credentials, tokens, secrets, or authentication material in
 Notion documentation.
@@ -56,12 +54,12 @@ Read the references needed for the request:
   development-log updates, or general requests to document work
   completed during a date.
 - `references/technical-documentation.md` --- use when verified
-  implementation changes may require API or other durable technical
-  documentation updates.
+  implementation or troubleshooting findings may require durable Pump
+  documentation updates outside the Daily Development Log.
 
 For a general request such as "document what we did today", read all
-three references because the implementation may require both a
-development-log update and technical-documentation updates.
+three references because the verified work may require both a
+development-log update and durable documentation updates.
 
 ## Repository Instructions
 
@@ -118,11 +116,12 @@ concluding that no work occurred.
     period, normally today.
 5.  Separate findings into:
     - development-log facts;
-    - durable technical-documentation changes.
+    - durable documentation changes.
 6.  Update the Daily Development Log according to
     `references/development-log.md`.
-7.  If durable system behavior changed, update the relevant Notion
-    documentation according to `references/technical-documentation.md`.
+7.  If durable documentation is affected, route and update it according to
+    `references/technical-documentation.md` and the Documentation Boundaries
+    defined below.
 8.  Re-fetch each affected Notion record or page after processing the
     documentation request to:
     - verify the resulting content;
@@ -136,9 +135,8 @@ concluding that no work occurred.
     - the literal canonical Notion URL of that entry, exactly as
       returned or verified through Notion;
     - repository values recorded;
-    - technical/API pages created, updated, or verified, if any;
-    - the literal canonical Notion URL of each affected technical/API
-      page;
+    - other documentation pages created, updated, or verified, if any;
+    - the literal canonical Notion URL of each affected documentation page;
     - verification or blockers worth mentioning;
     - anything intentionally not documented because it could not be
       verified.
@@ -151,19 +149,54 @@ verified.
 
 For each affected Notion entry or page:
 
-1.  Re-fetch it through Notion after processing.
-2.  Read the canonical URL returned by Notion.
-3.  Include that exact URL in the final response.
+1. Re-fetch it through Notion after processing.
+2. Read the canonical URL returned by Notion.
+3. Include that exact URL in the final response.
 
-The canonical URL must appear literally in the final response, for
-example:
+The canonical URL must appear literally in the final response.
+
+When only the Daily Development Log was affected, use a concise format
+such as:
 
 ```text
 Daily Development Log:
 https://app.notion.com/p/...
 ```
 
-Do not satisfy this requirement by returning only a page title, page ID,
+When additional Pump documentation was created, updated, or verified,
+include each affected page separately using a short descriptive label that
+identifies the documentation that was affected.
+
+```text
+Daily Development Log:
+https://app.notion.com/p/...
+
+Coaching API Documentation:
+https://app.notion.com/p/...
+
+Training Block Data Model:
+https://app.notion.com/p/...
+```
+
+Use the actual purpose or title of the affected documentation when choosing
+the label. Prefer specific labels such as:
+
+- Authentication API Documentation
+- Coaching API Documentation
+- Social API Documentation
+- Training Block Data Model
+- Authentication Architecture
+- Infrastructure Documentation
+
+Do not use a generic label such as Technical API changes when a more
+specific description of the affected page is available.
+
+If multiple documentation pages were affected, return every affected page and its canonical URL separately. Do not collapse multiple pages into a single generic documentation result.
+
+Do not include additional documentation sections in the completion response
+when no additional documentation was created, updated, or verified.
+
+Do not satisfy the URL requirement by returning only a page title, page ID,
 styled text, or other display text.
 
 Do not hide the URL behind Markdown link text. The literal canonical
@@ -174,35 +207,158 @@ Use only a URL returned or verified through Notion. Never manually
 construct a Notion URL from a page ID.
 
 If no write was required because the requested information was already
-documented, still re-fetch the affected entry and return its canonical
-URL.
+documented, still re-fetch the affected entry and return its canonical URL.
 
 If Notion does not return a canonical URL after re-fetching the affected
 content, explicitly state that the URL could not be retrieved.
 
 Do not claim that a Notion page was updated unless the write succeeded.
 
-If a write fails, clearly identify the failed update and do not present
-it as successfully updated.
+If a write fails, clearly identify the failed update and do not present it
+as successfully updated.
 
 Keep the completion response concise.
 
 ## Documentation Boundaries
 
-The Daily Development Log records **what changed on a date**.
+The Pump Notion documentation contains the following documentation areas:
 
-Technical Notion pages describe **how the current system works**.
+- `Daily Development Log`
+- `Feature Tracker`
+- `Backend API Tracker`
+- `Frontend Tracker`
+- `Version / Release Log`
+- `Helpers`
+
+These are the Pump documentation areas this skill should consider when
+searching for, reading, creating, updating, or verifying development
+documentation.
+
+### Documentation Responsibilities
+
+`Daily Development Log` records **what changed on a date**.
+
+`Feature Tracker` describes the current state and implementation status of
+Pump features.
+
+`Backend API Tracker` contains durable backend API documentation, including
+implemented endpoints, request and response contracts, validation,
+authentication and authorization behavior, and other backend API behavior.
+
+`Frontend Tracker` contains durable frontend documentation, including
+implemented screens, flows, client-side integrations, and other relevant
+frontend behavior.
+
+`Version / Release Log` records version and release information when the
+documented work affects a Pump version or release.
+
+`Helpers` contains reusable troubleshooting knowledge discovered while
+developing Pump. It should preserve useful problems and their verified
+solutions when that knowledge is likely to help diagnose or resolve the
+same or a similar issue in the future.
+
+Examples appropriate for `Helpers` include:
+
+- difficult or non-obvious bugs and their verified solutions;
+- dependency, framework, SDK, runtime, or tool version incompatibilities;
+- build, package, migration, or environment issues;
+- platform-specific development issues;
+- configuration problems and their verified resolutions;
+- recurring development pitfalls;
+- debugging findings that explain why an issue occurred;
+- workarounds that remain relevant to future Pump development.
+
+Do not use `Helpers` as a duplicate Daily Development Log.
+
+A Daily Development Log entry should record that an issue was investigated
+or resolved on a particular date. `Helpers` should preserve the reusable
+technical knowledge needed to understand and solve that issue in the future.
 
 The repository's `AGENTS.md` provides **Codex engineering context and
-instructions**.
+instructions** for the current repository.
 
 Do not duplicate `AGENTS.md` into Notion. Extract only the information
-necessary to keep the relevant Notion documentation accurate.
+necessary to keep the appropriate Pump documentation accurate.
+
+### Documentation Routing
+
+Route documentation according to the type of information being recorded:
+
+- date-based development progress → `Daily Development Log`;
+- feature implementation or feature-status changes → `Feature Tracker`;
+- backend API or backend contract changes → `Backend API Tracker`;
+- Flutter/frontend behavior or client integration changes → `Frontend Tracker`;
+- version or release changes → `Version / Release Log`;
+- reusable issues, troubleshooting findings, and verified solutions → `Helpers`.
+
+A single development task may require updates to more than one documentation
+area when the verified work affects multiple documentation responsibilities.
+
+For example, resolving a difficult Flutter dependency incompatibility may
+require:
+
+- a concise record of the completed work in `Daily Development Log`;
+- durable troubleshooting details and the verified solution in `Helpers`;
+- an update to `Frontend Tracker` only if the resulting implementation
+  materially changes documented frontend behavior.
+
+Do not update a documentation area merely because it is related to the
+feature or issue. Update it only when the verified work changes information
+owned by that area.
+
+Not every documentation request requires updates to every applicable area.
+Update only the areas whose existing documentation is materially affected by
+the verified work.
+
+When the user explicitly asks to document a reusable issue, bug, solution, or
+troubleshooting finding, evaluate `Helpers` even when the implementation
+itself does not require another durable documentation update.
+
+### Helpers Documentation Rules
+
+Before creating new troubleshooting documentation in `Helpers`, search for
+an existing page or entry describing the same or a substantially similar
+problem.
+
+If an appropriate existing entry exists, update it when the new information
+improves, corrects, or extends the existing troubleshooting knowledge.
+
+Create a new entry only when the issue represents distinct reusable
+knowledge and no suitable existing entry exists.
+
+When documenting an issue in `Helpers`, include only information that can be
+verified from the development work. As applicable, capture:
+
+- the problem or observed behavior;
+- the relevant context or environment;
+- the verified root cause, when established;
+- the solution or workaround that resolved the issue;
+- relevant dependency, framework, SDK, runtime, or tool versions;
+- important commands or configuration changes when they are safe and useful;
+- verification showing that the solution worked;
+- limitations or follow-up considerations that remain relevant.
+
+Do not claim a suspected cause as the root cause unless it was actually
+verified.
+
+Do not preserve large debugging transcripts, raw logs, failed experiments,
+or investigation noise when a concise explanation of the problem and
+solution is sufficient.
+
+### Canonical Documentation
+
+Within the appropriate documentation area, find and update the canonical
+existing page or record whenever one exists rather than creating duplicate
+documentation.
+
+Preserve the existing organization, terminology, and formatting conventions
+of that documentation area.
+
+When no appropriate destination exists and creating new documentation is
+authorized by the documentation workflow, create it only when the correct
+documentation area and parent location can be determined confidently.
 
 ## Write Discipline
-
-Prefer updating canonical existing Notion content over creating
-duplicates.
 
 Preserve unrelated existing content when updating a page or database
 row.
@@ -211,9 +367,11 @@ Do not change Notion database schemas, property names, select options,
 views, page hierarchy, or documentation structure unless the user
 explicitly requests that structural change.
 
-Do not delete, archive, or consolidate existing Notion content unless
-the user explicitly requests it or the requested documentation update
-makes the action safe, necessary, and unambiguous.
+Do not delete, archive, move, or consolidate existing Notion content unless
+the user explicitly requests that destructive or structural action.
+
+A normal documentation request does not authorize deletion, archival,
+movement, or consolidation of existing Notion content.
 
 When the correct write target is ambiguous, stop before making a
 destructive or structural change and ask the user.
