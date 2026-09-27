@@ -85,6 +85,20 @@ Do not create one Daily Development Log row per repository.
     preserve unrelated content.
 7.  If no entry exists, inspect nearby rows to preserve the database's
     existing title/content convention, then create one.
+
+    When creating a new Daily Development Log entry, place it at the very
+    bottom of the existing monthly database table/view, after all existing
+    daily entries.
+
+    Do not rely on the entry's creation time, date value, or Notion's default
+    insertion behavior to determine its visible position. Verify after
+    creation that the new entry appears at the bottom of the intended monthly
+    table/view.
+
+    If the available Notion tools cannot control or verify the visible row
+    position, do not claim that bottom placement was verified. Report that
+    limitation to the user.
+
 8.  If multiple entries exist for the same date and the canonical entry
     is unclear, do not guess, merge, or delete automatically. Report the
     duplicates and ask the user how to proceed.
@@ -212,8 +226,19 @@ not continue presenting it as active. Do not remove unrelated blockers.
 Record verified commits associated with the work being documented.
 
 When processing a development-log request, inspect the current repository's
-commit history and determine which relevant commits were made since the most
-recently documented commit for that repository.
+commit history and the commits already represented in the Daily Development
+Log entry.
+
+Identify relevant commits belonging to the requested documentation period
+that are not already recorded.
+
+For a normal "document what we did today" request, inspect relevant commits
+from the current local calendar date up to the time of the documentation
+request. Do not assume that only the latest commit should be documented.
+
+For subsequent documentation requests on the same date, preserve previously
+recorded commits and append only newly verified commits that are not already
+represented.
 
 For the first documentation update for a repository on a date, include all
 verified commits from that date that occurred before the documentation
@@ -252,8 +277,19 @@ Do not include a commit merely because it appears in repository history.
 Verify that it belongs to the requested date or documentation period and is
 relevant to the work being documented.
 
-Use the Commits property according to its live Notion type and existing
+Use the `Commits` property according to its live Notion type and existing
 log convention.
+
+When the live `Commits` property supports multiple commit URLs as text,
+preserve the existing commit URLs and append each newly verified commit URL
+as a separate entry.
+
+Before updating `Commits`, compare the verified commits with the commit URLs
+already recorded in the Daily Development Log entry. Append only commits that
+are not already represented.
+
+After updating the entry, re-fetch it and verify that every newly documented
+commit URL is present and that previously recorded commit URLs were preserved.
 
 For every newly verified commit, add its canonical remote commit URL when
 that URL can be established safely from the repository's configured remote
