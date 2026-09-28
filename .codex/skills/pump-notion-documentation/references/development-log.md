@@ -280,27 +280,51 @@ relevant to the work being documented.
 Use the `Commits` property according to its live Notion type and existing
 log convention.
 
-When the live `Commits` property supports multiple commit URLs as text,
-preserve the existing commit URLs and append each newly verified commit URL
-as a separate entry.
+For every newly verified commit, establish its canonical remote commit URL
+from the repository's configured remote and verified commit when that URL can
+be determined safely.
 
-Before updating `Commits`, compare the verified commits with the commit URLs
-already recorded in the Daily Development Log entry. Append only commits that
-are not already represented.
+When the live `Commits` property supports rich text with hyperlinks, represent
+each commit using its short Git commit hash as the visible text and attach the
+canonical remote commit URL as the hyperlink.
+
+Example:
+
+```text
+a4342b9
+6afef60
+5efab21
+```
+
+Each displayed short hash should link to its corresponding canonical remote
+commit URL.
+
+Prefer this compact hyperlink representation over displaying the full commit
+URL when the live Notion property and available Notion tools support it.
+
+Do not use third-party URL-shortening services.
+
+Before updating `Commits`, compare the verified commits with the commits
+already represented in the Daily Development Log entry. Treat a commit as
+already represented whether it appears as a full commit URL or as a rich-text
+hyperlink whose target is that commit's canonical remote URL.
+
+Append only newly verified commits that are not already represented.
+
+Preserve all previously recorded commit references when adding newly verified
+commits.
+
+If the live `Commits` property or available Notion tools do not support
+rich-text hyperlinks, preserve the existing log convention and use the
+canonical remote commit URL directly.
 
 After updating the entry, re-fetch it and verify that every newly documented
-commit URL is present and that previously recorded commit URLs were preserved.
-
-For every newly verified commit, add its canonical remote commit URL when
-that URL can be established safely from the repository's configured remote
-and verified commit.
-
-Preserve all previously recorded commit URLs and append only newly verified
-commit URLs.
+commit is represented and that previously recorded commit references were
+preserved.
 
 Do not include repository names in the Commits property merely to identify
 which repository owns a commit. Repository identity is represented by the
-Repository property.
+`Repository` property.
 
 Do not fabricate a commit URL from an assumed repository, organization,
 branch, host, or remote.
