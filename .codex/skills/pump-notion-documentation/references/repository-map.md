@@ -3,44 +3,13 @@
 Use this file to map the current Git repository to the exact value
 stored in the Notion Daily Development Log `Repository` multi-select.
 
----
-
-Git Repository Notion Repository Value Primary Scope
-
----
-
-`Pump` `pump` Flutter mobile
-application and
-client-side API
-integration
-
-`pump-auth-service` `pump-auth-service` Authentication,
-identity, JWT/security,
-auth-owned persistence,
-and authentication
-contracts
-
-`pump-social-service` `pump-social-service` Social profiles, posts,
-comments, likes,
-follows, social-owned
-persistence, and social
-contracts
-
-`pump-coaching-service` `pump-coaching-service` Coaching domain,
-coach/client
-relationships, client
-profiles,
-training/coaching APIs,
-and coaching-owned
-persistence
-
-`pump-infra` `pump-infra` Docker/Compose,
-Kubernetes, ingress,
-deployment/runtime
-infrastructure, and
-related configuration
-
----
+| Git Repository          | Notion Repository Value | Primary Scope                                                                                                        |
+| ----------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `pump`                  | `pump`                  | Flutter mobile application and client-side API integration                                                           |
+| `pump-auth-service`     | `pump-auth-service`     | Authentication, identity, JWT/security, auth-owned persistence, and authentication contracts                         |
+| `pump-social-service`   | `pump-social-service`   | Social profiles, posts, comments, likes, follows, social-owned persistence, and social contracts                     |
+| `pump-coaching-service` | `pump-coaching-service` | Coaching domain, coach/client relationships, client profiles, training/coaching APIs, and coaching-owned persistence |
+| `pump-infra`            | `pump-infra`            | Docker/Compose, Kubernetes, ingress, deployment/runtime infrastructure, and related configuration                    |
 
 ## Repository Detection
 
