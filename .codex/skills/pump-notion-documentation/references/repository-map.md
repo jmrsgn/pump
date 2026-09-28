@@ -3,40 +3,44 @@
 Use this file to map the current Git repository to the exact value
 stored in the Notion Daily Development Log `Repository` multi-select.
 
-  ---------------------------------------------------------------------------
-  Git Repository            Notion Repository Value   Primary Scope
-  ------------------------- ------------------------- -----------------------
-  `Pump`                    `pump`                    Flutter mobile
-                                                      application and
-                                                      client-side API
-                                                      integration
+---
 
-  `pump-auth-service`       `pump-auth-service`       Authentication,
-                                                      identity, JWT/security,
-                                                      auth-owned persistence,
-                                                      and authentication
-                                                      contracts
+Git Repository Notion Repository Value Primary Scope
 
-  `pump-social-service`     `pump-social-service`     Social profiles, posts,
-                                                      comments, likes,
-                                                      follows, social-owned
-                                                      persistence, and social
-                                                      contracts
+---
 
-  `pump-coaching-service`   `pump-coaching-service`   Coaching domain,
-                                                      coach/client
-                                                      relationships, client
-                                                      profiles,
-                                                      training/coaching APIs,
-                                                      and coaching-owned
-                                                      persistence
+`Pump` `pump` Flutter mobile
+application and
+client-side API
+integration
 
-  `pump-infra`              `pump-infra`              Docker/Compose,
-                                                      Kubernetes, ingress,
-                                                      deployment/runtime
-                                                      infrastructure, and
-                                                      related configuration
-  ---------------------------------------------------------------------------
+`pump-auth-service` `pump-auth-service` Authentication,
+identity, JWT/security,
+auth-owned persistence,
+and authentication
+contracts
+
+`pump-social-service` `pump-social-service` Social profiles, posts,
+comments, likes,
+follows, social-owned
+persistence, and social
+contracts
+
+`pump-coaching-service` `pump-coaching-service` Coaching domain,
+coach/client
+relationships, client
+profiles,
+training/coaching APIs,
+and coaching-owned
+persistence
+
+`pump-infra` `pump-infra` Docker/Compose,
+Kubernetes, ingress,
+deployment/runtime
+infrastructure, and
+related configuration
+
+---
 
 ## Repository Detection
 
@@ -44,15 +48,23 @@ Determine the current repository from the Git repository itself.
 
 Prefer, in order:
 
-1.  Git repository/remote identity.
-2.  Git repository root.
-3.  Known Pump repository structure.
+1. Git repository/remote identity.
+2. Git repository root.
+3. Known Pump repository structure.
 
 Do not determine the repository solely from the name of an arbitrary
 parent or working directory.
 
-Map the detected repository to the exact Notion `Repository` value
-defined in the table above.
+Use repository identity only to determine which Pump repository is active.
+After detection, map it to the exact Notion `Repository` value defined in
+this file.
+
+Do not derive, normalize, rename, or create a Notion `Repository` value from
+the Git remote name. The mapping in this file is authoritative for supported
+Pump repositories.
+
+If repository signals conflict and the repository cannot be identified
+confidently, follow the `Unknown Repository` rules below.
 
 ## Repository Context
 
@@ -89,20 +101,41 @@ working only in `Pump` does not by itself prove that
 
 If the user explicitly requests a cross-repository documentation pass
 and the relevant repositories are available, inspect each repository
-independently and merge every verified repository into the same daily
-entry.
+independently.
+
+For each repository:
+
+- verify the work performed during the requested documentation period;
+- determine the exact Notion `Repository` value using this file;
+- inspect relevant repository-specific commits according to
+  `development-log.md`;
+- include only tasks and commits supported by that repository's evidence.
+
+Merge all verified repository values and development outcomes into the same
+Daily Development Log entry for the date.
+
+Preserve repository values, tasks, commits, and other unrelated information
+already recorded on that daily entry.
 
 ## Repository-Specific Documentation
 
 Documentation must respect repository ownership.
 
+Repository ownership determines which implementation can be attributed to a
+repository. It does not by itself determine which Notion documentation area
+must be updated.
+
+Use the documentation routing rules in the main `SKILL.md` and
+`technical-documentation.md` to determine the appropriate Notion destination
+for verified changes.
+
 Examples:
 
--   `Pump` documents Flutter behavior and client-side API integration.
--   `pump-auth-service` documents authentication and identity behavior.
--   `pump-social-service` documents social-domain behavior.
--   `pump-coaching-service` documents coaching-domain behavior.
--   `pump-infra` documents infrastructure and deployment behavior.
+- `Pump` documents Flutter behavior and client-side API integration.
+- `pump-auth-service` documents authentication and identity behavior.
+- `pump-social-service` documents social-domain behavior.
+- `pump-coaching-service` documents coaching-domain behavior.
+- `pump-infra` documents infrastructure and deployment behavior.
 
 Do not attribute an implementation change to a repository unless the
 change can be verified from that repository or other authoritative
