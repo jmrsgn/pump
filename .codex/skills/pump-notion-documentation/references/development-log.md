@@ -236,39 +236,12 @@ For a normal "document what we did today" request, inspect relevant commits
 from the current local calendar date up to the time of the documentation
 request. Do not assume that only the latest commit should be documented.
 
-For subsequent documentation requests on the same date, preserve previously
-recorded commits and append only newly verified commits that are not already
-represented.
-
 For the first documentation update for a repository on a date, include all
 verified commits from that date that occurred before the documentation
 request and are relevant to the work being recorded.
 
-For subsequent documentation updates on the same date, append only newly
-verified commits that have not already been recorded in the Daily Development
-Log.
-
-Example:
-
-```text
-Commit A
-Commit B
-↓
-Documentation request
-↓
-Recorded commits:
-Commit A
-Commit B
-
-Commit C
-↓
-Later documentation request
-↓
-Recorded commits:
-Commit A
-Commit B
-Commit C
-```
+For subsequent documentation updates on the same date, identify newly
+verified relevant commits that have not already been recorded.
 
 Do not add the same commit more than once.
 
@@ -276,6 +249,8 @@ Do not include a commit merely because it appears in repository history.
 
 Verify that it belongs to the requested date or documentation period and is
 relevant to the work being documented.
+
+### Commit Representation
 
 Use the `Commits` property according to its live Notion type and existing
 log convention.
@@ -285,46 +260,134 @@ from the repository's configured remote and verified commit when that URL can
 be determined safely.
 
 When the live `Commits` property supports rich text with hyperlinks, represent
-each commit using its short Git commit hash as the visible text and attach the
-canonical remote commit URL as the hyperlink.
-
-Example:
+each commit using the following visible-text format:
 
 ```text
-a4342b9
-6afef60
-5efab21
+<short-hash>_<repository>_<MM_DD>_<HH:mm>
 ```
 
-Each displayed short hash should link to its corresponding canonical remote
-commit URL.
+Where:
+
+- `<short-hash>` is the verified short Git commit hash;
+- `<repository>` is the exact Notion repository value defined in
+  `repository-map.md` for the repository that owns the commit;
+- `<MM_DD>` is the commit's month and day;
+- `<HH:mm>` is the commit's time using a 24-hour clock.
+
+Examples:
+
+```text
+a4342b9_pump_09_28_10:14
+91fd2ac_pump-auth-service_09_28_10:30
+0be31d7_pump-social-service_09_28_10:35
+```
+
+Preserve the exact repository value defined in `repository-map.md`. Do not
+replace hyphens in repository values with underscores or otherwise transform
+the repository name.
+
+Attach the commit's canonical remote commit URL as the hyperlink for the
+entire visible label.
+
+The date and time in the visible label must come from the verified Git commit
+timestamp. Do not derive them from the documentation request time, Notion
+creation time, or the position of the commit in the `Commits` property.
+
+Use the same local-time interpretation consistently for all commits represented
+on the daily entry so that their displayed timestamps and chronological order
+are comparable.
 
 Prefer this compact hyperlink representation over displaying the full commit
 URL when the live Notion property and available Notion tools support it.
 
 Do not use third-party URL-shortening services.
 
+### Commit Ordering
+
+Keep all commits represented in the Daily Development Log entry in
+chronological order by their verified Git commit timestamps, from earliest to
+latest.
+
+Do not assume that a newly discovered commit belongs at the end of the
+`Commits` property.
+
+When newly verified commits are added, determine the timestamps of the
+existing represented commits when necessary and place all represented commits
+in their correct chronological positions.
+
+For example, if the existing entry contains:
+
+```text
+aaa1234_pump-auth-service_09_28_10:14
+bbb1234_pump_09_28_10:30
+ccc1234_pump_09_28_10:35
+```
+
+and another verified commit is discovered with a timestamp of `10:28`, the
+result must be:
+
+```text
+aaa1234_pump-auth-service_09_28_10:14
+ddd1234_pump_09_28_10:28
+bbb1234_pump_09_28_10:30
+ccc1234_pump_09_28_10:35
+```
+
+Do not leave a newly discovered commit at the end merely because it was
+documented later.
+
+When multiple commits have the same timestamp at the displayed minute
+precision, preserve their existing relative order when possible. For newly
+discovered commits with the same displayed minute, use their full verified Git
+timestamps to determine chronological order when that information is
+available.
+
+### Duplicate Detection and Preservation
+
 Before updating `Commits`, compare the verified commits with the commits
-already represented in the Daily Development Log entry. Treat a commit as
-already represented whether it appears as a full commit URL or as a rich-text
-hyperlink whose target is that commit's canonical remote URL.
+already represented in the Daily Development Log entry.
 
-Append only newly verified commits that are not already represented.
+Treat a commit as already represented whether it appears as:
 
-Preserve all previously recorded commit references when adding newly verified
-commits.
+- a full canonical commit URL;
+- a rich-text hyperlink using the formatted visible label; or
+- another existing representation whose hyperlink target can be verified as
+  the same canonical commit URL.
+
+Use the commit identity and canonical remote URL for duplicate detection, not
+the visible label alone.
+
+Add only newly verified commits that are not already represented.
+
+Preserve every previously recorded verified commit when rebuilding or
+reordering the `Commits` property.
+
+Reordering existing commit references solely to maintain the required
+chronological order is allowed. Do not otherwise rewrite, remove, or replace
+previously recorded commit references merely to change their presentation.
+
+If an older entry is represented by a full commit URL rather than the compact
+label, it may remain in that representation. Do not convert existing commit
+references solely for formatting consistency.
 
 If the live `Commits` property or available Notion tools do not support
 rich-text hyperlinks, preserve the existing log convention and use the
-canonical remote commit URL directly.
+canonical remote commit URL directly. The chronological ordering requirement
+still applies when the property and available tools allow its entries to be
+ordered.
 
-After updating the entry, re-fetch it and verify that every newly documented
-commit is represented and that previously recorded commit references were
-preserved.
+### Verification
 
-Do not include repository names in the Commits property merely to identify
-which repository owns a commit. Repository identity is represented by the
-`Repository` property.
+After updating the entry, re-fetch it and verify that:
+
+- every newly documented commit is represented;
+- every previously recorded verified commit is still represented;
+- no commit is represented more than once;
+- the commits are ordered from earliest to latest according to their verified
+  Git commit timestamps;
+- each newly created compact commit label contains the correct short hash,
+  repository value, date, and time;
+- each newly created hyperlink targets the correct canonical remote commit URL.
 
 Do not fabricate a commit URL from an assumed repository, organization,
 branch, host, or remote.
