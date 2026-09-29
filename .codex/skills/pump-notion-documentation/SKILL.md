@@ -25,21 +25,19 @@ contracts, architecture decisions, root causes, or verification results.
 
 ## Required Capability
 
-This skill requires access to Notion through the Notion MCP tools configured for the current project.
-
-Treat MCP authentication, credential loading, and MCP server startup as
-infrastructure concerns outside this skill.
+This skill requires access to Notion through the installed ChatGPT plugin's
+Notion tools in the current session. Use the tools that are available; the
+plugin connection and authentication are managed outside this repository.
 
 Do not:
 
-- read or inspect `config/credentials.properties`;
-- read, print, log, or expose `NOTION_TOKEN`;
-- attempt to authenticate with Notion;
-- run `codex mcp login notion`;
-- start or configure the Notion MCP server manually;
-- modify `.codex/config.toml` as part of a documentation request.
+- read, print, log, or expose credentials or tokens;
+- attempt to authenticate with Notion or configure its connection manually;
+- create repository-local MCP configuration or credential files.
 
-If the required Notion MCP tools are unavailable or a Notion operation fails because access is not configured, stop the documentation operation and report the MCP/access problem without attempting to retrieve credentials.
+If the Notion tools are unavailable or a Notion operation fails because access
+is not configured, stop the documentation operation and report the access
+problem without attempting to retrieve credentials.
 
 Never include credentials, tokens, secrets, or authentication material in
 Notion documentation.
