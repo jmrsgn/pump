@@ -23,6 +23,26 @@ The skill has two responsibilities:
 Do not invent implementation details, tests, commits, blockers, API
 contracts, architecture decisions, root causes, or verification results.
 
+## Invocation
+
+Treat `document today's work` as a request to execute the complete
+Pump documentation workflow defined by this skill for the current repository.
+
+When invoked:
+
+- inspect today's relevant repository state, Git history, commits, session
+  work, and existing Pump Notion documentation;
+- document only work supported by verifiable evidence;
+- update today's Daily Development Log;
+- update any other durable Pump documentation required by the documentation
+  routing rules;
+- preserve information already documented by other Pump repositories and
+  unrelated Notion content;
+- re-fetch and verify every affected Notion entry or page after all writes;
+- return the literal canonical Notion URL for every affected entry or page.
+
+Do not modify or commit repository files as part of the documentation request.
+
 ## Required Capability
 
 This skill requires access to Notion through the Notion tools available in
