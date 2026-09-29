@@ -25,9 +25,10 @@ contracts, architecture decisions, root causes, or verification results.
 
 ## Required Capability
 
-This skill requires access to Notion through the installed ChatGPT plugin's
-Notion tools in the current session. Use the tools that are available; the
-plugin connection and authentication are managed outside this repository.
+This skill requires access to Notion through the Notion tools available in
+the current session. Use the available Notion tools for documentation
+operations. Notion connection and authentication are managed outside this
+repository.
 
 Do not:
 
@@ -35,9 +36,9 @@ Do not:
 - attempt to authenticate with Notion or configure its connection manually;
 - create repository-local MCP configuration or credential files.
 
-If the Notion tools are unavailable or a Notion operation fails because access
-is not configured, stop the documentation operation and report the access
-problem without attempting to retrieve credentials.
+If the required Notion tools are unavailable or a Notion operation fails
+because access is not configured, stop the documentation operation and report
+the access problem without attempting to retrieve credentials.
 
 Never include credentials, tokens, secrets, or authentication material in
 Notion documentation.
