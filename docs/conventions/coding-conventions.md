@@ -915,7 +915,7 @@ directly inside `build()`.
 Compute simple presentation values locally when doing so remains
 readable.
 
-Extract meaningful UI sections according to `UI_CONVENTIONS.md` when a
+Extract meaningful UI sections according to `ui-conventions.md` when a
 build method becomes difficult to understand.
 
 Do not extract widgets solely to satisfy an arbitrary line-count target.
