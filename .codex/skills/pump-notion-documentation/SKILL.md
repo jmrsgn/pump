@@ -238,6 +238,81 @@ as successfully updated.
 
 Keep the completion response concise.
 
+## Pump Notion Scope Boundary
+
+The only Notion content this skill is authorized to access is the canonical
+Pump documentation page and content contained within its descendant hierarchy.
+
+Canonical Pump documentation root:
+
+`https://app.notion.com/p/Pump-287ed925b7cf808aaa19f1d721dad1d7?source=copy_link`
+
+Treat this page as a strict Notion access boundary for this skill.
+
+### Allowed Notion Access
+
+The skill may:
+
+- fetch the canonical Pump documentation root;
+- search within the canonical Pump root and its descendants;
+- read pages, databases, data sources, and other documentation contained
+  within that hierarchy;
+- create or update Pump documentation only within that hierarchy;
+- follow links or references only when the referenced Notion content is
+  itself contained within the canonical Pump hierarchy.
+
+### Prohibited Notion Access
+
+The skill must not:
+
+- perform workspace-wide Notion searches;
+- browse the user's Notion workspace outside the canonical Pump root;
+- list or inspect unrelated private, shared, favorite, or recent pages;
+- read a Notion page merely because its title resembles a Pump
+  documentation page;
+- fetch, search, inspect, create, update, move, or otherwise access Notion
+  content outside the canonical Pump hierarchy;
+- use unrelated Notion content as development context;
+- discover or inspect other personal or work pages in the user's Notion
+  workspace.
+
+The fact that the connected Notion account or available Notion tools may
+technically permit broader workspace access does not authorize this skill
+to use that access.
+
+### Scoped Discovery
+
+Begin every Pump documentation operation from the canonical Pump root.
+
+When searching for documentation, constrain discovery to that root or a
+verified descendant whenever the available Notion tool supports scoped
+search.
+
+When a tool does not support restricting an operation to the canonical Pump
+hierarchy, do not use that tool for broad discovery. Use verified Pump page,
+database, data-source, or descendant identifiers obtained from the canonical
+Pump hierarchy instead.
+
+Before accessing a discovered Notion object, establish that it belongs to
+the canonical Pump hierarchy.
+
+Do not rely on title matching alone to establish that relationship.
+
+### Boundary Failure
+
+If required Pump documentation cannot be found within the canonical Pump
+hierarchy, report that the documentation could not be found within the
+authorized Pump scope.
+
+Do not broaden the search to the rest of the user's Notion workspace.
+
+If the canonical Pump root cannot be fetched or its hierarchy cannot be
+verified, stop the Notion documentation operation and report the access or
+scope problem.
+
+Never work around this boundary by using another available Notion search,
+listing, browsing, or retrieval capability.
+
 ## Documentation Boundaries
 
 The Pump Notion documentation contains the following documentation areas:
