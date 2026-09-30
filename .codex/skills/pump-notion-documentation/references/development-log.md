@@ -13,18 +13,37 @@ multi-select and may contain multiple Pump repositories.
 The log is under the Pump project's `Daily Development Log` page in
 Notion.
 
-The log is organized into monthly databases/data sources. Do not assume
-that a monthly database or data-source ID is permanent.
+The `Daily Development Log` is organized by year and month:
+
+```text
+Daily Development Log
+└── <Year>
+    └── <Month>
+        └── monthly development-log database/data source
+```
+
+Each year is represented by its corresponding year database.
+
+Each month is represented by a page within that year database. The month's
+development-log database/data source is contained within that month page.
 
 For every write:
 
 1.  Locate the Pump `Daily Development Log` page.
-2.  Identify the database/data source for the requested month.
-3.  Fetch its current schema before creating or updating an entry.
-4.  Use the actual property names, property types, valid select values,
+2.  Identify the year database for the requested date.
+3.  Identify the month page within that year.
+4.  Locate the development-log database/data source contained within the
+    month page.
+5.  Fetch its current schema before creating or updating an entry.
+6.  Use the actual property names, property types, valid select values,
     and existing row conventions returned by Notion.
 
-The current structure is expected to contain fields equivalent to:
+Do not assume that year database, month page, monthly database, or data-source
+IDs are permanent. Resolve the required structure from the verified
+`Daily Development Log` hierarchy.
+
+The current monthly development-log structure is expected to contain fields
+equivalent to:
 
 - `Date`
 - `Repository`
@@ -76,14 +95,17 @@ Do not create one Daily Development Log row per repository.
     local calendar date available to the runtime/session; do not infer
     the date from commit timestamps alone.
 2.  Locate the Pump `Daily Development Log`.
-3.  Locate the monthly database/data source for that date.
-4.  Fetch the data source so the current schema, valid property values,
+3.  Locate the year database corresponding to the requested date.
+4.  Locate the month page for the requested date within that year.
+5.  Locate the monthly development-log database/data source contained
+    within that month page.
+6.  Fetch the data source so the current schema, valid property values,
     and title property are known.
-5.  Query the data source for entries whose `Date` equals the requested
+7.  Query the data source for entries whose `Date` equals the requested
     date.
-6.  If exactly one entry exists, fetch/read it before updating and
+8.  If exactly one entry exists, fetch/read it before updating and
     preserve unrelated content.
-7.  If no entry exists, inspect nearby rows to preserve the database's
+9.  If no entry exists, inspect nearby rows to preserve the database's
     existing title/content convention, then create one.
 
     When creating a new Daily Development Log entry, place it at the very
@@ -99,16 +121,16 @@ Do not create one Daily Development Log row per repository.
     position, do not claim that bottom placement was verified. Report that
     limitation to the user.
 
-8.  If multiple entries exist for the same date and the canonical entry
+10. If multiple entries exist for the same date and the canonical entry
     is unclear, do not guess, merge, or delete automatically. Report the
     duplicates and ask the user how to proceed.
-9.  Merge the verified repository value into `Repository` without
+11. Merge the verified repository value into `Repository` without
     removing values already recorded for that date.
-10. Merge only newly verified work into `Task / Description`.
-11. Update other properties only when there is verified information
+12. Merge only newly verified work into `Task / Description`.
+13. Update other properties only when there is verified information
     relevant to them.
-12. Preserve unrelated existing content.
-13. Re-fetch the resulting entry after processing to verify its final
+14. Preserve unrelated existing content.
+15. Re-fetch the resulting entry after processing to verify its final
     content and retrieve its canonical Notion URL for the completion
     response.
 
@@ -408,14 +430,15 @@ summary, such as:
 
 Do not duplicate `Task / Description` in `Notes`.
 
-## Missing Month
+## Missing Year or Month
 
-If the requested month's database does not exist, do not create a new
-monthly database, data source, schema, or page hierarchy automatically.
+If the required year database, month page, or monthly development-log
+database does not exist, do not create a new year, month, database,
+data source, schema, or page hierarchy automatically.
 
-Report that the requested month's development-log structure does not exist
-and ask the user whether they want the established monthly structure
-extended for that month.
+Report which part of the requested development-log structure does not
+exist and ask the user whether they want the established structure
+extended for that date.
 
-Do not infer authorization to create a new month from a general request such
-as "document what we did today."
+Do not infer authorization to extend the structure from a general request
+such as "document what we did today."
